@@ -49,8 +49,8 @@
     position:sticky;top:0;z-index:40;
     background:var(--surface);
     border-bottom:1px solid var(--border);
-    display:flex;align-items:center;gap:12px;
-    padding:10px 18px;
+    display:flex;align-items:center;gap:18px;
+    padding:10px 22px;
     flex-wrap:wrap;
   }
   .nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;}
@@ -67,8 +67,8 @@
   .nav-tabs{display:flex;gap:4px;flex:1;flex-wrap:wrap;}
   .nav-tab{
     position:relative;
-    padding:8px 11px;border-radius:9px;border:none;background:transparent;
-    color:var(--muted);font-weight:600;font-size:14px;white-space:nowrap;
+    padding:9px 14px;border-radius:9px;border:none;background:transparent;
+    color:var(--muted);font-weight:600;font-size:14px;
   }
   .nav-tab:hover{background:var(--primary-light);color:var(--primary-dark);}
   .nav-tab.active{background:var(--primary);color:#fff;}
@@ -186,50 +186,17 @@
   .trade-msg-preview{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
   /* ---------- Chat ---------- */
-  .chat-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;}
-  .chat-head-av{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
-  .chat-head-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-head-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-thread{background:#f3ede5;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:12px 14px;}
-  .chat-box{display:flex;flex-direction:column;gap:0;max-height:320px;overflow-y:auto;padding:2px 2px 6px;margin-bottom:10px;}
-  .chat-day{align-self:center;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 12px;border-radius:99px;margin:8px 0 10px;}
-  .chat-box .chat-day:first-child{margin-top:0;}
-  .msg{max-width:76%;padding:7px 10px 5px;font-size:13.5px;line-height:1.42;position:relative;word-wrap:break-word;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.06);margin-bottom:8px;}
-  .msg.grouped{margin-bottom:3px;}
-  .msg-me{align-self:flex-end;background:#ffe8d6;color:var(--ink);border-radius:12px 12px 3px 12px;}
-  .msg-me.grouped{border-radius:12px 3px 3px 12px;}
-  .msg-them{align-self:flex-start;background:var(--surface);color:var(--ink);border-radius:12px 12px 12px 3px;}
-  .msg-them.grouped{border-radius:3px 12px 12px 3px;}
-  .msg-time{font-size:10px;margin-left:8px;margin-top:5px;float:right;white-space:nowrap;color:var(--muted);}
-  .msg-me .msg-time{color:#8a5a2b;}
-  .msg-tick{margin-left:3px;font-size:10px;}
-  .msg-tick.seen{color:#1d9bf0;}
-  .chat-typing{align-self:flex-start;font-size:12px;color:var(--muted);font-style:italic;margin:2px 0 6px 4px;}
-  .chat-input-row{display:flex;gap:8px;align-items:center;}
-  .chat-input-row input[type="text"]{flex:1;height:38px;border-radius:99px;padding:0 14px;border:1px solid var(--border);background:var(--surface);font-size:13.5px;}
-  .chat-input-row input[type="text"]:focus{outline:none;border-color:var(--primary);}
-  .chat-send{width:38px;height:38px;flex-shrink:0;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
-  .chat-send:hover{filter:brightness(.94);}
-  .msg-img{display:block;max-width:190px;width:100%;border-radius:10px;margin-bottom:4px;cursor:pointer;background:var(--bg);}
-  .msg-img+.msg-img{margin-top:4px;}
-  .chat-attach{display:flex;align-items:center;justify-content:center;width:38px;height:38px;flex-shrink:0;border-radius:10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:17px;line-height:1;}
-  .chat-attach:hover{border-color:var(--primary);background:var(--primary-light);}
-  .chat-attach input{display:none;}
-  .attach-wide{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;border:1px dashed var(--border);background:var(--surface);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);}
-  .attach-wide:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
-  .attach-wide input{display:none;}
-  .chat-img-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
-  .chat-img-strip:empty{display:none;margin:0;}
-  .chat-img-thumb{position:relative;width:58px;height:58px;}
-  .chat-img-thumb img{width:58px;height:58px;object-fit:cover;border-radius:9px;border:1px solid var(--border);}
-  .chat-img-x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:none;background:#ef4444;color:#fff;font-size:12px;line-height:1;cursor:pointer;padding:0;}
+  .chat-box{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding:4px 2px 10px;margin-bottom:10px;}
+  .msg{max-width:78%;padding:9px 12px;border-radius:13px;font-size:13.5px;line-height:1.4;}
+  .msg-me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:3px;}
+  .msg-them{align-self:flex-start;background:var(--bg);color:var(--ink);border-bottom-left-radius:3px;}
+  .msg-time{font-size:10.5px;opacity:.7;margin-top:3px;display:block;}
+  .chat-input-row{display:flex;gap:8px;}
+  .chat-input-row input{flex:1;}
 
   /* ---------- Profile ---------- */
   .profile-head{display:flex;gap:16px;align-items:center;padding:22px;}
-  .profile-avatar{font-size:48px;background:var(--primary-light);border-radius:16px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
-  .avatar-upload-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;}
-  .avatar-upload-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
-  .avatar-upload-btn input{display:none;}
+  .profile-avatar{font-size:48px;background:var(--primary-light);border-radius:16px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .stat-row{display:flex;gap:22px;margin-top:8px;flex-wrap:wrap;}
   .stat{font-size:13px;color:var(--muted);}
   .stat b{color:var(--ink);font-size:16px;display:block;}
@@ -365,27 +332,16 @@
 
   /* ---------- Chat inbox ---------- */
   .chat-list{display:flex;flex-direction:column;gap:0;}
-  .chat-row{display:flex;flex-direction:row;align-items:flex-start;text-align:left;gap:12px;padding:12px 14px;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+  .chat-row{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
   .chat-row:hover{background:var(--primary-light);}
   .chat-row:first-child{border-radius:var(--radius) var(--radius) 0 0;}
   .chat-row:last-child{border-radius:0 0 var(--radius) var(--radius);border-bottom:none;}
-  .chat-row.unread{background:#fff8f3;}
-  .chat-avatar{font-size:21px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg);border-radius:50%;border:1px solid var(--border);}
-  .chat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-  .chat-top{display:flex;align-items:baseline;gap:8px;}
-  .chat-name{font-weight:600;font-size:14.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-row.unread .chat-name{font-weight:700;}
-  .chat-item{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-preview{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .chat-row.unread .chat-preview{color:var(--ink);font-weight:500;}
-  .chat-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;padding-top:1px;}
-  .chat-time{font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
-  .chat-unread{width:8px;height:8px;border-radius:50%;background:var(--primary);display:block;}
-  .chat-tag{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px solid var(--border);white-space:nowrap;}
-  .chat-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-  .chat-chip{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;}
-  .chat-chip:hover{border-color:var(--primary);color:var(--primary);}
-  .chat-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .chat-avatar{font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg);border-radius:50%;border:1px solid var(--border);}
+  .chat-info{flex:1;min-width:0;}
+  .chat-name{font-weight:700;font-size:14px;}
+  .chat-preview{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+  .chat-time{font-size:11px;color:var(--muted);flex-shrink:0;}
+  .chat-unread{background:var(--primary);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:2px 6px;margin-top:4px;}
 
   /* ---------- Recent searches ---------- */
   .recent-searches{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
@@ -476,9 +432,6 @@
   var USER_KEY = "baganto_user_v2";
   var DAY = 86400000;
   var HOUR = 3600000;
-  // How long an ad stays live, as promised on the Plans page. Declared here so
-  // it already has a value when the database is loaded and migrated below.
-  var AD_LIFETIME_DAYS = 30;
   var API_BASE = (window.BAGANTO_API_BASE || "").replace(/\/+$/, "");
   var apiOnline = false;
   var apiChecked = false;
@@ -905,70 +858,9 @@
     if(storageOk){ try{ return window.localStorage.getItem(key); }catch(e){} }
     return (key in memoryStore) ? memoryStore[key] : null;
   }
-  var storageFullWarned = false;
   function storageSet(key, val){
-    if(storageOk){
-      try{ window.localStorage.setItem(key, val); return true; }
-      catch(e){
-        // Out of space (usually too many photos). Warn once — silently falling
-        // back to memory would lose everything on the next reload.
-        var quota = e && (e.name==="QuotaExceededError" || e.name==="NS_ERROR_DOM_QUOTA_REACHED" || e.code===22 || e.code===1014);
-        if(quota){
-          // A toast would be overwritten by the next one, and this is too
-          // important to miss — show a banner that stays until space is freed.
-          storageFullWarned = true;
-          try{ if(typeof render==="function") setTimeout(render, 0); }catch(e2){}
-        }
-      }
-    }
+    if(storageOk){ try{ window.localStorage.setItem(key, val); return; }catch(e){} }
     memoryStore[key] = val;
-    return false;
-  }
-  function storageUsedBytes(){
-    var total = 0;
-    if(!storageOk) return 0;
-    try{
-      for(var k in window.localStorage){
-        if(Object.prototype.hasOwnProperty.call(window.localStorage, k)){
-          var v = window.localStorage.getItem(k);
-          total += (k.length + (v ? v.length : 0)) * 2; // UTF-16
-        }
-      }
-    }catch(e){}
-    return total;
-  }
-  // Shrink a photo before storing it. Phone photos are several megabytes as
-  // base64, and the browser only gives the whole app about 5 MB.
-  function compressImage(dataUrl, maxDim, quality, cb){
-    // The callback must always fire exactly once — otherwise a photo that fails
-    // to decode would be silently dropped instead of being saved as-is.
-    var done = false;
-    var finish = function(result){
-      if(done) return;
-      done = true;
-      cb(result || dataUrl);
-    };
-    setTimeout(function(){ finish(dataUrl); }, 1500);
-    try{
-      var img = new Image();
-      img.onload = function(){
-        try{
-          var w = img.width || 0, h = img.height || 0;
-          if(!w || !h){ finish(dataUrl); return; }
-          var scale = Math.min(1, maxDim / Math.max(w, h));
-          var cw = Math.max(1, Math.round(w*scale)), ch = Math.max(1, Math.round(h*scale));
-          var canvas = document.createElement("canvas");
-          canvas.width = cw; canvas.height = ch;
-          var ctx = canvas.getContext && canvas.getContext("2d");
-          if(!ctx){ finish(dataUrl); return; }
-          ctx.drawImage(img, 0, 0, cw, ch);
-          var out = canvas.toDataURL("image/jpeg", quality);
-          finish(out && out.length < dataUrl.length ? out : dataUrl);
-        }catch(e){ finish(dataUrl); }
-      };
-      img.onerror = function(){ finish(dataUrl); };
-      img.src = dataUrl;
-    }catch(e){ finish(dataUrl); }
   }
   function storageRemove(key){
     if(storageOk){ try{ window.localStorage.removeItem(key); return; }catch(e){} }
@@ -995,7 +887,6 @@
     editingItemId: null,       // item being edited (null = add new)
     newListingCategory: "",    // tracks selected category in new listing form
     newListingImages: [],       // base64 images for new listing
-    chatImages: [],             // base64 images staged for the current chat message
     authScreen: false,          // show login/signup instead of app
     authPage: "login",          // "login" | "signup"
     authReturnTab: null,        // tab to return to after login
@@ -1005,90 +896,8 @@
     loginMode: "phone",             // "phone" | "email"
     otpSent: false,                 // for OTP verification flow
     otpVerifyMode: null,            // null | "login" | "forgot-password"
-    phoneOtpSent: false,            // phone verification OTP sent on Profile
-    loginPassDraft: "",             // keeps the typed password when switching phone/email
-    forgotPasswordEmail: ""        // temp storage during forgot password flow         // "all" | "barter" | "sale" | "offer"
+    forgotPasswordEmail: ""          // temp storage during forgot password flow         // "all" | "barter" | "sale" | "offer"
   };
-
-  // ---------------- Password hashing ----------------
-  // Passwords are never stored as typed. Each account gets a random salt and we
-  // keep only sha256(salt + ":" + password).
-  // NOTE: with no server this is obfuscation, not real protection — anyone with
-  // the device can read the hash and brute-force a weak password. Real auth
-  // (bcrypt/argon2 on a backend) is Phase 2.
-  function sha256(ascii){
-    function rightRotate(v, a){ return (v>>>a) | (v<<(32-a)); }
-    var mathPow = Math.pow, maxWord = mathPow(2,32), i, j, result = "";
-    var words = [], asciiBitLength = ascii.length*8;
-    var hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], primeCounter = k.length;
-    var isComposite = {};
-    for(var candidate = 2; primeCounter < 64; candidate++){
-      if(!isComposite[candidate]){
-        for(i = 0; i < 313; i += candidate) isComposite[i] = candidate;
-        hash[primeCounter] = (mathPow(candidate, 0.5)*maxWord)|0;
-        k[primeCounter++]  = (mathPow(candidate, 1/3)*maxWord)|0;
-      }
-    }
-    ascii += "\x80";
-    while(ascii.length%64 - 56) ascii += "\x00";
-    for(i = 0; i < ascii.length; i++){
-      j = ascii.charCodeAt(i);
-      if(j>>8) return "";
-      words[i>>2] |= j << ((3-i)%4)*8;
-    }
-    words[words.length] = ((asciiBitLength/maxWord)|0);
-    words[words.length] = (asciiBitLength);
-    for(j = 0; j < words.length;){
-      var w = words.slice(j, j += 16), oldHash = hash;
-      hash = hash.slice(0, 8);
-      for(i = 0; i < 64; i++){
-        var w15 = w[i-15], w2 = w[i-2];
-        var a = hash[0], e = hash[4];
-        var temp1 = hash[7]
-          + (rightRotate(e,6) ^ rightRotate(e,11) ^ rightRotate(e,25))
-          + ((e&hash[5]) ^ ((~e)&hash[6]))
-          + k[i]
-          + (w[i] = (i<16) ? w[i] : (
-              w[i-16]
-              + (rightRotate(w15,7) ^ rightRotate(w15,18) ^ (w15>>>3))
-              + w[i-7]
-              + (rightRotate(w2,17) ^ rightRotate(w2,19) ^ (w2>>>10))
-            )|0
-          );
-        var temp2 = (rightRotate(a,2) ^ rightRotate(a,13) ^ rightRotate(a,22))
-          + ((a&hash[1]) ^ (a&hash[2]) ^ (hash[1]&hash[2]));
-        hash = [(temp1+temp2)|0].concat(hash);
-        hash[4] = (hash[4]+temp1)|0;
-      }
-      for(i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i])|0;
-    }
-    for(i = 0; i < 8; i++){
-      for(j = 3; j+1; j--){
-        var b = (hash[i]>>(j*8))&255;
-        result += ((b<16) ? 0 : "") + b.toString(16);
-      }
-    }
-    return result;
-  }
-  function makeSalt(){
-    return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  }
-  function hashPassword(pw, salt){
-    try{ return sha256(salt + ":" + String(pw)); }catch(e){ return ""; }
-  }
-  function setUserPassword(user, pw){
-    if(!user) return;
-    user.pwSalt = makeSalt();
-    user.pwHash = hashPassword(pw, user.pwSalt);
-    if(user.password) delete user.password;   // never keep the plain text
-  }
-  function checkPassword(user, pw){
-    if(!user) return false;
-    if(user.pwHash && user.pwSalt) return hashPassword(pw, user.pwSalt) === user.pwHash;
-    // Not yet migrated (shouldn't happen) — accept once, then upgrade in place
-    if(user.password && user.password === pw){ setUserPassword(user, pw); saveDB(); return true; }
-    return false;
-  }
 
   function nowTs(){ return Date.now(); }
   function uid(prefix){ return prefix + "_" + Math.random().toString(36).slice(2,9); }
@@ -1107,18 +916,9 @@
   function loadDB(){
     var raw = storageGet(STORAGE_KEY);
     if(raw){
-      try{
-        var loaded = migrateDB(JSON.parse(raw));
-        var expiredCount = loaded.__expiredNow || 0;
-        delete loaded.__expiredNow;
-        // Write expiries back immediately, otherwise they are recalculated on
-        // every load and never actually stored
-        if(expiredCount > 0) storageSet(STORAGE_KEY, JSON.stringify(loaded));
-        return loaded;
-      }catch(e){ /* fall through to reseed */ }
+      try{ return migrateDB(JSON.parse(raw)); }catch(e){ /* fall through to reseed */ }
     }
     var fresh = migrateDB(seedDB());
-    delete fresh.__expiredNow;
     storageSet(STORAGE_KEY, JSON.stringify(fresh));
     return fresh;
   }
@@ -1239,20 +1039,20 @@
       {userId:"u2", itemId:"i1"}
     ];
     var reports = [];
-    return {users:users, items:items, deals:deals, messages:messages, ratings:ratings, savedItems:savedItems, reports:reports, notifications:[], supportTickets:[]};
+    return {users:users, items:items, deals:deals, messages:messages, ratings:ratings, savedItems:savedItems, reports:reports, notifications:[]};
   }
 
   // migrate: add new fields to an existing saved DB so old data still works
   // ================= PRICING / MONETISATION (additive) =================
   var PRICING_PLANS = [
-    { id:"free", name:"Free", price:0, ads:3, boosts:0, badge:"", tagline:"Try Baganto",
-      features:["3 ads per month","Each ad runs for 30 days","Chat with buyers and sellers"] },
-    { id:"growth", name:"Growth", price:199, ads:25, boosts:2, badge:"Popular", tagline:"For regular sellers",
-      features:["25 ads per month","Each ad runs for 30 days","2 free boosts every month","Ad performance stats"] },
+    { id:"free", name:"Free", price:0, ads:2, boosts:0, badge:"", tagline:"Try Baganto",
+      features:["2 ads per month","Basic search filters","Chat with buyers","Community support"] },
+    { id:"growth", name:"Growth", price:199, ads:22, boosts:2, badge:"Popular", tagline:"For regular sellers",
+      features:["22 ads per month","2 free boosts every month","Advanced search filters","Saved searches","Email support"] },
     { id:"professional", name:"Professional", price:499, ads:60, boosts:4, badge:"", tagline:"For small dealers",
-      features:["60 ads per month","Each ad runs for 30 days","4 free boosts every month","Ad performance stats"] },
-    { id:"business", name:"Business", price:899, ads:100, boosts:8, badge:"Best value", tagline:"For professional dealers",
-      features:["100 ads per month","Each ad runs for 30 days","8 free boosts every month","Ad performance stats","Verified business badge"] }
+      features:["60 ads per month","4 free boosts every month","Premium filters","Ad performance stats","Priority support"] },
+    { id:"business", name:"Business", price:899, ads:100, boosts:5, badge:"Best value", tagline:"For professional dealers",
+      features:["100 ads per month","5 free boosts every month","All premium features","Verified business badge","24/7 priority support"] }
   ];
 
   var PRICING_ADDONS = [
@@ -1377,50 +1177,6 @@
     showToast("Premium listing active for "+(c.days||7)+" days.");
     return true;
   }
-  // ---- Ad lifetime: every ad runs for 30 days, as stated on the Plans page ----
-  // (AD_LIFETIME_DAYS is declared with the other constants at the top.)
-  function adExpiresAt(it){
-    if(!it) return 0;
-    return it.expiresAt || ((it.createdAt || nowTs()) + AD_LIFETIME_DAYS*DAY);
-  }
-  function isExpired(it){ return !!(it && it.status === "expired"); }
-  function daysLeft(it){
-    return Math.max(0, Math.ceil((adExpiresAt(it) - nowTs()) / DAY));
-  }
-  // Closes ads that have run their 30 days. Only touches ads still available,
-  // so sold, traded and reserved ads keep their status.
-  function expireOldAds(db){
-    var now = nowTs(), changed = 0;
-    (db.items||[]).forEach(function(it){
-      if(!it.expiresAt) it.expiresAt = (it.createdAt || now) + AD_LIFETIME_DAYS*DAY;
-      if(it.status === "available" && it.expiresAt <= now){
-        it.status = "expired";
-        changed++;
-      }
-    });
-    return changed;
-  }
-  // Puts an expired ad back on the market for another 30 days. Counts against
-  // the monthly ad quota, same as posting a new one.
-  function repostListing(itemId){
-    var it = itemById(itemId);
-    if(!it || !it.id){ showToast("Listing not found."); return false; }
-    if(it.ownerId !== UI.currentUserId){ showToast("You can only repost your own ads."); return false; }
-    var qu = refreshBillingPeriod(currentUser());
-    if(qu && qu.id && adsRemaining(qu.id) <= 0){
-      showToast("You've used all "+adsAllowed(qu.id)+" ads this month. Upgrade in the Plans tab to repost.");
-      UI.tab = "pricing";
-      return false;
-    }
-    it.status = "available";
-    it.createdAt = nowTs();
-    it.expiresAt = nowTs() + AD_LIFETIME_DAYS*DAY;
-    if(qu && qu.id) qu.adsUsedThisPeriod = (qu.adsUsedThisPeriod||0) + 1;
-    saveDB();
-    showToast("Reposted — live for another "+AD_LIFETIME_DAYS+" days.");
-    return true;
-  }
-
   function isBoosted(it){ return !!(it && it.boostedUntil && it.boostedUntil > nowTs()); }
   function isPremium(it){ return !!(it && it.premiumUntil && it.premiumUntil > nowTs()); }
   // Clears boosts/premium that have run out. Seed "featured" ads have no
@@ -1438,7 +1194,6 @@
     if(!db.savedItems)    db.savedItems    = [];
     if(!db.reports)       db.reports       = [];
     if(!db.notifications) db.notifications = [];
-    if(!db.supportTickets) db.supportTickets = [];
     var now = nowTs();
     db.users.forEach(function(u){
       if(!u.memberSince) u.memberSince = now - Math.floor(Math.random()*300)*DAY;
@@ -1464,14 +1219,6 @@
       if(!u.hasOwnProperty("adsUsedThisPeriod")) u.adsUsedThisPeriod = 0;
       if(!u.hasOwnProperty("boostCredits")) u.boostCredits = 0;
       if(!u.hasOwnProperty("premiumCredits")) u.premiumCredits = [];
-      // Uploaded profile picture (base64). Null = show the emoji avatar.
-      if(!u.hasOwnProperty("avatarPhoto")) u.avatarPhoto = null;
-      // Replace any plain-text password with a salted hash, once
-      if(!u.pwHash){
-        setUserPassword(u, u.password != null ? u.password : "demo123");
-      } else if(u.password){
-        delete u.password;
-      }
     });
     if(!db.purchases) db.purchases = [];
     db.items.forEach(function(it){
@@ -1479,8 +1226,6 @@
       if(!it.hasOwnProperty("premiumUntil")) it.premiumUntil = null;
     });
     expirePromotions(db);
-    // Remember whether anything expired so loadDB can write it straight back
-    db.__expiredNow = expireOldAds(db);
     db.deals.forEach(function(d){
       if(!d.hasOwnProperty("typingUsers")) d.typingUsers = [];
     });
@@ -1531,17 +1276,6 @@
   function userById(id){ var u=null; for(var i=0;i<DB.users.length;i++){ if(DB.users[i].id===id){u=DB.users[i];break;} } return u || {id:id, name:"Unknown User", avatar:"❔", city:CITIES[0].name}; }
   function itemById(id){ var it=null; for(var i=0;i<DB.items.length;i++){ if(DB.items[i].id===id){it=DB.items[i];break;} } return it || {id:id, title:"(removed listing)", icon:"❔", category:"Other", status:"traded", city:CITIES[0].name, description:"", wantInExchange:"", forSale:false, forBarter:false, price:null}; }
   function currentUser(){ return userById(UI.currentUserId); }
-  // Profile picture if one was uploaded, otherwise the emoji avatar.
-  // Used everywhere a person is shown, so a photo appears consistently.
-  function avatarOf(userOrId, size){
-    var u = (typeof userOrId === "string") ? userById(userOrId) : userOrId;
-    if(!u) return "";
-    var px = size || 22;
-    if(u.avatarPhoto){
-      return '<img src="'+u.avatarPhoto+'" alt="'+esc(u.name||"")+'" style="width:'+px+'px;height:'+px+'px;border-radius:50%;object-fit:cover;vertical-align:middle;display:inline-block;">';
-    }
-    return u.avatar || "🙂";
-  }
   function cityCoord(name){ for(var i=0;i<CITIES.length;i++){ if(CITIES[i].name===name) return CITIES[i]; } return CITIES[0]; }
 
   function distanceKm(cityA, cityB){
@@ -1753,6 +1487,55 @@
   }
 
   // -------- ADVANCED SEARCH --------
+  function filterAndSortItems(items, filters){
+    var f = filters;
+    var now = nowTs();
+    var DAY = 24*60*60*1000;
+
+    var filtered = items.filter(function(it){
+      // Posted date filter
+      if(f.postedDate === "24h" && now - it.createdAt > 1*DAY) return false;
+      if(f.postedDate === "week" && now - it.createdAt > 7*DAY) return false;
+      if(f.postedDate === "month" && now - it.createdAt > 30*DAY) return false;
+
+      // Seller type filter
+      if(f.sellerType === "verified"){
+        var owner = userById(it.ownerId);
+        if(!owner || !owner.isVerified) return false;
+      }
+
+      // Radius/distance filter
+      if(f.radius && f.radius > 0){
+        var dist = distanceKm(currentUser().city, it.city);
+        if(dist > parseInt(f.radius)) return false;
+      }
+
+      // Negotiable filter
+      if(f.negotiableOnly && !it.negotiable) return false;
+
+      return true;
+    });
+
+    // Sort
+    filtered.sort(function(a, b){
+      // Boosted ads always float to the top, then the chosen sort applies
+      var ba = isBoosted(a) ? 1 : 0, bb = isBoosted(b) ? 1 : 0;
+      if(ba !== bb) return bb - ba;
+      if(f.sort === "newest") return b.createdAt - a.createdAt;
+      if(f.sort === "price-low") return (a.price||0) - (b.price||0);
+      if(f.sort === "price-high") return (b.price||0) - (a.price||0);
+      if(f.sort === "popular") return (b.views||0) - (a.views||0);
+      if(f.sort === "nearest"){
+        var distA = distanceKm(currentUser().city, a.city);
+        var distB = distanceKm(currentUser().city, b.city);
+        return distA - distB;
+      }
+      return 0;
+    });
+
+    return filtered;
+  }
+
   function saveSearch(name, filters){
     if(!name || !name.trim()){ showToast("Enter a name for this search"); return; }
     var search = {
@@ -1807,36 +1590,10 @@
     return new Date(ts).toLocaleDateString();
   }
 
-  // Clock time inside a chat bubble, e.g. "4:12 pm"
-  function formatClock(ts){
-    try{
-      return new Date(ts).toLocaleTimeString("en-IN", {hour:"numeric", minute:"2-digit", hour12:true}).toLowerCase();
-    }catch(e){
-      var dt = new Date(ts), h = dt.getHours(), m = dt.getMinutes();
-      var ap = h>=12 ? "pm" : "am"; h = h%12; if(h===0) h=12;
-      return h+":"+(m<10?"0":"")+m+" "+ap;
-    }
-  }
-  // Divider label above the first message of each day
-  function chatDayLabel(ts){
-    var startOf = function(t){ var x=new Date(t); x.setHours(0,0,0,0); return x.getTime(); };
-    var days = Math.round((startOf(nowTs()) - startOf(ts)) / DAY);
-    if(days===0) return "Today";
-    if(days===1) return "Yesterday";
-    if(days < 7){ try{ return new Date(ts).toLocaleDateString("en-IN",{weekday:"long"}); }catch(e){} }
-    try{ return new Date(ts).toLocaleDateString("en-IN",{day:"numeric", month:"short", year:"numeric"}); }
-    catch(e){ return new Date(ts).toLocaleDateString(); }
-  }
-  function sameDay(a, b){
-    var x=new Date(a), y=new Date(b);
-    return x.getFullYear()===y.getFullYear() && x.getMonth()===y.getMonth() && x.getDate()===y.getDate();
-  }
-
   function statusPillForItem(status){
     if(status==="available") return '<span class="pill pill-available">Available</span>';
     if(status==="pending") return '<span class="pill pill-pending">Reserved</span>';
     if(status==="sold") return '<span class="pill pill-sold">Sold</span>';
-    if(status==="expired") return '<span class="pill" style="background:#f3f4f6;color:#6b7280;">Expired</span>';
     return '<span class="pill pill-traded">Traded</span>';
   }
 
@@ -2030,10 +1787,8 @@
 
   // ---------------- Actions ----------------
   function lockItemsAndRejectOthers(deal){
-    var req = itemById(deal.requestedItemId);
-    // A described (non-listed) offer has no ad to lock
-    if(deal.offeredItemId) itemById(deal.offeredItemId).status = "pending";
-    req.status = "pending";
+    var off = itemById(deal.offeredItemId), req = itemById(deal.requestedItemId);
+    off.status = "pending"; req.status = "pending";
     for(var i=0;i<DB.deals.length;i++){
       var d = DB.deals[i];
       if(d.id===deal.id) continue;
@@ -2071,8 +1826,8 @@
     var d = findDeal(id); if(!d) return;
     d.status = "completed";
     d.completedAt = nowTs();
-    if(d.offeredItemId) itemById(d.offeredItemId).status = "traded";
-    if(d.requestedItemId) itemById(d.requestedItemId).status = "traded";
+    itemById(d.offeredItemId).status = "traded";
+    itemById(d.requestedItemId).status = "traded";
     addNotification(d.fromUserId===UI.currentUserId ? d.toUserId : d.fromUserId, "deal", currentUser().name+" marked your trade complete", {dealId:d.id});
     saveDB();
     showToast("Trade marked complete! You can rate each other now.");
@@ -2093,47 +1848,24 @@
     return d;
   }
 
-  function sendMessage(dealId, text, photos){
+  function sendMessage(dealId, text){
     text = (text||"").trim();
-    photos = photos || [];
-    // A message needs either text or at least one photo
-    if(!text && !photos.length) return;
-    // Blocking works both ways — neither side can message the other
-    var dlk = DB.deals.filter(function(d){ return d.id===dealId; })[0];
-    if(dlk){
-      var otherId = dlk.fromUserId===UI.currentUserId ? dlk.toUserId : dlk.fromUserId;
-      if(isUserBlocked(otherId, UI.currentUserId)){
-        showToast("You blocked this user. Unblock them to send a message.");
-        return;
-      }
-      if(isUserBlocked(UI.currentUserId, otherId)){
-        showToast("You can't message this user.");
-        return;
-      }
-    }
-    DB.messages.push({id:uid("m"), dealId:dealId, senderId:UI.currentUserId, text:text, photos:photos.slice(0), createdAt:nowTs()});
+    if(!text) return;
+    DB.messages.push({id:uid("m"), dealId:dealId, senderId:UI.currentUserId, text:text, createdAt:nowTs()});
     var dl = DB.deals.filter(function(d){ return d.id===dealId; })[0];
     if(dl){
       var other = dl.fromUserId===UI.currentUserId ? dl.toUserId : dl.fromUserId;
-      var note = (!text && photos.length) ? " sent you a photo" : " sent you a message";
-      addNotification(other, "message", currentUser().name+note, {dealId:dealId});
+      addNotification(other, "message", currentUser().name+" sent you a message", {dealId:dealId});
     }
     saveDB();
   }
 
-  function createBarterProposal(requestedItemId, offeredItemId, message, photos, offeredText){
+  function createBarterProposal(requestedItemId, offeredItemId, message){
     var reqItem = itemById(requestedItemId);
-    photos = photos || [];
-    offeredText = (offeredText||"").trim();
-    // A described item has no ad behind it, so offeredItemId stays empty
-    var isCustom = (offeredItemId === "__custom__" || !offeredItemId);
-    var d = {id:uid("d"), kind:"barter", fromUserId:UI.currentUserId, toUserId:reqItem.ownerId,
-             offeredItemId: isCustom ? null : offeredItemId,
-             offeredText: isCustom ? offeredText : "",
-             requestedItemId:requestedItemId, status:"pending", createdAt:nowTs(), completedAt:null};
+    var d = {id:uid("d"), kind:"barter", fromUserId:UI.currentUserId, toUserId:reqItem.ownerId, offeredItemId:offeredItemId, requestedItemId:requestedItemId, status:"pending", createdAt:nowTs(), completedAt:null};
     DB.deals.push(d);
-    if((message && message.trim()) || photos.length){
-      DB.messages.push({id:uid("m"), dealId:d.id, senderId:UI.currentUserId, text:(message||"").trim(), photos:photos.slice(0), createdAt:nowTs()});
+    if(message && message.trim()){
+      DB.messages.push({id:uid("m"), dealId:d.id, senderId:UI.currentUserId, text:message.trim(), createdAt:nowTs()});
     }
     addNotification(reqItem.ownerId, "barter", currentUser().name+" proposed a trade for your "+reqItem.title, {itemId:requestedItemId, dealId:d.id});
     saveDB();
@@ -2170,8 +1902,7 @@
       photos: data.photos || [],
       views: 0,
       isFeatured: false,
-      createdAt: nowTs(),
-      expiresAt: nowTs() + AD_LIFETIME_DAYS*DAY
+      createdAt: nowTs()
     };
     DB.items.push(item);
     if(quotaUser && quotaUser.id) quotaUser.adsUsedThisPeriod = (quotaUser.adsUsedThisPeriod||0) + 1;
@@ -2206,86 +1937,6 @@
     saveDB();
     showToast("Profile created - now viewing as " + name + ".");
     return user;
-  }
-
-  // ---- Your data: export and account deletion ----
-  // Everything this app holds about you, in one readable file.
-  function exportMyData(){
-    var u = currentUser();
-    if(!u || !u.id){ showToast("Log in first."); return; }
-    var myDealIds = DB.deals.filter(function(d){ return d.fromUserId===u.id || d.toUserId===u.id; }).map(function(d){ return d.id; });
-    var safeUser = {};
-    for(var k in u){
-      if(!Object.prototype.hasOwnProperty.call(u, k)) continue;
-      if(k==="pwHash" || k==="pwSalt" || k==="password" || k==="otp" || k==="otpExpiry" || k==="emailOtp" || k==="emailOtpExpiry") continue;
-      safeUser[k] = u[k];
-    }
-    var payload = {
-      exportedAt: new Date().toISOString(),
-      note: "Your Baganto data. Passwords and one-time codes are deliberately excluded.",
-      profile: safeUser,
-      myAds: DB.items.filter(function(it){ return it.ownerId===u.id; }),
-      myDeals: DB.deals.filter(function(d){ return myDealIds.indexOf(d.id)>=0; }),
-      myMessages: DB.messages.filter(function(m){ return myDealIds.indexOf(m.dealId)>=0; }),
-      reviewsAboutMe: DB.ratings.filter(function(r){ return r.toUserId===u.id; }),
-      reviewsIWrote: DB.ratings.filter(function(r){ return r.fromUserId===u.id; }),
-      savedAds: (DB.savedItems||[]).filter(function(s){ return s.userId===u.id; }),
-      notifications: (DB.notifications||[]).filter(function(n){ return n.userId===u.id; }),
-      purchases: (DB.purchases||[]).filter(function(p){ return p.userId===u.id; }),
-      supportTickets: (DB.supportTickets||[]).filter(function(t){ return t.userId===u.id; })
-    };
-    try{
-      var text = JSON.stringify(payload, null, 2);
-      var blob = new Blob([text], {type:"application/json"});
-      var url  = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = "baganto-my-data-" + new Date().toISOString().slice(0,10) + ".json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} }, 2000);
-      showToast("Your data has been downloaded.");
-    }catch(e){
-      showToast("Could not create the download on this browser.");
-    }
-  }
-
-  // Erases the signed-in account and everything attached to it.
-  function deleteMyAccount(){
-    var u = currentUser();
-    if(!u || !u.id){ showToast("Log in first."); return; }
-    if(DB.users.length <= 1){ showToast("This is the only account — reset the demo data instead."); return; }
-    if(!window.confirm("Permanently delete your account?\n\nThis removes your profile, ads, chats, messages, reviews and saved ads. It cannot be undone.")) return;
-    var typed = window.prompt('This cannot be undone. Type DELETE to confirm:');
-    if(!typed || typed.trim().toUpperCase() !== "DELETE"){ showToast("Account deletion cancelled."); return; }
-
-    var uid_ = u.id, name = u.name;
-    var myDealIds = DB.deals.filter(function(d){ return d.fromUserId===uid_ || d.toUserId===uid_; }).map(function(d){ return d.id; });
-
-    DB.items    = DB.items.filter(function(it){ return it.ownerId!==uid_; });
-    DB.deals    = DB.deals.filter(function(d){ return myDealIds.indexOf(d.id)===-1; });
-    DB.messages = DB.messages.filter(function(m){ return myDealIds.indexOf(m.dealId)===-1; });
-    DB.ratings  = DB.ratings.filter(function(r){ return r.fromUserId!==uid_ && r.toUserId!==uid_; });
-    if(DB.savedItems)    DB.savedItems    = DB.savedItems.filter(function(s){ return s.userId!==uid_; });
-    if(DB.notifications) DB.notifications = DB.notifications.filter(function(n){ return n.userId!==uid_; });
-    if(DB.reports)       DB.reports       = DB.reports.filter(function(r){ return r.userId!==uid_ && r.reportedBy!==uid_; });
-    if(DB.purchases)     DB.purchases     = DB.purchases.filter(function(p){ return p.userId!==uid_; });
-    if(DB.supportTickets) DB.supportTickets = DB.supportTickets.filter(function(t){ return t.userId!==uid_; });
-    // Remove them from everyone else's block lists too
-    DB.users.forEach(function(other){
-      if(other.blockedUsers) other.blockedUsers = other.blockedUsers.filter(function(id){ return id!==uid_; });
-    });
-    DB.users = DB.users.filter(function(uu){ return uu.id!==uid_; });
-
-    UI.currentUserId = "";
-    storageSet(USER_KEY, "");
-    UI.authScreen = true;
-    UI.authPage   = "login";
-    UI.modal = null;
-    UI.tab = "market";
-    saveDB();
-    showToast("Account \"" + name + "\" and all its data were deleted.");
   }
 
   function deleteProfile(userId){
@@ -2446,14 +2097,13 @@
     render();
   }
 
-  function makeOffer(itemId, offerPrice, message, photos){
+  function makeOffer(itemId, offerPrice, message){
     var it = itemById(itemId);
     if(!it) return;
-    photos = photos || [];
     var d = {id:uid("d"), kind:"offer", fromUserId:UI.currentUserId, toUserId:it.ownerId, itemId:itemId, price:offerPrice, status:"pending", createdAt:nowTs(), completedAt:null};
     DB.deals.push(d);
     var txt = "Hi! I\'d like to offer ₹" + Number(offerPrice).toLocaleString("en-IN") + " for your " + it.title + "." + (message ? " " + message.trim() : "");
-    DB.messages.push({id:uid("m"), dealId:d.id, senderId:UI.currentUserId, text:txt, photos:photos.slice(0), createdAt:nowTs()});
+    DB.messages.push({id:uid("m"), dealId:d.id, senderId:UI.currentUserId, text:txt, createdAt:nowTs()});
     addNotification(it.ownerId, "offer", currentUser().name+" offered "+formatINR(offerPrice)+" for your "+it.title, {itemId:itemId, dealId:d.id});
     saveDB();
     showToast("Offer sent for " + formatINR(offerPrice) + "! Check My Trades.");
@@ -2740,7 +2390,7 @@
               : '<div class="auth-field"><label>Phone Number</label>'+
                   '<input type="tel" name="phone" placeholder="Enter your phone number" required></div>')+
             '<div class="auth-field"><label>Password</label>'+
-              '<input type="password" name="password" placeholder="Enter password" value="'+esc(UI.loginPassDraft||"")+'" required></div>'+
+              '<input type="password" name="password" placeholder="Enter password" required></div>'+
             '<button type="button" class="auth-btn" data-action="submit-login">Login</button>'+
             '<div style="text-align:center;margin-top:12px;">'+
               '<button type="button" class="auth-link" data-action="goto-forgot-password" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;text-decoration:underline;">Forgot Password?</button>'+
@@ -2783,29 +2433,10 @@
           '<div class="auth-switch" style="margin-top:12px;"><a data-action="resend-otp">Resend OTP</a> · <a data-action="back-from-otp">Back</a></div>'+
         '</div>'+
       '</div>';
-    } else if(UI.authPage === "reset-password"){
-      return '<div class="auth-screen">'+
-        '<div class="auth-card">'+
-          '<button class="auth-dismiss" data-action="dismiss-auth">&larr; Continue browsing</button>'+
-          '<div class="auth-logo">'+logoTag+'</div>'+
-          '<div class="auth-title">Set a New Password</div>'+
-          '<div class="auth-sub">Choose a new password for your account</div>'+
-          '<div class="auth-error" id="authError"></div>'+
-          '<form data-form="auth-reset-password">'+
-            '<div class="auth-field"><label>New Password</label>'+
-              '<input type="password" name="newPassword" placeholder="Enter new password" required></div>'+
-            '<div class="auth-field"><label>Confirm Password</label>'+
-              '<input type="password" name="confirmPassword" placeholder="Re-enter new password" required></div>'+
-            '<button type="submit" class="auth-btn">Save Password</button>'+
-          '</form>'+
-          '<div class="auth-switch" style="margin-top:16px;"><a data-action="goto-login">Back to Login</a></div>'+
-        '</div>'+
-      '</div>';
     } else {
       return '<div class="auth-screen">'+
         '<div class="auth-card">'+
           '<div class="auth-logo">'+logoTag+'</div>'+
-          '<button class="auth-dismiss" data-action="dismiss-auth">&larr; Continue browsing</button>'+
           '<div class="auth-title">Create Account</div>'+
           '<div class="auth-sub">Join Baganto and start trading</div>'+
           '<div class="auth-error" id="authError"></div>'+
@@ -2840,7 +2471,7 @@
       try{ selStart=active.selectionStart; selEnd=active.selectionEnd; }catch(e){}
     }
 
-    var html = renderNav() + renderStorageWarning() + '<div class="wrap">' + renderTabContent() + '</div>' + renderModal() + renderPhotoViewer() + renderToast() + renderFooter();
+    var html = renderNav() + '<div class="wrap">' + renderTabContent() + '</div>' + renderModal() + renderToast() + renderFooter();
     app.innerHTML = html;
 
     if(activeId){
@@ -2850,10 +2481,6 @@
         if(selStart!=null && el.setSelectionRange){ try{ el.setSelectionRange(selStart, selEnd); }catch(e){} }
       }
     }
-
-    // Keep the chat thread scrolled to the newest message
-    var cbox = document.querySelector(".chat-box");
-    if(cbox){ try{ cbox.scrollTop = cbox.scrollHeight; }catch(e){} }
 
     // Auto-detect location on render if user is logged in
     if(UI.currentUserId){
@@ -2866,105 +2493,7 @@
       return '<button class="footer-link" data-action="open-legal" data-page="'+k+'">'+esc(LEGAL_DOCS[k].title)+'</button>';
     }).join(' · ');
     return '<div class="footer-note">Baganto is a demo prototype for the Indian market - all data is stored locally in your browser.' +
-      '<div class="footer-links"><button class="footer-link" data-action="goto-support">💬 Support</button> · '+links+'</div>' +
-    '</div>';
-  }
-
-  // -------- Support Centre --------
-  var SUPPORT_CATEGORIES = ["Billing & plans", "Technical issue", "Report a user or ad", "Account & login", "Something else"];
-
-  function myTickets(){
-    return (DB.supportTickets || []).filter(function(t){ return t.userId===UI.currentUserId; })
-      .sort(function(a,b){ return b.createdAt-a.createdAt; });
-  }
-
-  function renderSupportPage(){
-    var backTab = UI.supportReturnTab || "market";
-    var cu = UI.currentUserId ? currentUser() : null;
-    var catOpts = SUPPORT_CATEGORIES.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join("");
-
-    var contactCard = '<div class="card" style="padding:16px;margin-bottom:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
-      '<div style="font-size:28px;">✉️</div>' +
-      '<div style="flex:1;min-width:200px;">' +
-        '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">Prefer email?</div>' +
-        '<div style="font-size:13px;color:var(--muted);">Write to us directly and we\'ll reply from the same address.</div>' +
-      '</div>' +
-      '<a href="mailto:support@baganto.com" class="btn btn-outline btn-sm" style="white-space:nowrap;">support@baganto.com</a>' +
-    '</div>';
-
-    var formCard = '<form class="card" data-form="support-ticket" style="padding:20px;margin-bottom:18px;">' +
-      '<div style="font-weight:800;margin-bottom:12px;color:var(--primary-dark);">Send us a message</div>' +
-      (cu ? '' : '<div class="form-row"><label>Your email</label><input type="email" name="guestEmail" required placeholder="you@example.com"></div>') +
-      '<div class="form-row"><label>What\'s this about?</label><select name="category">'+catOpts+'</select></div>' +
-      '<div class="form-row"><label>Subject</label><input type="text" name="subject" required placeholder="e.g. Boost I bought never applied"></div>' +
-      '<div class="form-row"><label>Message</label><textarea name="message" required placeholder="Tell us what happened, and include the ad title or order if relevant."></textarea></div>' +
-      '<button type="submit" class="btn btn-primary btn-block">Submit</button>' +
-    '</form>';
-
-    var ticketsHtml = "";
-    if(cu){
-      var tickets = myTickets();
-      var rows = tickets.map(function(t){
-        var open = t.status==="open";
-        return '<div class="card" style="padding:12px;margin-bottom:8px;">' +
-          '<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">' +
-            '<div style="font-weight:700;font-size:13px;">'+esc(t.subject)+'</div>' +
-            '<span class="pill" style="background:'+(open?'#fef3c7':'#dcfce7')+';color:'+(open?'#92400e':'#166534')+';white-space:nowrap;">'+(open?'⏳ Open':'✓ Resolved')+'</span>' +
-          '</div>' +
-          '<div class="muted" style="font-size:12px;margin:4px 0;">'+esc(t.category)+' · '+timeAgo(t.createdAt)+'</div>' +
-          '<div style="font-size:13px;">'+esc(t.message)+'</div>' +
-          (t.adminReply ? '<div style="margin-top:8px;padding:8px;background:#F9F9F9;border-radius:8px;font-size:13px;"><b>Baganto support:</b> '+esc(t.adminReply)+'</div>' : '') +
-        '</div>';
-      }).join("");
-      ticketsHtml = '<div class="section-title" style="font-size:16px;">Your messages</div>' +
-        (rows || '<div class="card empty" style="padding:20px;text-align:center;color:var(--muted);">No messages yet.</div>');
-    }
-
-    return '' +
-      '<button class="btn btn-ghost btn-sm" data-action="goto-tab" data-tab="'+backTab+'" style="margin-bottom:14px;">← Back</button>' +
-      '<div class="section-title">💬 Support Centre</div>' +
-      '<div class="section-sub">Questions, complaints or something broken? We read every message.</div>' +
-      contactCard +
-      formCard +
-      ticketsHtml +
-      '<div class="card" style="padding:12px;font-size:12px;color:var(--muted);margin-top:14px;">Grievances about content or conduct can also go through our <button class="footer-link" style="font-size:12px;" data-action="open-legal" data-page="grievance">Grievance Redressal page</button>.</div>';
-  }
-
-  // How much of the browser's ~5 MB allowance the app is using. Photos are by
-  // far the biggest cost, so this gives a warning before things fill up.
-  function renderStorageMeter(){
-    var used = storageUsedBytes();
-    if(!used) return "";
-    var limit = 5*1024*1024;
-    var pct = Math.min(100, Math.round(used/limit*100));
-    var mb = (used/1048576).toFixed(1);
-    var colour = pct >= 85 ? "#ef4444" : (pct >= 60 ? "#f59e0b" : "var(--primary)");
-    return '<div style="margin-bottom:10px;">' +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Storage used: <b>'+mb+' MB</b> of about 5 MB ('+pct+'%)' +
-        (pct >= 85 ? ' — delete some photos or old ads soon' : '') + '</div>' +
-      '<div style="height:6px;background:var(--border);border-radius:6px;overflow:hidden;">' +
-        '<div style="height:100%;width:'+pct+'%;background:'+colour+';"></div>' +
-      '</div>' +
-    '</div>';
-  }
-
-  // Shown when the browser refuses to save any more data, so changes are not
-  // silently lost on the next reload.
-  function renderStorageWarning(){
-    if(!storageFullWarned) return "";
-    return '<div style="background:#fef2f2;border-bottom:1px solid #fecaca;color:#991b1b;padding:10px 18px;font-size:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
-      '<b>⚠️ Storage full.</b>' +
-      '<span>New ads, photos and messages will be lost when you reload. Delete some photos or old ads to free up space.</span>' +
-      '<button class="btn btn-sm" data-action="goto-tab" data-tab="listings" style="margin-left:auto;">Manage my ads</button>' +
-    '</div>';
-  }
-
-  // Full-size view for a photo tapped inside a chat
-  function renderPhotoViewer(){
-    if(!UI.chatPhotoView) return "";
-    return '<div data-action="close-photo-view" style="position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;">' +
-      '<img src="'+UI.chatPhotoView+'" alt="Photo" style="max-width:100%;max-height:100%;border-radius:10px;">' +
-      '<button class="btn btn-sm" data-action="close-photo-view" style="position:absolute;top:16px;right:16px;background:#fff;">Close</button>' +
+      '<div class="footer-links">'+links+'</div>' +
     '</div>';
   }
 
@@ -2981,20 +2510,14 @@
       {id:"listings", label:"My Ads"},
       {id:"trades",   label:"Chats"},
       {id:"profile",  label:"Profile"},
-      {id:"pricing",  label:"👑 Plans"}
+      {id:"pricing",  label:"💎 Plans"}
     ];
     if(isCurrentUserAdmin()) tabs.push({id:"admin", label:"⚙️ Admin"});
     var tabsHtml = tabs.map(function(t){
       var cls = "nav-tab" + (UI.tab===t.id ? " active" : "");
       var b = "";
       if(t.id==="trades" && badge>0) b = '<span class="nav-badge">'+badge+'</span>';
-      if(t.id==="profile"){
-        // Unread notifications live in the bell on the Profile page, so surface
-        // the count on the tab itself — otherwise nobody knows to look.
-        var unreadN = UI.currentUserId ? unreadNotificationCount() : 0;
-        if(unreadN>0) b += '<span class="nav-badge" title="Unread notifications">'+(unreadN>9?'9+':unreadN)+'</span>';
-        if(saved>0) b += '<span class="saved-badge">'+saved+'</span>';
-      }
+      if(t.id==="profile" && saved>0) b += '<span class="saved-badge">'+saved+'</span>';
       return '<button class="'+cls+'" data-action="goto-tab" data-tab="'+t.id+'">'+t.label+b+'</button>';
     }).join("");
 
@@ -3013,7 +2536,6 @@
       '</div>' +
       '<span id="syncPill" class="'+sp.cls+'">'+esc(sp.text)+'</span>' +
       '<div class="nav-tabs">'+tabsHtml+'</div>' +
-      '<button class="btn btn-ghost btn-sm" data-action="goto-support" title="Support" style="margin-right:6px;">💬 Support</button>' +
       '<div style="position:relative;display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:2px solid var(--primary);border-radius:20px;max-width:220px;font-size:11px;margin-right:8px;"><span style="font-size:13px;flex-shrink:0;">📍</span><input type="text" id="navLocationInput" placeholder="Location" value="'+esc(currentUser().city)+'" style="border:none;outline:none;flex:1;font-size:11px;background:transparent;min-width:80px;" data-action="location-search"><div id="locationDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;margin-top:4px;max-height:240px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div></div>' +
       (UI.currentUserId ? '' : '<button class="post-btn login-btn" data-action="goto-login-screen" style="background:#1a1a2e;margin-right:6px;">Login</button>') +
       '<button class="post-btn" data-action="start-sell">+ Post</button>' +
@@ -3056,7 +2578,6 @@
     if(UI.tab==="trades") return renderTrades();
     if(UI.tab==="profile") return renderProfile();
     if(UI.tab==="pricing") return renderPricing();
-    if(UI.tab==="support") return renderSupportPage();
     if(UI.tab==="admin" && isCurrentUserAdmin()) return renderAdmin();
     return "";
   }
@@ -3076,6 +2597,9 @@
     }
     if(UI.homeSection && UI.homeSection.indexOf("parent:")===0){
       return renderSubcategoryGrid(UI.homeSection.replace("parent:",""), cu);
+    }
+    if(UI.homeSection==="super:barter" || UI.homeSection==="super:nobarter"){
+      return renderSuperCategoryGrid(UI.homeSection, cu);
     }
     return renderMarketHome(cu);
   }
@@ -3114,6 +2638,40 @@
       '<div class="sub-cat-list">'+rows+'</div>';
   }
 
+  function renderSuperCategoryGrid(superSection, cu){
+    var isBarter = (superSection === "super:barter");
+    var title    = isBarter ? "🤝 Barter & Trade" : "🏢 Services & More";
+    var subtitle = isBarter ? "Exchange, barter & post items" : "Jobs, properties & services";
+
+    var subCounts = {};
+    DB.items.forEach(function(it){
+      if(it.ownerId!==UI.currentUserId && it.status==="available") subCounts[it.category]=(subCounts[it.category]||0)+1;
+    });
+
+    var tiles = CATEGORY_TREE.filter(function(p){
+      return isBarter ? !isNoBarterParent(p.id) : isNoBarterParent(p.id);
+    }).map(function(p){
+      var total = 0;
+      p.subs.forEach(function(s){ total += (subCounts[s]||0); });
+      return '<div class="cat-tile" data-action="browse-category" data-cat="'+esc(p.id)+'">' +
+        '<div class="cat-tile-icon" style="background:'+(p.bg||'#F3F4F6')+';">'+
+          '<span class="cat-emoji">'+p.icon+'</span>'+
+        '</div>' +
+        '<div class="cat-tile-label">'+esc(p.label)+'</div>' +
+        '<div class="cat-tile-count">'+total+' ad'+(total!==1?'s':'')+'</div>' +
+      '</div>';
+    }).join("");
+
+    return renderSearchBar("Search for anything…") +
+      '<button class="btn btn-ghost btn-sm" data-action="clear-home-section" style="margin-bottom:14px;">← Home</button>' +
+      '<div class="home-section">' +
+        '<div class="home-section-head"><span class="home-section-title">'+title+'</span>' +
+          '<span style="font-size:13px;color:var(--muted);margin-left:8px;">'+subtitle+'</span>' +
+        '</div>' +
+        '<div class="cat-grid">'+tiles+'</div>' +
+      '</div>';
+  }
+
   function renderMarketHome(cu){
     // ---------- parent category grid (counts roll up from all subcategories) ----------
     var subCounts = {};
@@ -3133,22 +2691,22 @@
     }).join("");
 
     // ---------- featured listings ----------
-    var featured = DB.items.filter(function(it){ return it.isFeatured && it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId); });
+    var featured = DB.items.filter(function(it){ return it.isFeatured && it.status==="available" && it.ownerId!==UI.currentUserId; });
 
     // ---------- recently viewed ----------
     var rvItems = [];
     UI.recentlyViewed.forEach(function(id){
       var it = itemById(id);
-      if(it && it.id && it.id!=="__missing__" && it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId)) rvItems.push(it);
+      if(it && it.id && it.id!=="__missing__" && it.status==="available" && it.ownerId!==UI.currentUserId) rvItems.push(it);
     });
 
     // ---------- fresh picks (newest) ----------
-    var fresh = DB.items.filter(function(it){ return it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId); });
+    var fresh = DB.items.filter(function(it){ return it.status==="available" && it.ownerId!==UI.currentUserId; });
     fresh.sort(function(a,b){ return b.createdAt-a.createdAt; });
     var freshSlice = fresh.slice(0,8);
 
     // ---------- nearby ----------
-    var nearby = DB.items.filter(function(it){ return it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId); });
+    var nearby = DB.items.filter(function(it){ return it.status==="available" && it.ownerId!==UI.currentUserId; });
     nearby.sort(function(a,b){ return distanceKm(cu.city,a.city)-distanceKm(cu.city,b.city); });
     var nearbySlice = nearby.slice(0,8);
 
@@ -3238,10 +2796,6 @@
       };
     }
 
-    // Expired ads never show in the marketplace, even with "show sold/traded" on
-    allItems = allItems.filter(function(it){ return it.status!=="expired"; });
-    // Hide ads from people you have blocked
-    if(UI.currentUserId) allItems = allItems.filter(function(it){ return !isUserBlocked(it.ownerId, UI.currentUserId); });
     if(!f.showTraded) allItems = allItems.filter(function(it){ return it.status!=="traded" && it.status!=="sold"; });
     if(cat)           allItems = allItems.filter(function(it){ return it.category===cat; });
     if(f.category!=="all") allItems = allItems.filter(function(it){ return it.category===f.category; });
@@ -3284,19 +2838,11 @@
       allItems = allItems.filter(function(it){ return it.negotiable; });
     }
 
-    // Boosted (paid) ads always come first, then the chosen sort decides the rest
-    var boostFirst = function(inner){
-      return function(a, b){
-        var ba = isBoosted(a) ? 1 : 0, bb = isBoosted(b) ? 1 : 0;
-        if(ba !== bb) return bb - ba;
-        return inner(a, b);
-      };
-    };
-    if(f.sort==="nearest")   allItems.sort(boostFirst(function(a,b){ return distanceKm(cu.city,a.city)-distanceKm(cu.city,b.city); }));
-    else if(f.sort==="views") allItems.sort(boostFirst(function(a,b){ return (b.views||0)-(a.views||0); }));
-    else if(f.sort==="price_asc")  allItems.sort(boostFirst(function(a,b){ return (a.price||0)-(b.price||0); }));
-    else if(f.sort==="price_desc") allItems.sort(boostFirst(function(a,b){ return (b.price||0)-(a.price||0); }));
-    else allItems.sort(boostFirst(function(a,b){ return b.createdAt-a.createdAt; }));
+    if(f.sort==="nearest")   allItems.sort(function(a,b){ return distanceKm(cu.city,a.city)-distanceKm(cu.city,b.city); });
+    else if(f.sort==="views") allItems.sort(function(a,b){ return (b.views||0)-(a.views||0); });
+    else if(f.sort==="price_asc")  allItems.sort(function(a,b){ return (a.price||0)-(b.price||0); });
+    else if(f.sort==="price_desc") allItems.sort(function(a,b){ return (b.price||0)-(a.price||0); });
+    else allItems.sort(function(a,b){ return b.createdAt-a.createdAt; });
 
     var cityOpts = '<option value="all">All cities</option>' + CITIES.map(function(c){ return '<option value="'+esc(c.name)+'"'+(f.city===c.name?' selected':'')+'>'+esc(c.name)+'</option>'; }).join("");
     var catOpts  = '<option value="all">All categories</option>' + CATEGORY_TREE.map(function(p){
@@ -3414,7 +2960,7 @@
     var wantLine   = (it.forBarter && !isNoBarter(it.category)) ? '<div class="item-want">Wants: '+esc(it.wantInExchange||"Open to offers")+'</div>' : '';
     var viewCount  = '<span class="view-count">👁 '+(it.views||0)+'</span>';
     var ribbon     = isBoosted(it) ? '<div class="featured-ribbon">⚡ Boosted</div>' : (it.isFeatured ? '<div class="featured-ribbon">⭐ Featured</div>' : '');
-    var premiumBadge = isPremium(it) ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>' : '';
+    var premiumBadge = isPremium(it) ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">💎 Premium</span>' : '';
     var heartBtn   = '<button class="heart-btn '+(saved?'saved':'')+'" data-action="toggle-save" data-id="'+it.id+'" title="'+(saved?'Remove from saved':'Save ad')+'">'+(saved?'❤️':'🤍')+'</button>';
     var photoDisplay = (it.photos && it.photos.length) ? '<div style="width:100%;height:160px;background-size:cover;background-position:center;border-radius:6px;margin-bottom:8px;background-image:url('+it.photos[0]+');"></div>' : '<div class="item-icon">'+it.icon+'</div>';
     return '' +
@@ -3426,7 +2972,7 @@
         '<div class="item-meta">'+'<span class="pill pill-cat">'+esc(it.category)+'</span>'+statusPillForItem(it.status)+modeBadges+premiumBadge+'</div>' +
         priceLine +
         wantLine +
-        '<div class="item-owner">'+avatarOf(owner, 18)+' '+esc(owner.name)+' '+getSellerBadge(owner.id)+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1):'')+' '+viewCount+'</div>' +
+        '<div class="item-owner">'+owner.avatar+' '+esc(owner.name)+' '+getSellerBadge(owner.id)+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1):'')+' '+viewCount+'</div>' +
       '</div>';
   }
 
@@ -3437,10 +2983,9 @@
       '<div style="font-weight:700;font-size:17px;margin-bottom:8px;">Login to see your ads</div>'+
       '<button class="btn btn-primary" data-action="goto-login-screen">Login</button></div>';
     var mine = myItems().slice().sort(function(a,b){return b.createdAt-a.createdAt;});
-    var activeItems  = mine.filter(function(it){ return it.status==="available"; });
-    var soldItems    = mine.filter(function(it){ return it.status==="sold" || it.status==="traded"; });
-    var expiredItems = mine.filter(function(it){ return it.status==="expired"; });
-    var displayItems = UI.myAdsTab==="sold" ? soldItems : (UI.myAdsTab==="expired" ? expiredItems : activeItems);
+    var activeItems = mine.filter(function(it){ return it.status==="available"; });
+    var soldItems   = mine.filter(function(it){ return it.status==="sold" || it.status==="traded"; });
+    var displayItems = UI.myAdsTab==="sold" ? soldItems : activeItems;
 
     var formHtml = UI.listingFormOpen ? (UI.editingItemId ? renderEditListingForm(UI.editingItemId) : renderListingForm()) : "";
     var toggleLabel = UI.listingFormOpen ? "Cancel" : "+ Post Free Ad";
@@ -3451,8 +2996,6 @@
       '<div style="display:flex;flex-direction:column;gap:10px;">'+displayItems.map(renderMyItemRow).join("")+'</div>' :
       (UI.myAdsTab==="sold" ?
         '<div class="card empty"><div class="empty-icon">🏷️</div>No sold or traded items yet.</div>' :
-       UI.myAdsTab==="expired" ?
-        '<div class="card empty"><div class="empty-icon">⏳</div>No expired ads. Every ad stays live for '+AD_LIFETIME_DAYS+' days.</div>' :
         '<div class="card empty"><div class="empty-icon">📦</div>You haven\'t posted any ads yet.<br>Tap "Post Free Ad" to get started.</div>');
 
     return '' +
@@ -3462,7 +3005,7 @@
         '<span><b>'+esc(currentPlan(UI.currentUserId).name)+'</b> plan</span>' +
         '<span>· '+adsRemaining(UI.currentUserId)+' of '+adsAllowed(UI.currentUserId)+' ads left this month</span>' +
         '<span>· ⚡ '+boostCredits(UI.currentUserId)+' boosts</span>' +
-        '<span>· 👑 '+premiumCredits(UI.currentUserId).length+' premium credits</span>' +
+        '<span>· 💎 '+premiumCredits(UI.currentUserId).length+' premium credits</span>' +
         '<button class="btn btn-sm btn-outline" data-action="goto-pricing" style="margin-left:auto;">View plans</button>' +
       '</div>' +
       '<button class="btn btn-primary" data-action="toggle-listing-form" style="margin-bottom:14px;">'+toggleLabel+'</button>' +
@@ -3470,7 +3013,6 @@
       '<div class="ads-tab-bar">' +
         '<button class="ads-tab-btn'+(UI.myAdsTab==="active"?" active":"")+'" data-action="my-ads-tab" data-tab="active">Active ('+activeItems.length+')</button>' +
         '<button class="ads-tab-btn'+(UI.myAdsTab==="sold"?" active":"")+'" data-action="my-ads-tab" data-tab="sold">Sold/Traded ('+soldItems.length+')</button>' +
-        '<button class="ads-tab-btn'+(UI.myAdsTab==="expired"?" active":"")+'" data-action="my-ads-tab" data-tab="expired">Expired ('+expiredItems.length+')</button>' +
       '</div>' +
       listHtml;
   }
@@ -3568,13 +3110,6 @@
   function renderMyItemRow(it){
     var modeBadges = (it.forSale ? '<span class="pill pill-sale">'+(it.price===0?'FREE':formatINR(it.price||0))+'</span>' : '') + (it.forBarter && !isNoBarter(it.category) ? '<span class="pill pill-barter">Barter</span>' : '');
     var isSold = it.status==="sold" || it.status==="traded";
-    var expired = isExpired(it);
-    var left = daysLeft(it);
-    var expiryNote = expired
-      ? '<span style="font-size:12px;color:#b45309;">⏳ Expired — repost to make it live again</span>'
-      : (it.status==="available"
-          ? '<span style="font-size:12px;color:'+(left<=3?'#b45309':'var(--muted)')+';">⏳ '+(left===0?'Expires today':(left+' day'+(left===1?'':'s')+' left'))+'</span>'
-          : '');
     return '' +
       '<div class="card my-ad-row">' +
         '<div class="item-icon" style="font-size:32px;flex-shrink:0;">'+it.icon+(it.isFeatured?' <span style="font-size:14px;">⭐</span>':'')+'</div>' +
@@ -3582,18 +3117,16 @@
           '<div class="item-title">'+esc(it.title)+'</div>' +
           '<div class="my-ad-meta">'+statusPillForItem(it.status)+modeBadges+'</div>' +
           '<div class="my-ad-meta"><span class="muted" style="font-size:12px;">'+esc(it.city)+' · '+timeAgo(it.createdAt)+'</span><span class="my-ad-views">👁 '+(it.views||0)+' views</span></div>' +
-          (expiryNote ? '<div class="my-ad-meta">'+expiryNote+'</div>' : '') +
         '</div>' +
         '<div class="my-ad-actions">' +
-          (expired ? '<button class="btn btn-sm btn-primary" data-action="repost-listing" data-id="'+it.id+'">↻ Repost</button>' : '') +
-          (!isSold && !expired ? '<button class="btn btn-sm btn-primary" data-action="edit-listing" data-id="'+it.id+'">Edit</button>' : '') +
-          (!isSold && !expired ? '<button class="btn btn-sm" data-action="mark-sold" data-id="'+it.id+'">Mark Sold</button>' : '') +
-          (!isSold && !expired ? (isBoosted(it)
+          (!isSold ? '<button class="btn btn-sm btn-primary" data-action="edit-listing" data-id="'+it.id+'">Edit</button>' : '') +
+          (!isSold ? '<button class="btn btn-sm" data-action="mark-sold" data-id="'+it.id+'">Mark Sold</button>' : '') +
+          (!isSold ? (isBoosted(it)
               ? '<span class="pill" style="background:#fef3c7;color:#92400e;">⚡ Boosted</span>'
               : '<button class="btn btn-sm btn-outline" data-action="boost-listing" data-id="'+it.id+'" title="Uses 1 boost credit">⚡ Boost ('+boostCredits(UI.currentUserId)+')</button>') : '') +
-          (!isSold && !expired ? (isPremium(it)
-              ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>'
-              : '<button class="btn btn-sm btn-outline" data-action="premium-listing" data-id="'+it.id+'" title="Uses 1 premium credit">👑 Premium ('+premiumCredits(UI.currentUserId).length+')</button>') : '') +
+          (!isSold ? (isPremium(it)
+              ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">💎 Premium</span>'
+              : '<button class="btn btn-sm btn-outline" data-action="premium-listing" data-id="'+it.id+'" title="Uses 1 premium credit">💎 Premium ('+premiumCredits(UI.currentUserId).length+')</button>') : '') +
           '<button class="btn btn-sm btn-danger" data-action="delete-listing" data-id="'+it.id+'">Delete</button>' +
         '</div>' +
       '</div>';
@@ -3631,8 +3164,8 @@
 
       var itemLabel = "";
       if(d.kind==="barter"){
-        var reqItem = itemById(d.requestedItemId);
-        itemLabel = offeredLabel(d)+" ⇄ "+reqItem.icon+" "+esc(reqItem.title);
+        var offItem = itemById(d.offeredItemId), reqItem = itemById(d.requestedItemId);
+        itemLabel = offItem.icon+" "+esc(offItem.title)+" ⇄ "+reqItem.icon+" "+esc(reqItem.title);
       } else if(d.kind==="sale" || d.kind==="offer"){
         var saleItem = itemById(d.itemId);
         itemLabel = saleItem.icon+" "+esc(saleItem.title);
@@ -3641,27 +3174,20 @@
         itemLabel = qItem.icon+" "+esc(qItem.title);
       }
 
-      var lastHasPhoto = !!(last && last.photos && last.photos.length);
-      var preview = last
-        ? (last.text ? (lastHasPhoto ? "📷 " : "") + esc(last.text) : (lastHasPhoto ? "📷 Photo" : ""))
-        : (isIncoming ? "New enquiry" : "Awaiting reply");
+      var preview = last ? esc(last.text) : (isIncoming ? "New enquiry" : "Awaiting reply");
       var kindIcon = d.kind==="barter"?"🔄":d.kind==="sale"?"🛒":d.kind==="offer"?"💬":"❓";
       var statusPill = statusPillFor(d.status);
 
-      var showTag = (d.status==="pending" || d.status==="accepted" || d.status==="completed");
-      var tagText = d.status==="completed" ? "Done" : (d.status==="accepted" ? "Accepted" : "Awaiting reply");
-      return '<div class="chat-row'+(isUnread?' unread':'')+'" data-action="open-deal" data-id="'+d.id+'">' +
-        '<div class="chat-avatar">'+avatarOf(cp, 40)+'</div>' +
+      return '<div class="chat-row trade-card" data-action="open-deal" data-id="'+d.id+'">' +
+        '<div class="chat-avatar">'+cp.avatar+'</div>' +
         '<div class="chat-info">' +
-          '<div class="chat-top"><span class="chat-name">'+esc(cp.name)+'</span>' +
-            (showTag ? '<span class="chat-tag">'+kindIcon+' '+esc(tagText)+'</span>' : '') +
-          '</div>' +
-          '<div class="chat-item">'+itemLabel+'</div>' +
+          '<div class="chat-name">'+esc(cp.name)+' <span style="font-size:12px;font-weight:400;color:var(--muted);">'+kindIcon+' '+statusPill+'</span></div>' +
+          '<div style="font-size:11.5px;color:var(--muted);margin-top:1px;">'+itemLabel+'</div>' +
           '<div class="chat-preview">'+preview+'</div>' +
         '</div>' +
-        '<div class="chat-side">' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">' +
           '<span class="chat-time">'+timeAgo(last ? last.createdAt : d.createdAt)+'</span>' +
-          (isUnread ? '<span class="chat-unread" title="Unread"></span>' : '') +
+          (isUnread ? '<span class="chat-unread">New</span>' : '') +
         '</div>' +
       '</div>';
     }).join("");
@@ -3669,10 +3195,10 @@
     var emptyHtml = '<div class="card empty"><div class="empty-icon">💬</div>No chats yet.<br>Browse the marketplace and make an enquiry!</div>';
 
     var filterBar = '' +
-      '<div class="chat-filters">' +
+      '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">' +
         ['all','barter','sale','offer','query'].map(function(k){
           var labels = {all:"All",barter:"Barter",sale:"Purchases",offer:"Offers",query:"Enquiries"};
-          return '<button class="chat-chip'+(UI.chatsFilter===k?" active":"")+'" data-action="chats-filter" data-val="'+k+'">'+labels[k]+'</button>';
+          return '<button class="btn btn-sm'+(UI.chatsFilter===k?" btn-primary":"")+'" data-action="chats-filter" data-val="'+k+'">'+labels[k]+'</button>';
         }).join("") +
       '</div>';
 
@@ -3687,6 +3213,38 @@
     var map = {pending:"pill-pending", accepted:"pill-accepted", completed:"pill-completed", rejected:"pill-rejected", withdrawn:"pill-withdrawn"};
     var label = status.charAt(0).toUpperCase()+status.slice(1);
     return '<span class="pill '+(map[status]||"pill-pending")+'">'+label+'</span>';
+  }
+
+  function renderTradeCard(d){
+    if(d.kind==="sale"){
+      var it = itemById(d.itemId);
+      var cpId = (d.fromUserId===UI.currentUserId) ? d.toUserId : d.fromUserId;
+      var cp = userById(cpId);
+      var isBuyer = d.fromUserId===UI.currentUserId;
+      var label = isBuyer ? "Bought from " : "Sold to ";
+      return '' +
+        '<div class="card trade-card" data-action="open-deal" data-id="'+d.id+'">' +
+          '<div class="trade-row-top">' +
+            '<div class="trade-swap">'+it.icon+' '+esc(it.title)+' · '+formatINR(d.price)+'</div>' +
+            statusPillFor(d.status) +
+          '</div>' +
+          '<div class="item-meta">'+label+cp.avatar+' '+esc(cp.name)+' · '+timeAgo(d.createdAt)+'</div>' +
+        '</div>';
+    }
+    var offered = itemById(d.offeredItemId), requested = itemById(d.requestedItemId);
+    var counterpartyId = (d.fromUserId===UI.currentUserId) ? d.toUserId : d.fromUserId;
+    var counterparty = userById(counterpartyId);
+    var msgs = messagesFor(d.id);
+    var last = msgs.length ? msgs[msgs.length-1] : null;
+    return '' +
+      '<div class="card trade-card" data-action="open-deal" data-id="'+d.id+'">' +
+        '<div class="trade-row-top">' +
+          '<div class="trade-swap">'+offered.icon+' '+esc(offered.title)+' <span class="arrow">⇄</span> '+requested.icon+' '+esc(requested.title)+'</div>' +
+          statusPillFor(d.status) +
+        '</div>' +
+        '<div class="item-meta">'+counterparty.avatar+' '+esc(counterparty.name)+' · '+timeAgo(d.createdAt)+'</div>' +
+        (last ? '<div class="trade-msg-preview">💬 '+esc(last.text)+'</div>' : '') +
+      '</div>';
   }
 
   // -------- Profile --------
@@ -3707,7 +3265,7 @@
 
     var reviewsHtml = reviews.length ? reviews.map(function(r){
       var reviewer = userById(r.fromUserId);
-      return '<div class="card review-card"><div class="review-top"><div>'+avatarOf(reviewer, 22)+' <b>'+esc(reviewer.name)+'</b></div><div class="stars">'+starsStr(r.stars)+'</div></div>' + (r.review ? '<div class="muted" style="font-size:13.5px;">'+esc(r.review)+'</div>' : '') + '</div>';
+      return '<div class="card review-card"><div class="review-top"><div>'+reviewer.avatar+' <b>'+esc(reviewer.name)+'</b></div><div class="stars">'+starsStr(r.stars)+'</div></div>' + (r.review ? '<div class="muted" style="font-size:13.5px;">'+esc(r.review)+'</div>' : '') + '</div>';
     }).join("") : '<div class="card empty">No reviews yet.</div>';
 
     var userOpts = DB.users.map(function(uu){ return '<option value="'+uu.id+'"'+(uu.id===UI.currentUserId?' selected':'')+'>'+esc(uu.avatar)+' '+esc(uu.name)+'</option>'; }).join("");
@@ -3717,24 +3275,10 @@
     var savedTabActive = UI.savedTab;
 
     return '' +
-      '<div style="display:flex;align-items:center;gap:10px;">' +
-        '<div class="section-title" style="margin:0;">Profile</div>' +
-        '<div style="margin-left:auto;">' + renderNotifBell() + '</div>' +
-      '</div>' +
+      '<div class="section-title">Profile</div>' +
       '<div class="section-sub">This is a multi-user demo - switch users below to see both sides of a trade or sale.</div>' +
       '<div class="card profile-head">' +
-        '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;">' +
-          '<div class="profile-avatar">' +
-            (u.avatarPhoto
-              ? '<img src="'+u.avatarPhoto+'" alt="'+esc(u.name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">'
-              : u.avatar) +
-          '</div>' +
-          '<label class="avatar-upload-btn" title="Upload a profile picture">' +
-            (u.avatarPhoto ? '🔄 Change' : '📷 Add photo') +
-            '<input type="file" id="avatarFileInput" accept="image/*">' +
-          '</label>' +
-          (u.avatarPhoto ? '<button class="btn btn-ghost btn-sm" data-action="remove-avatar-photo" style="font-size:11.5px;padding:2px 8px;color:#ef4444;">Remove</button>' : '') +
-        '</div>' +
+        '<div class="profile-avatar">'+u.avatar+'</div>' +
         '<div>' +
           '<div style="font-size:19px;font-weight:800;">'+esc(u.name)+'</div>' +
           '<div class="muted">'+esc(u.city)+'</div>' +
@@ -3759,7 +3303,7 @@
             '</div>' +
           '</div>' +
           '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);">' +
-            '👑 Plan: <b>'+esc(currentPlan(u.id).name)+'</b> · '+adsRemaining(u.id)+'/'+adsAllowed(u.id)+' ads left · ⚡ '+boostCredits(u.id)+' boosts · 👑 '+premiumCredits(u.id).length+' premium ' +
+            '💎 Plan: <b>'+esc(currentPlan(u.id).name)+'</b> · '+adsRemaining(u.id)+'/'+adsAllowed(u.id)+' ads left · ⚡ '+boostCredits(u.id)+' boosts · 💎 '+premiumCredits(u.id).length+' premium ' +
             '<button class="btn btn-sm btn-ghost" data-action="goto-pricing" style="margin-left:6px;">Manage</button>' +
           '</div>' +
           '<button class="btn btn-outline btn-sm" data-action="logout" style="margin-top:12px;color:#ef4444;border-color:#ef4444;">&#x1F512; Logout</button>' +
@@ -3786,11 +3330,6 @@
         '<div class="hr"></div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">🔐 Account Verification</div>' +
         '<div style="margin-bottom:14px;">' +
-          (u.phoneVerified ?
-            '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">☎️ Phone verified</div>' :
-            '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="tel" id="phoneInput" placeholder="Phone number" value="'+esc(u.phone==="[hidden]"?"":u.phone)+'" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-primary" data-action="send-phone-otp">Send OTP</button></div>' +
-            (UI.phoneOtpSent ? '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" id="phoneOtpInput" placeholder="Enter OTP" maxlength="6" style="width:110px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-ghost" data-action="verify-phone-otp">Verify</button></div>' : '')
-          ) +
           (u.emailVerified ?
             '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">✓ Email verified</div>' :
             '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="email" id="emailInput" placeholder="Email address" value="'+esc(u.email)+'" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-primary" data-action="send-email-otp">Send OTP</button></div>' +
@@ -3800,30 +3339,6 @@
             '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">✓ ID verified - Pro Seller Badge Unlocked</div>' :
             '<button class="btn btn-sm btn-outline" data-action="start-id-verification" style="margin-bottom:8px;">🆔 Verify ID (Pro Seller)</button>'
           ) +
-        '</div>' +
-        '<div class="hr"></div>' +
-        '<div style="font-weight:800;margin:8px 0 10px;">🚫 Blocked Users</div>' +
-        ((u.blockedUsers && u.blockedUsers.length) ?
-          '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">' +
-            u.blockedUsers.map(function(bid){
-              var bu = userById(bid);
-              return '<div class="card" style="padding:10px;display:flex;align-items:center;gap:10px;">' +
-                '<span>'+avatarOf(bu, 24)+'</span><span style="flex:1;font-size:14px;">'+esc(bu.name)+'</span>' +
-                '<button class="btn btn-sm btn-outline" data-action="unblock-user" data-userid="'+bid+'">Unblock</button>' +
-              '</div>';
-            }).join("") +
-          '</div>' :
-          '<div class="muted" style="font-size:13px;margin-bottom:14px;">You haven\'t blocked anyone. Use 🚫 Block on an ad to stop seeing someone\'s listings and messages.</div>') +
-        '<div class="hr"></div>' +
-        '<div style="font-weight:800;margin:8px 0 10px;">🗂️ Your Data</div>' +
-        '<div class="card" style="padding:12px;margin-bottom:14px;">' +
-          '<div style="font-size:13px;color:var(--muted);margin-bottom:10px;">Download everything Baganto holds about you, or close your account for good.</div>' +
-          renderStorageMeter() +
-          '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-            '<button class="btn btn-sm btn-outline" data-action="export-my-data">⬇️ Download my data</button>' +
-            '<button class="btn btn-sm btn-danger" data-action="delete-my-account">Delete my account</button>' +
-          '</div>' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Deleting removes your profile, ads, chats, messages and reviews. It cannot be undone.</div>' +
         '</div>' +
         '<div class="hr"></div>' +
         '<button class="btn btn-ghost" data-action="reset-demo">↻ Reset Demo Data</button>'
@@ -3846,7 +3361,7 @@
       '<div style="font-size:17px;font-weight:800;">'+esc(p.name)+'</div>' +
       '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'+esc(p.tagline)+'</div>' +
       '<div style="font-size:28px;font-weight:800;">'+formatINR(p.price)+'<span style="font-size:13px;font-weight:500;color:var(--muted);">/month</span></div>' +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">'+p.ads+' ads · '+p.boosts+' boost'+(p.boosts===1?'':'s')+' included<br>Every ad runs for 30 days</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">'+p.ads+' ads · '+p.boosts+' boost'+(p.boosts===1?'':'s')+' included</div>' +
       '<ul style="margin:0 0 14px;padding:0;flex:1;">'+feats+'</ul>' +
       '<button class="btn btn-sm '+(isActive?'btn-ghost':'btn-primary')+'" data-action="select-plan" data-plan="'+p.id+'"'+(isActive?' disabled':'')+'>'+btnLabel+'</button>' +
     '</div>';
@@ -3891,7 +3406,7 @@
       '<div class="section-title" style="font-size:18px;">⚡ Boosts</div>' +
       '<div class="section-sub">Push any single ad to the top of search results.</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:10px 0 22px;">'+boostAddons.map(addonCard).join("")+'</div>' +
-      '<div class="section-title" style="font-size:18px;">👑 Premium listings</div>' +
+      '<div class="section-title" style="font-size:18px;">💎 Premium listings</div>' +
       '<div class="section-sub">Highlight an ad with a premium badge so buyers notice it first.</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:10px 0 22px;">'+premAddons.map(addonCard).join("")+'</div>';
 
@@ -3917,12 +3432,13 @@
       }).join("") + '</div>';
 
     var compareRows = [
-      ["Ads per month", "3", "25", "60", "100"],
-      ["How long each ad runs", "30 days", "30 days", "30 days", "30 days"],
-      ["Boosts included", "0", "2", "4", "8"],
-      ["Search and filters", "✓", "✓", "✓", "✓"],
-      ["Ad performance stats", "-", "✓", "✓", "✓"],
-      ["Verified business badge", "-", "-", "-", "✓"]
+      ["Ads per month", "2", "22", "60", "100"],
+      ["Boosts included", "0", "2", "4", "5"],
+      ["Advanced filters", "-", "✓", "✓", "✓"],
+      ["Saved searches", "-", "✓", "✓", "✓"],
+      ["Ad performance stats", "-", "-", "✓", "✓"],
+      ["Verified business badge", "-", "-", "-", "✓"],
+      ["Support", "Community", "Email", "Priority", "24/7"]
     ].map(function(r){
       return '<tr>' + r.map(function(c,i){
         return '<td style="padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;'+(i===0?'font-weight:600;':'text-align:center;')+'">'+esc(c)+'</td>';
@@ -3937,7 +3453,6 @@
       '</table></div>';
 
     var faqs = [
-      ["How long does an ad stay live?", "Every ad runs for 30 days from the day you post it, on all plans. You can repost it after that."],
       ["Can I change plans any time?", "Yes. Upgrades apply immediately and your ad quota updates straight away."],
       ["Do unused ads roll over?", "No. Your ad quota resets at the start of each 30-day billing period."],
       ["What happens if I hit my ad limit?", "You can still edit, chat and complete deals - you just need to upgrade or wait for the reset to post new ads."],
@@ -3949,26 +3464,16 @@
         '<div style="font-size:13px;color:var(--muted);">'+esc(f[1])+'</div></div>';
     }).join("");
 
-    var supportHtml = '<div class="section-title" style="font-size:18px;">Need help?</div>' +
-      '<div class="card" style="padding:16px;margin:10px 0 22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">' +
-        '<div style="font-size:28px;">💬</div>' +
-        '<div style="flex:1;min-width:200px;">' +
-          '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">Questions, complaints or something not working?</div>' +
-          '<div style="font-size:13px;color:var(--muted);">Visit the Support Centre to send us a message or email support@baganto.com directly.</div>' +
-        '</div>' +
-        '<button class="btn btn-primary btn-sm" data-action="goto-support" style="white-space:nowrap;">💬 Support Centre</button>' +
-      '</div>';
-
     return '' +
       '<div class="section-title">Plans &amp; Pricing</div>' +
       '<div class="section-sub">Free to browse and barter. Pay only when you want to sell more or stand out.</div>' +
       usageHtml +
       plansHtml +
       addonsHtml +
+      examplesHtml +
       compareHtml +
       '<div class="section-title" style="font-size:18px;">Common questions</div>' +
       faqs +
-      supportHtml +
       '<div class="card" style="padding:12px;font-size:12px;color:var(--muted);margin-top:10px;">Demo note: no real payment is taken. Plan changes and add-on purchases are simulated locally so you can test the full flow.</div>';
   }
 
@@ -3990,24 +3495,6 @@
       '</div>';
     }).join("");
 
-    var ticketCount = DB.supportTickets ? DB.supportTickets.filter(function(t){ return t.status==="open"; }).length : 0;
-    var openTickets = (DB.supportTickets || []).filter(function(t){ return t.status==="open"; })
-      .sort(function(a,b){ return a.createdAt-b.createdAt; });
-    var ticketsHtml = openTickets.map(function(t){
-      var who = t.userId ? userById(t.userId) : null;
-      return '<div class="card" style="padding:12px;margin-bottom:10px;">' +
-        '<div style="display:flex;justify-content:space-between;gap:8px;">' +
-          '<div style="font-weight:600;">'+esc(t.subject)+'</div>' +
-          '<span class="muted" style="font-size:11px;white-space:nowrap;">'+timeAgo(t.createdAt)+'</span>' +
-        '</div>' +
-        '<div class="muted" style="font-size:12px;margin:4px 0;">'+esc(t.category)+' · '+esc(who?who.name:t.contactEmail)+' ('+esc(t.contactEmail)+')</div>' +
-        '<div style="font-size:13px;margin-bottom:8px;">'+esc(t.message)+'</div>' +
-        '<div style="display:flex;gap:6px;">' +
-          '<button class="btn btn-sm btn-primary" data-action="admin-resolve-ticket" data-id="'+t.id+'">Mark Resolved</button>' +
-        '</div>' +
-      '</div>';
-    }).join("");
-
     return '' +
       '<div class="section-title">Admin Dashboard</div>' +
       '<div class="section-sub">Moderation & platform management</div>' +
@@ -4024,17 +3511,10 @@
           '<div style="font-size:28px;font-weight:800;color:var(--danger);">'+reportCount+'</div>' +
           '<div class="muted" style="font-size:12px;">Open Reports</div>' +
         '</div>' +
-        '<div class="card" style="flex:1;min-width:150px;padding:16px;text-align:center;">' +
-          '<div style="font-size:28px;font-weight:800;color:var(--danger);">'+ticketCount+'</div>' +
-          '<div class="muted" style="font-size:12px;">Open Support Tickets</div>' +
-        '</div>' +
       '</div>' +
       '<div class="hr"></div>' +
       '<div style="font-weight:800;margin:12px 0;color:var(--primary-dark);">Open Reports</div>' +
-      (reportsHtml || '<div class="muted">No open reports</div>') +
-      '<div class="hr"></div>' +
-      '<div style="font-weight:800;margin:12px 0;color:var(--primary-dark);">Open Support Tickets</div>' +
-      (ticketsHtml || '<div class="muted">No open support tickets</div>');
+      (reportsHtml || '<div class="muted">No open reports</div>');
   }
 
   function renderProfileForm(){
@@ -4120,7 +3600,9 @@
         parts.push('<button class="btn btn-primary btn-block" data-action="open-buy" data-id="'+it.id+'">Claim for Free</button>');
       }
       if(it.forBarter && !isNoBarter(it.category)){
-        if(hasPendingProposalOnItem(UI.currentUserId, it.id)){
+        if(myAvailableItems().length===0){
+          parts.push('<div class="muted">Add a listing in <b>My Ads</b> to propose a trade.</div>');
+        } else if(hasPendingProposalOnItem(UI.currentUserId, it.id)){
           parts.push('<button class="btn btn-block" disabled>Trade Proposal Already Sent</button>');
         } else {
           parts.push('<button class="btn btn-block" data-action="open-propose" data-id="'+it.id+'">Propose a Trade</button>');
@@ -4132,11 +3614,7 @@
 
     var saveBtn = !isMine ? '<button class="btn btn-ghost btn-sm" data-action="toggle-save" data-id="'+it.id+'" style="margin-left:6px;">'+(saved?'❤️ Saved':'🤍 Save Ad')+'</button>' : '';
 
-    var blockedAlready = isUserBlocked(owner.id, UI.currentUserId);
-    var reportLink = !isMine ? '<div style="text-align:center;margin-top:10px;">' +
-      '<button class="btn btn-ghost btn-sm" data-action="open-report" data-id="'+it.id+'" style="color:var(--muted);font-size:12px;">⚑ Report this Ad</button>' +
-      (UI.currentUserId ? '<button class="btn btn-ghost btn-sm" data-action="'+(blockedAlready?'unblock-user':'block-user')+'" data-userid="'+owner.id+'" style="color:var(--muted);font-size:12px;">'+(blockedAlready?'✓ Unblock '+esc(owner.name):'🚫 Block '+esc(owner.name))+'</button>' : '') +
-    '</div>' : '';
+    var reportLink = !isMine ? '<div style="text-align:center;margin-top:10px;"><button class="btn btn-ghost btn-sm" data-action="open-report" data-id="'+it.id+'" style="color:var(--muted);font-size:12px;">⚑ Report this Ad</button></div>' : '';
 
     var shareBtn = '<button class="btn btn-ghost btn-sm" data-action="share-item" data-id="'+it.id+'" style="margin-left:6px;" title="Share this ad">📤 Share</button>';
 
@@ -4167,7 +3645,7 @@
       priceLine +
       wantLine +
       '<div class="hr"></div>' +
-      '<div class="item-meta" style="margin:10px 0 4px;">'+avatarOf(owner, 22)+' <b>'+esc(owner.name)+'</b> · '+esc(it.city)+(dist>0?' · '+dist+' km away':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1)+' ('+rating.count+')':' · No reviews yet')+'</div>' +
+      '<div class="item-meta" style="margin:10px 0 4px;">'+owner.avatar+' <b>'+esc(owner.name)+'</b> · '+esc(it.city)+(dist>0?' · '+dist+' km away':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1)+' ('+rating.count+')':' · No reviews yet')+'</div>' +
       memberLine +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;font-size:12px;">' +
         (owner.phoneVerified ? '<span class="trust-badge">☎️ Verified</span>' : '') +
@@ -4226,21 +3704,8 @@
       '<form data-form="make-offer" data-id="'+it.id+'">' +
         '<div class="form-row"><label>Your Offer (₹)</label><input type="number" name="offerPrice" min="1" step="1" placeholder="e.g. '+Math.round((it.price||0)*0.85)+'" required></div>' +
         '<div class="form-row"><label>Message (optional)</label><textarea name="message" placeholder="Explain your offer or ask about the item…"></textarea></div>' +
-        renderPhotoAttachRow("Photos (optional)") +
         '<button type="submit" class="btn btn-primary btn-block">Send Offer</button>' +
       '</form>';
-  }
-
-  // Photo attach control for the Propose / Offer forms — reuses the same
-  // staging area (UI.chatImages) as the chat composer.
-  function renderPhotoAttachRow(labelText){
-    return '<div class="form-row"><label>'+esc(labelText||"Photos (optional)")+'</label>' +
-      renderChatImageStrip() +
-      '<label class="attach-wide">📎 Attach photos' +
-        '<input type="file" id="chatImgInput" accept="image/*" multiple>' +
-      '</label>' +
-      '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Up to 4 photos. They are sent with your message.</div>' +
-    '</div>';
   }
 
   function renderReportModalBody(itemId){
@@ -4265,123 +3730,21 @@
       '<div style="font-size:46px;">'+it.icon+'</div>' +
       '<div style="font-size:19px;font-weight:800;margin:6px 0 4px;">'+esc(it.title)+'</div>' +
       '<div class="item-price" style="margin-bottom:10px;">'+formatINR(it.price)+'</div>' +
-      '<div class="muted" style="margin-bottom:16px;">Buying from '+avatarOf(owner, 20)+' '+esc(owner.name)+'. This purchase completes immediately - no negotiation needed.</div>' +
+      '<div class="muted" style="margin-bottom:16px;">Buying from '+owner.avatar+' '+esc(owner.name)+'. This purchase completes immediately - no negotiation needed.</div>' +
       '<button class="btn btn-primary btn-block" data-action="confirm-buy" data-id="'+it.id+'">Confirm Purchase - '+formatINR(it.price)+'</button>';
   }
 
   function renderProposeModalBody(itemId){
     var it = itemById(itemId);
     var mine = myAvailableItems();
-    var hasAds = mine.length > 0;
-    // With ads: a dropdown of them plus a "Something else" entry that reveals a
-    // text box. With no ads: only the text box, since there is nothing to pick.
-    var pickerHtml;
-    if(hasAds){
-      var opts = mine.map(function(m){ return '<option value="'+m.id+'">'+m.icon+' '+esc(m.title)+'</option>'; }).join("");
-      opts += '<option value="__custom__">✏️ Something else — I\'ll describe it</option>';
-      pickerHtml =
-        '<div class="form-row"><label>Offer one of your items</label>' +
-          '<select name="offeredItemId" id="offeredItemSelect">'+opts+'</select></div>' +
-        '<div class="form-row" id="offerCustomWrap" style="display:none;">' +
-          '<label>What are you offering?</label>' +
-          '<input type="text" name="offeredText" id="offeredTextInput" maxlength="80" placeholder="e.g. Yamaha keyboard, 61 keys, barely used">' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Attach photos below so they can see it.</div>' +
-        '</div>';
-    } else {
-      pickerHtml =
-        '<div class="form-row" id="offerCustomWrap">' +
-          '<label>What are you offering?</label>' +
-          '<input type="hidden" name="offeredItemId" value="__custom__">' +
-          '<input type="text" name="offeredText" id="offeredTextInput" maxlength="80" placeholder="e.g. Yamaha keyboard, 61 keys, barely used" required>' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">You have no ads posted yet — just describe your item and add photos.</div>' +
-        '</div>';
-    }
+    var opts = mine.map(function(m){ return '<option value="'+m.id+'">'+m.icon+' '+esc(m.title)+'</option>'; }).join("");
     return '' +
       '<div class="muted" style="margin-bottom:12px;">You\'re proposing a trade for <b>'+esc(it.title)+'</b> '+it.icon+' with '+esc(userById(it.ownerId).name)+'.</div>' +
       '<form data-form="propose-trade" data-requested="'+it.id+'">' +
-        '<div id="proposeError" style="display:none;color:#ef4444;font-size:12.5px;margin-bottom:8px;"></div>' +
-        pickerHtml +
+        '<div class="form-row"><label>Offer one of your items</label><select name="offeredItemId">'+opts+'</select></div>' +
         '<div class="form-row"><label>Message (optional)</label><textarea name="message" placeholder="Say hello and explain your offer…"></textarea></div>' +
-        renderPhotoAttachRow("Photos of your item (optional)") +
         '<button type="submit" class="btn btn-primary btn-block">Send Proposal</button>' +
       '</form>';
-  }
-
-  // What the proposer put on the table: one of their ads, or a typed description
-  function offeredLabel(d){
-    if(d && !d.offeredItemId && d.offeredText) return '✏️ '+esc(d.offeredText);
-    var o = itemById(d ? d.offeredItemId : null);
-    return o.icon+' '+esc(o.title);
-  }
-
-  // One-line description of what a deal is about, used in the chat header
-  function dealItemLine(d){
-    if(!d) return "";
-    if(d.kind==="barter"){
-      var r = itemById(d.requestedItemId);
-      return offeredLabel(d)+' ⇄ '+r.icon+' '+esc(r.title);
-    }
-    var it = itemById(d.itemId);
-    var price = (d.price!=null) ? ' · '+formatINR(d.price) : (it.forSale && it.price!=null ? ' · '+formatINR(it.price) : '');
-    return it.icon+' '+esc(it.title)+price;
-  }
-
-  // The full WhatsApp-style chat thread — shared by every kind of deal
-  // (barter, purchase, offer and enquiry) so photos can be sent in all of them.
-  function renderChatThread(d, counterparty){
-    var msgs = messagesFor(d.id);
-
-    // Timestamp of the last message the other person sent — anything of mine
-    // before it has certainly been seen, which drives the ✓✓ ticks.
-    var theirLastTs = 0;
-    msgs.forEach(function(m){ if(m.senderId!==UI.currentUserId && m.createdAt>theirLastTs) theirLastTs = m.createdAt; });
-
-    var msgsHtml = msgs.map(function(m, i){
-      var mine = m.senderId===UI.currentUserId;
-      var prev = i>0 ? msgs[i-1] : null;
-      var out = "";
-      if(!prev || !sameDay(prev.createdAt, m.createdAt)){
-        out += '<div class="chat-day">'+esc(chatDayLabel(m.createdAt))+'</div>';
-      }
-      var grouped = !!(prev && prev.senderId===m.senderId && sameDay(prev.createdAt, m.createdAt) &&
-                       (m.createdAt - prev.createdAt) < 5*60*1000);
-      var imgs = (m.photos && m.photos.length) ? m.photos.map(function(src){
-        return '<img class="msg-img" src="'+src+'" alt="Shared photo" data-action="view-chat-photo" data-src="'+src+'">';
-      }).join("") : "";
-      var body = imgs + (m.text ? esc(m.text) : "");
-      var seen = mine && theirLastTs > m.createdAt;
-      var tick = mine ? '<span class="msg-tick'+(seen?' seen':'')+'">'+(seen?'✓✓':'✓')+'</span>' : '';
-      out += '<div class="msg '+(mine?'msg-me':'msg-them')+(grouped?' grouped':'')+'">' + body +
-        '<span class="msg-time">'+esc(formatClock(m.createdAt))+tick+'</span></div>';
-      return out;
-    }).join("");
-
-    var typingUsers = getTypingUsers(d.id);
-    var typingHtml = typingUsers.length ? '<div class="chat-typing">'+esc(typingUsers.join(", "))+' is typing…</div>' : '';
-
-    var emptyThread = '<div class="chat-day">Today</div>' +
-      '<div class="muted" style="align-self:center;font-size:12.5px;text-align:center;padding:14px 0;">No messages yet — say hello!</div>';
-
-    return '' +
-      '<div class="chat-head">' +
-        '<div class="chat-head-av">'+avatarOf(counterparty, 34)+'</div>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div class="chat-head-name">'+esc(counterparty.name)+' '+getSellerBadge(counterparty.id)+'</div>' +
-          '<div class="chat-head-sub">'+dealItemLine(d)+'</div>' +
-        '</div>' +
-        statusPillFor(d.status) +
-      '</div>' +
-      '<div class="chat-thread">' +
-        '<div class="chat-box">'+(msgsHtml || emptyThread)+typingHtml+'</div>' +
-        renderChatImageStrip() +
-        '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
-          '<label class="chat-attach" title="Send a photo">📎' +
-            '<input type="file" id="chatImgInput" accept="image/*" multiple>' +
-          '</label>' +
-          '<input type="text" id="msgInput_'+d.id+'" name="text" placeholder="Type a message…" autocomplete="off" data-dealid="'+d.id+'">' +
-          '<button class="chat-send" type="submit" title="Send" aria-label="Send">&#10148;</button>' +
-        '</form>' +
-      '</div>';
   }
 
   function renderTradeModalBody(dealId){
@@ -4402,12 +3765,24 @@
         actionsS = '<button class="btn btn-primary btn-sm" data-action="open-rate" data-id="'+d.id+'" data-to="'+counterpartyId+'">Rate '+esc(counterparty.name)+'</button>';
       }
       return '' +
-        '<div class="muted" style="margin-bottom:12px;font-size:13px;">'+roleLine+'</div>' +
-        renderChatThread(d, counterparty) +
-        '<div style="margin-top:14px;">'+actionsS+'</div>';
+        '<div class="trade-swap" style="margin-bottom:6px;">'+it.icon+' '+esc(it.title)+' · '+formatINR(d.price)+'</div>' +
+        '<div class="item-meta" style="margin-bottom:14px;">'+counterparty.avatar+' '+esc(counterparty.name)+' · '+statusPillFor(d.status)+' · '+timeAgo(d.createdAt)+'</div>' +
+        '<div class="muted" style="margin-bottom:14px;">'+roleLine+'</div>' +
+        '<div style="margin-top:6px;">'+actionsS+'</div>';
     }
 
+    var offered = itemById(d.offeredItemId), requested = itemById(d.requestedItemId);
     var isIncoming = d.toUserId === UI.currentUserId;
+    var msgs = messagesFor(d.id);
+
+    var msgsHtml = msgs.map(function(m){
+      var mine = m.senderId===UI.currentUserId;
+      return '<div class="msg '+(mine?'msg-me':'msg-them')+'">'+esc(m.text)+'<span class="msg-time">'+timeAgo(m.createdAt)+'</span></div>';
+    }).join("");
+
+    // Add typing indicator
+    var typingUsers = getTypingUsers(d.id);
+    var typingHtml = typingUsers.length ? '<div class="msg msg-them" style="font-style:italic;color:var(--muted);">'+typingUsers.join(", ")+' is typing...</div>' : '';
 
     var actions = "";
     if(d.status==="pending" && isIncoming){
@@ -4428,26 +3803,17 @@
       actions = '<div class="muted">This proposal is '+d.status+'.</div>';
     }
 
-    return renderChatThread(d, counterparty) +
+    return '' +
+      '<div class="trade-swap" style="margin-bottom:6px;">'+offered.icon+' '+esc(offered.title)+' <span class="arrow">⇄</span> '+requested.icon+' '+esc(requested.title)+'</div>' +
+      '<div class="item-meta" style="margin-bottom:14px;">'+counterparty.avatar+' '+esc(counterparty.name)+' · '+statusPillFor(d.status)+' · '+timeAgo(d.createdAt)+'</div>' +
+      '<div class="card" style="padding:12px;background:var(--bg);border:none;">' +
+        '<div class="chat-box">'+(msgsHtml || '<div class="muted" style="font-size:13px;">No messages yet - say hello!</div>')+typingHtml+'</div>' +
+        '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
+          '<input type="text" id="msgInput_'+d.id+'" name="text" placeholder="Type a message…" autocomplete="off" data-dealid="'+d.id+'">' +
+          '<button class="btn btn-primary btn-sm" type="submit">Send</button>' +
+        '</form>' +
+      '</div>' +
       '<div style="margin-top:14px;">'+actions+'</div>';
-  }
-
-  // Thumbnails of the photos staged for the next message
-  function chatImageThumbsHtml(){
-    return (UI.chatImages || []).map(function(src, i){
-      return '<div class="chat-img-thumb"><img src="'+src+'" alt="Attached photo">' +
-        '<button type="button" class="chat-img-x" data-action="remove-chat-img" data-idx="'+i+'" title="Remove">×</button></div>';
-    }).join("");
-  }
-  // The container is always present (hidden while empty) so photos can be added
-  // or removed without a full re-render — that keeps whatever the user has typed.
-  function renderChatImageStrip(){
-    return '<div class="chat-img-strip" id="chatImgStrip">' + chatImageThumbsHtml() + '</div>';
-  }
-  function refreshChatImageStrip(){
-    var strip = document.getElementById("chatImgStrip");
-    if(strip){ strip.innerHTML = chatImageThumbsHtml(); return true; }
-    return false;
   }
 
   function renderRateModalBody(dealId, toUserId){
@@ -4500,7 +3866,7 @@
   // ---------------- Event wiring ----------------
   function onClick(e){
     var overlay = e.target.closest && e.target.closest('[data-action="close-modal-overlay"]');
-    if(overlay && e.target===overlay){ UI.modal=null; UI.chatImages=[]; UI.chatPhotoView=null; render(); return; }
+    if(overlay && e.target===overlay){ UI.modal=null; render(); return; }
 
     var t = e.target.closest("[data-action]");
 
@@ -4522,69 +3888,19 @@
         if(dest==="market") UI.homeSection=null;
         UI.tab=dest; UI.modal=null; UI.legalPage=null; render(); return;
       }
-    if(action==="close-modal"){ UI.modal=null; UI.chatPhotoView=null; UI.chatImages=[]; render(); return; }
-    // ---- Chat photo attachments ----
-    if(action==="remove-chat-img"){
-      var rIdx = parseInt(t.dataset.idx, 10);
-      UI.chatImages = (UI.chatImages||[]).filter(function(_, i){ return i!==rIdx; });
-      if(!refreshChatImageStrip()) render();
-      return;
-    }
-    if(action==="view-chat-photo"){
-      UI.chatPhotoView = t.dataset.src || null;
-      render(); return;
-    }
-    if(action==="close-photo-view"){ UI.chatPhotoView = null; render(); return; }
-    if(action==="remove-avatar-photo"){
-      var au2 = currentUser();
-      if(au2 && au2.id){ au2.avatarPhoto = null; saveDB(); showToast("Profile picture removed."); }
-      render(); return;
-    }
+    if(action==="close-modal"){ UI.modal=null; render(); return; }
     // ---- Pricing / monetisation actions (additive) ----
     if(action==="goto-pricing"){ UI.tab="pricing"; UI.modal=null; UI.legalPage=null; render(); window.scrollTo(0,0); return; }
-    if(action==="goto-support"){ UI.supportReturnTab = (UI.tab!=="support") ? UI.tab : (UI.supportReturnTab||"market"); UI.tab="support"; UI.modal=null; UI.legalPage=null; render(); window.scrollTo(0,0); return; }
     if(action==="select-plan"){ selectPlan(t.dataset.plan); render(); return; }
     if(action==="buy-addon"){ buyAddon(t.dataset.addon); render(); return; }
     if(action==="boost-listing"){ applyBoostToItem(t.dataset.id); render(); return; }
     if(action==="premium-listing"){ applyPremiumToItem(t.dataset.id); render(); return; }
-    if(action==="repost-listing"){ repostListing(t.dataset.id); render(); return; }
     if(action==="open-legal"){ UI.legalPage = t.dataset.page; UI.modal=null; render(); window.scrollTo(0,0); return; }
     if(action==="close-legal"){ UI.legalPage = null; render(); return; }
     if(action==="dismiss-auth"){ UI.authScreen=false; UI.authReturnTab=null; UI.authReturnAction=null; render(); return; }
     if(action==="goto-login-screen"){ UI.authScreen=true; UI.authPage="login"; render(); return; }
     if(action==="goto-signup"){ UI.authScreen=true; UI.authPage="signup"; render(); return; }
     if(action==="goto-login"){ UI.authPage="login"; render(); return; }
-    // ---- Login page fixes (previously dead buttons) ----
-    if(action==="set-login-mode"){
-      var keepPass = document.querySelector('input[name="password"]');
-      UI.loginPassDraft = keepPass ? keepPass.value : "";
-      UI.loginMode = (t.dataset.mode === "email") ? "email" : "phone";
-      var errSw = document.getElementById("authError");
-      if(errSw) errSw.textContent = "";
-      render();
-      return;
-    }
-    if(action==="goto-forgot-password"){
-      UI.authScreen=true; UI.authPage="forgot-password";
-      UI.otpSent=false; UI.otpVerifyMode=null;
-      render(); return;
-    }
-    if(action==="resend-otp"){
-      var errRe = document.getElementById("authError");
-      if(UI.otpVerifyMode==="forgot-password"){
-        UI.tempForgotOtp = generateOTP();
-        if(errRe) errRe.innerHTML = '<span style="color:#16a34a;">✓ New code sent. Demo OTP: '+UI.tempForgotOtp+'</span>';
-      } else {
-        UI.tempLoginOtp = generateOTP();
-        if(errRe) errRe.innerHTML = '<span style="color:#16a34a;">✓ New OTP sent. Demo OTP: '+UI.tempLoginOtp+'</span>';
-      }
-      return;
-    }
-    if(action==="back-from-otp"){
-      UI.authPage = (UI.otpVerifyMode==="forgot-password") ? "forgot-password" : "login";
-      UI.otpSent=false; UI.otpVerifyMode=null;
-      render(); return;
-    }
     if(action==="submit-login"){
       var phoneField = document.querySelector('input[name="phone"]');
       var emailField = document.querySelector('input[name="email"]');
@@ -4594,9 +3910,9 @@
       var errEl = document.getElementById("authError");
       var match = null;
       if(UI.loginMode==="email"){
-        match = DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0];
+        match = DB.users.filter(function(u){ return u.email===emailOrPhone && u.password===pass; })[0];
       } else {
-        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && u.password===pass; })[0];
       }
       if(!match){
         if(errEl) errEl.textContent = "Incorrect "+UI.loginMode+" or password.";
@@ -4604,7 +3920,6 @@
       }
       UI.currentUserId = match.id;
       UI.authScreen = false;
-      UI.loginPassDraft = "";
       storageSet(USER_KEY, match.id);
       if(UI.authReturnAction==="start-sell"){
         UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
@@ -4614,7 +3929,7 @@
       render();
       return;
     }
-    if(action==="logout"){ UI.currentUserId=""; UI.authScreen=true; UI.authPage="login"; UI.loginMode="phone"; UI.loginPassDraft=""; UI.notifOpen=false; storageSet(USER_KEY,""); render(); return; }
+    if(action==="logout"){ UI.currentUserId=""; UI.authScreen=true; UI.authPage="login"; UI.loginMode="phone"; UI.notifOpen=false; storageSet(USER_KEY,""); render(); return; }
 
     // Notifications
     if(action==="toggle-notifs"){ UI.notifOpen = !UI.notifOpen; render(); return; }
@@ -4642,11 +3957,11 @@
     }
 
     if(action==="open-propose"){
-      if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; } UI.chatImages=[]; UI.modal = {type:"propose", itemId:t.dataset.id}; render(); return; }
+      if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; } UI.modal = {type:"propose", itemId:t.dataset.id}; render(); return; }
     if(action==="open-buy"){
       if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; }    UI.modal = {type:"buy",     itemId:t.dataset.id}; render(); return; }
     if(action==="open-offer"){
-      if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; }  UI.chatImages=[]; UI.modal = {type:"offer",   itemId:t.dataset.id}; render(); return; }
+      if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; }  UI.modal = {type:"offer",   itemId:t.dataset.id}; render(); return; }
     if(action==="open-report"){ UI.modal = {type:"report",  itemId:t.dataset.id}; render(); return; }
     if(action==="confirm-buy"){ buyItem(t.dataset.id); UI.modal=null; UI.tab="trades"; render(); return; }
     if(action==="open-deal"){   UI.modal = {type:"trade", dealId:t.dataset.id}; render(); return; }
@@ -4659,6 +3974,11 @@
     if(action==="detect-location"){
       detectLocation(); return; }
 
+    if(action==="clear-location"){
+      var input = document.getElementById("navLocationInput");
+      if(input) input.value = "";
+      return; }
+
     // OLX: "Is this still available?"
     if(action==="send-available"){ sendAvailableQuery(t.dataset.id); UI.modal=null; UI.tab="trades"; render(); return; }
 
@@ -4666,6 +3986,12 @@
     if(action==="start-sell"){
       if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; UI.authReturnAction="start-sell"; render(); return; }
       UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory=""; UI.modal=null; render(); window.scrollTo(0,0); return; }
+
+    // Super-category tiles (Barter & Trade / Services & More)
+    if(action==="browse-super"){
+      UI.homeSection = "super:"+t.dataset.group;
+      render(); window.scrollTo(0,0); return;
+    }
 
     // OLX: two-level category browse
     if(action==="browse-category"){
@@ -4759,6 +4085,15 @@
       if(wantRow) wantRow.style.display = t.checked ? "" : "none";
       return;
     }
+    if(action==="pick-icon"){
+      var grid = t.parentElement;
+      var hidden = document.getElementById("iconHidden");
+      if(hidden) hidden.value = t.dataset.icon;
+      var opts = grid.querySelectorAll(".icon-opt");
+      opts.forEach(function(o){ o.classList.remove("sel"); });
+      t.classList.add("sel");
+      return;
+    }
     if(action==="pick-avatar"){
       var aGrid = t.parentElement;
       var aHidden = document.getElementById("avatarHidden");
@@ -4785,49 +4120,6 @@
     if(action==="withdraw-deal"){ withdrawDeal(t.dataset.id); UI.modal=null; render(); return; }
     if(action==="complete-deal"){ completeDeal(t.dataset.id); render(); return; }
 
-    // Your data: export / delete account
-    if(action==="export-my-data"){ exportMyData(); return; }
-    if(action==="delete-my-account"){ deleteMyAccount(); render(); return; }
-    // Trust & Safety: Blocking
-    if(action==="block-user"){
-      var blkId = t.dataset.userid;
-      if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; render(); return; }
-      if(blkId === UI.currentUserId){ showToast("You can't block yourself."); return; }
-      if(!window.confirm("Block "+userById(blkId).name+"? You won't see their ads and they can't message you.")) return;
-      blockUser(blkId, UI.currentUserId);
-      UI.modal = null;
-      render(); return;
-    }
-    if(action==="unblock-user"){
-      unblockUser(t.dataset.userid, UI.currentUserId);
-      render(); return;
-    }
-    // Trust & Safety: Phone verification
-    if(action==="send-phone-otp"){
-      var phoneInputEl = document.getElementById("phoneInput");
-      var phoneVal = phoneInputEl ? phoneInputEl.value.trim() : "";
-      if(!/^[0-9]{10}$/.test(phoneVal.replace(/[^0-9]/g,""))){
-        showToast("Enter a valid 10-digit phone number.");
-        return;
-      }
-      var pu = currentUser();
-      if(!pu || !pu.id){ showToast("Log in first."); return; }
-      pu.phone = phoneVal;
-      sendOTP(pu.id);
-      UI.phoneOtpSent = true;
-      render();
-      return;
-    }
-    if(action==="verify-phone-otp"){
-      var phoneOtpEl = document.getElementById("phoneOtpInput");
-      var entered = phoneOtpEl ? phoneOtpEl.value.trim() : "";
-      if(!entered){ showToast("Enter the OTP."); return; }
-      if(verifyOTP(UI.currentUserId, entered)){
-        UI.phoneOtpSent = false;
-      }
-      render();
-      return;
-    }
     // Trust & Safety: Email verification
     if(action==="send-email-otp"){
       var emailInput = document.getElementById("emailInput");
@@ -4893,16 +4185,6 @@
         if(report) report.status = "closed";
         saveDB();
         showToast("Report dismissed");
-        render();
-      }
-      return;
-    }
-    if(action==="admin-resolve-ticket"){
-      if(isCurrentUserAdmin()){
-        var ticket = (DB.supportTickets||[]).find(function(x){ return x.id===t.dataset.id; });
-        if(ticket) ticket.status = "resolved";
-        saveDB();
-        showToast("Ticket marked resolved");
         render();
       }
       return;
@@ -5049,18 +4331,7 @@
     }
     if(type==="propose-trade"){
       var fd2 = new FormData(form);
-      var offId = fd2.get("offeredItemId") || "";
-      var offTxt = (fd2.get("offeredText") || "").trim();
-      if(offId === "__custom__" && !offTxt){
-        // Inline error only — a toast would re-render and wipe the form
-        var errP = document.getElementById("proposeError");
-        if(errP){ errP.textContent = "Describe the item you're offering."; errP.style.display = ""; }
-        var oti = document.getElementById("offeredTextInput");
-        if(oti){ try{ oti.focus(); }catch(e){} }
-        return;
-      }
-      createBarterProposal(form.dataset.requested, offId, fd2.get("message"), (UI.chatImages||[]), offTxt);
-      UI.chatImages = [];
+      createBarterProposal(form.dataset.requested, fd2.get("offeredItemId"), fd2.get("message"));
       UI.modal = null;
       UI.tab = "trades";
       render();
@@ -5068,11 +4339,7 @@
     }
     if(type==="send-message"){
       var fd3 = new FormData(form);
-      var msgText = fd3.get("text") || "";
-      var msgPhotos = (UI.chatImages || []);
-      if(!String(msgText).trim() && !msgPhotos.length){ return; }
-      sendMessage(form.dataset.id, msgText, msgPhotos);
-      UI.chatImages = [];
+      sendMessage(form.dataset.id, fd3.get("text"));
       render();
       return;
     }
@@ -5131,8 +4398,7 @@
       var fdO = new FormData(form);
       var offerPrice = parseFloat(fdO.get("offerPrice"));
       if(!(offerPrice>0)){ showToast("Enter a valid offer amount."); return; }
-      makeOffer(form.dataset.id, offerPrice, fdO.get("message")||"", (UI.chatImages||[]));
-      UI.chatImages = [];
+      makeOffer(form.dataset.id, offerPrice, fdO.get("message")||"");
       UI.modal = null;
       UI.tab = "trades";
       render();
@@ -5148,27 +4414,6 @@
       render();
       return;
     }
-    if(type==="support-ticket"){
-      var fdS = new FormData(form);
-      var cu = UI.currentUserId ? currentUser() : null;
-      if(!DB.supportTickets) DB.supportTickets = [];
-      DB.supportTickets.push({
-        id: uid("tix"),
-        userId: UI.currentUserId || null,
-        contactEmail: cu ? cu.email : (fdS.get("guestEmail") || ""),
-        category: fdS.get("category") || SUPPORT_CATEGORIES[0],
-        subject: (fdS.get("subject") || "").trim(),
-        message: (fdS.get("message") || "").trim(),
-        status: "open",
-        adminReply: "",
-        createdAt: nowTs()
-      });
-      saveDB();
-      form.reset();
-      showToast("✅ Message sent - we'll get back to you soon.");
-      render();
-      return;
-    }
     if(type==="auth-login"){
       var fdL = new FormData(form);
       var emailOrPhone = (UI.loginMode==="email") ? (fdL.get("email")||"").trim() : (fdL.get("phone")||"").trim();
@@ -5176,9 +4421,9 @@
       var errEl = document.getElementById("authError");
       var match = null;
       if(UI.loginMode==="email"){
-        match = DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0];
+        match = DB.users.filter(function(u){ return u.email===emailOrPhone && u.password===pass; })[0];
       } else {
-        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && u.password===pass; })[0];
       }
       if(!match){
         if(errEl) errEl.textContent = "Incorrect "+UI.loginMode+" or password.";
@@ -5215,13 +4460,11 @@
         if(sErr) sErr.textContent="That email is already registered."; return;
       }
       var newUser = {
-        id: uid("u"), name: sName, phone: sPhone, email: sEmail,
+        id: uid("u"), name: sName, phone: sPhone, email: sEmail, password: sPass,
         city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
         memberSince: nowTs()
       };
-      setUserPassword(newUser, sPass);   // stored as a salted hash, never plain
       DB.users.push(newUser);
-      migrateDB(DB);
       saveDB();
       UI.currentUserId = newUser.id;
       UI.authScreen    = false;
@@ -5254,31 +4497,6 @@
       UI.tempForgotOtp = demoOtp;
       if(errEl) errEl.innerHTML = '<span style="color:#16a34a;">✓ Reset code sent! Demo OTP: '+demoOtp+'</span>';
       UI.authPage = "otp-verify";
-      render();
-      return;
-    }
-    if(type==="auth-reset-password"){
-      var fdR = new FormData(form);
-      var np = (fdR.get("newPassword")||"").trim();
-      var cp = (fdR.get("confirmPassword")||"").trim();
-      var errR = document.getElementById("authError");
-      if(!np){ if(errR) errR.textContent="Enter a new password."; return; }
-      if(np.length < 5){ if(errR) errR.textContent="Password must be at least 5 characters."; return; }
-      if(np !== cp){ if(errR) errR.textContent="Passwords do not match."; return; }
-      var target = userById(UI.tempForgotUserId);
-      if(!target || !target.id || target.name==="Unknown User"){
-        if(errR) errR.textContent="Session expired. Start the reset again.";
-        UI.authPage="forgot-password"; render(); return;
-      }
-      setUserPassword(target, np);
-      UI.tempForgotUserId = null;
-      UI.tempForgotOtp = null;
-      UI.otpSent = false;
-      UI.otpVerifyMode = null;
-      UI.loginPassDraft = "";
-      UI.authPage = "login";
-      saveDB();
-      showToast("Password updated. Log in with your new password.");
       render();
       return;
     }
@@ -5321,72 +4539,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", function(){
-    // Profile picture upload (delegated — survives re-render)
-    document.addEventListener("change", function(ev){
-      if(!ev.target || ev.target.id !== "avatarFileInput") return;
-      var aFile = (ev.target.files || [])[0];
-      ev.target.value = "";
-      if(!aFile) return;
-      if(aFile.size && aFile.size > 5*1024*1024){ showToast("Profile picture must be under 5 MB."); return; }
-      var aReader = new FileReader();
-      aReader.onload = function(e){
-        var au = currentUser();
-        if(!au || !au.id){ showToast("Log in to set a profile picture."); return; }
-        compressImage(e.target.result, 320, 0.8, function(small){
-          au.avatarPhoto = small;
-          saveDB();
-          showToast("Profile picture updated.");
-          render();
-        });
-      };
-      aReader.onerror = function(){ showToast("Could not read that image."); };
-      aReader.readAsDataURL(aFile);
-    });
-    // Show the "describe your item" box only when "Something else" is picked.
-    // Toggled directly so anything already typed in the form is kept.
-    document.addEventListener("change", function(ev){
-      if(!ev.target || ev.target.id !== "offeredItemSelect") return;
-      var wrap = document.getElementById("offerCustomWrap");
-      var txt  = document.getElementById("offeredTextInput");
-      var custom = ev.target.value === "__custom__";
-      if(wrap) wrap.style.display = custom ? "" : "none";
-      if(txt && custom){ try{ txt.focus(); }catch(e){} }
-    });
-    // Photos attached to a chat message (delegated — survives re-render)
-    document.addEventListener("change", function(ev){
-      if(!ev.target || ev.target.id !== "chatImgInput") return;
-      var cFiles = Array.prototype.slice.call(ev.target.files || []);
-      var cRemaining = Math.max(0, 4 - (UI.chatImages||[]).length);
-      if(cFiles.length > cRemaining){
-        showToast("You can attach up to 4 photos per message.");
-      }
-      cFiles = cFiles.slice(0, cRemaining);
-      if(!cFiles.length){ ev.target.value = ""; return; }
-      var cLoaded = 0;
-      cFiles.forEach(function(file){
-        if(file.size && file.size > 5*1024*1024){
-          showToast("Photos must be under 5 MB.");
-          cLoaded++;
-          if(cLoaded===cFiles.length && !refreshChatImageStrip()) render();
-          return;
-        }
-        var cReader = new FileReader();
-        cReader.onload = function(e){
-          compressImage(e.target.result, 1000, 0.72, function(small){
-            UI.chatImages = (UI.chatImages || []).concat([small]);
-            cLoaded++;
-            if(cLoaded === cFiles.length && !refreshChatImageStrip()) render();
-          });
-        };
-        cReader.onerror = function(){
-          cLoaded++;
-          showToast("Could not read that photo.");
-          if(cLoaded === cFiles.length && !refreshChatImageStrip()) render();
-        };
-        cReader.readAsDataURL(file);
-      });
-      ev.target.value = "";
-    });
     // FileReader for image previews (delegated — survives re-render)
     document.addEventListener("change", function(ev){
       if(ev.target && ev.target.id === "imgFileInput"){
@@ -5397,9 +4549,8 @@
         var loaded = 0;
         files.forEach(function(file){
           var reader = new FileReader();
-          reader.onload = function(ev0){
-            compressImage(ev0.target.result, 1000, 0.72, function(small){
-            UI.newListingImages = (UI.newListingImages || []).concat([small]);
+          reader.onload = function(e){
+            UI.newListingImages = (UI.newListingImages || []).concat([e.target.result]);
             loaded++;
             if(loaded === files.length){
               // Update preview area without full re-render
@@ -5413,7 +4564,6 @@
                 }).join("");
               }
             }
-            });
           };
           reader.readAsDataURL(file);
         });

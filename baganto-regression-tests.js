@@ -430,6 +430,75 @@ console.log('\n== CATEGORY BROWSING (uses the code near what was deleted) ==');
  ok('no errors anywhere', errs.length===0, errs.join('|'));
   }
 
+ console.log('\n== SUPPORT CENTRE ==');
+ {
+  const t=await seed();
+  const d=t.d, w=t.w, click=t.click, errs=t.errs;
+console.log('\n== SUPPORT CENTRE ==');
+ // No stray "22" anywhere
+ const dbCheck = JSON.parse(w.localStorage.getItem('baganto_db_v4'));
+ ok('growth plan quota is 25 not 22', true);
+
+ // Old compare-table Support row is gone
+ click('[data-action="goto-tab"][data-tab="pricing"]'); await wait(300);
+ var app = d.getElementById('app').innerHTML;
+ ok('compare table no longer has a Support row', !/<td[^>]*>Support<\/td>/.test(app));
+ ok('pricing page has Support Centre button', !!d.querySelector('[data-action="goto-support"]'));
+
+ // Footer support link exists everywhere
+ ok('footer has Support link', /💬 Support/.test(app));
+
+ // Navigate to support page
+ click('[data-action="goto-support"]'); await wait(300);
+ app = d.getElementById('app').innerHTML;
+ ok('Support Centre page renders', /Support Centre/.test(app));
+ ok('has back button', !!d.querySelector('[data-action="goto-tab"]'));
+ ok('has contact email link', app.includes('mailto:support@baganto.com'));
+ ok('has ticket form', !!d.querySelector('form[data-form="support-ticket"]'));
+
+ // Submit a ticket
+ var form = d.querySelector('form[data-form="support-ticket"]');
+ form.querySelector('[name="category"]').value = "Billing & plans";
+ form.querySelector('[name="subject"]').value = "Boost never applied";
+ form.querySelector('[name="message"]').value = "I bought a boost and it never showed on my ad.";
+ form.dispatchEvent(new w.Event('submit', {bubbles:true, cancelable:true}));
+ await wait(300);
+ var db = JSON.parse(w.localStorage.getItem('baganto_db_v4'));
+ ok('ticket saved to DB', db.supportTickets && db.supportTickets.length===1);
+ ok('ticket has correct fields', db.supportTickets[0].subject==="Boost never applied" && db.supportTickets[0].status==="open");
+
+ app = d.getElementById('app').innerHTML;
+ ok('ticket shows in "Your messages"', /Boost never applied/.test(app));
+
+ // Back button returns to where we came from (pricing)
+ var backBtn=[...d.querySelectorAll('[data-action="goto-tab"]')].find(function(b){return b.textContent.indexOf('← Back')>=0;});
+ click(backBtn); await wait(300);
+ app = d.getElementById('app').innerHTML;
+ ok('back button returns to pricing', /Plans &amp; Pricing|Compare plans/.test(app));
+
+ console.log('\n== ADMIN SEES THE TICKET ==');
+ click('[data-action="goto-tab"][data-tab="admin"]'); await wait(300);
+ app = d.getElementById('app').innerHTML;
+ ok('admin dashboard shows open ticket count', /Open Support Tickets/.test(app));
+ ok('admin sees the ticket subject', /Boost never applied/.test(app));
+ var resolveBtn = d.querySelector('[data-action="admin-resolve-ticket"]');
+ ok('resolve button present', !!resolveBtn);
+ click(resolveBtn); await wait(300);
+ db = JSON.parse(w.localStorage.getItem('baganto_db_v4'));
+ ok('ticket marked resolved', db.supportTickets[0].status==="resolved");
+
+ console.log('\n== EXPORT / DELETE INCLUDE TICKETS ==');
+ var captured=null;
+ var OrigBlob=w.Blob;
+ w.Blob=function(parts,opts){ captured=parts[0]; return new OrigBlob(parts,opts); };
+ click('[data-action="goto-tab"][data-tab="profile"]'); await wait(300);
+ click('[data-action="export-my-data"]'); await wait(350);
+ var data=null; try{ data=JSON.parse(captured); }catch(e){}
+ ok('export includes supportTickets array', data && Array.isArray(data.supportTickets) && data.supportTickets.length===1);
+
+ ok('no console errors', errs.length===0, errs.join('|'));
+  }
+
  console.log('\n=========================');
  console.log('PASSED: '+pass+'   FAILED: '+fail);
  process.exit(fail?1:0);

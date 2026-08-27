@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Baganto Complete Backend & Deployment Roadmap</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4ade80;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e0e0e0;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-success {
+            background: #4ade80;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #22c55e;
+        }
+
+        .content {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .phase {
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+        }
+
+        .phase.completed {
+            border-left-color: #4ade80;
+            opacity: 0.7;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-toggle {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .phase-title {
+            flex: 1;
+        }
+
+        .phase-title h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .phase-title p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .phase-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .phase-count.completed {
+            background: #4ade80;
+        }
+
+        .phase-items {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .phase-items.show {
+            display: block;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .item:hover {
+            background: #f0f1f3;
+        }
+
+        .item.done {
+            background: #f0fdf4;
+        }
+
+        .item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #667eea;
+            flex-shrink: 0;
+        }
+
+        .item input[type="checkbox"]:checked {
+            accent-color: #4ade80;
+        }
+
+        .item-label {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .item.done .item-label {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .footer {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .controls {
+                display: none;
+            }
+            .content {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .phase {
+                padding-left: 15px;
+            }
+            .controls {
+                padding: 10px;
+                gap: 5px;
+            }
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Baganto Complete Roadmap</h1>
+            <p>Backend Infrastructure → Deployment (Weeks 1-11)</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="completedCount">0</span> of <span id="totalCount">0</span> items completed
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="expandAll()">📂 Expand All</button>
+            <button class="btn btn-secondary" onclick="collapseAll()">📁 Collapse All</button>
+            <button class="btn btn-success" onclick="markAllCompleted()">✅ Mark All Done</button>
+            <button class="btn btn-secondary" onclick="clearAllCompleted()">❌ Clear All</button>
+            <button class="btn btn-secondary" onclick="exportProgress()">📥 Export</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="statCompleted">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPending">0</div>
+                <div class="stat-label">Remaining</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPercentage">0%</div>
+                <div class="stat-label">Progress</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPhases">0</div>
+                <div class="stat-label">Phases Done</div>
+            </div>
+        </div>
+
+        <div class="content" id="content"></div>
+
+        <div class="footer">
+            <p>✅ Click checkboxes to mark items as done. Progress saves automatically!</p>
+            <p style="margin-top: 10px; font-size: 11px;">Last Updated: August 12, 2026 | Total Items: <span id="footerTotal">0</span></p>
+        </div>
+    </div>
+
+    <script>
+        const PHASES = {
+            'phase1': {
+                title: 'PHASE 1: Backend Infrastructure',
+                subtitle: '(Weeks 1-4)',
+                sections: {
+                    '1.1 Database Setup': [
+                        'Choose backend: Firebase, AWS, or custom Node.js server',
+                        'Design database schema (users, items, trades, messages, ratings)',
+                        'Set up database replication & backups (daily backups)',
+                        'Add database indexing for performance',
+                        'Implement soft deletes (don\'t permanently delete user data)'
+                    ],
+                    '1.2 API Development': [
+                        'Build REST/GraphQL API (from current localStorage logic)',
+                        'Create endpoints: auth, listings, search, trades, messages, ratings',
+                        'Implement pagination (don\'t load all items at once)',
+                        'Add rate limiting (prevent abuse)',
+                        'Version your API (v1, v2 for future updates)'
+                    ],
+                    '1.3 Authentication & Sessions': [
+                        'Implement JWT tokens (secure, stateless)',
+                        'Add refresh token rotation',
+                        'Session timeout (30 mins idle = logout)',
+                        'Add logout endpoint (clear tokens)',
+                        'Support phone/email login options'
+                    ]
+                }
+            },
+            'phase2': {
+                title: 'PHASE 2: Security Hardening',
+                subtitle: '(Weeks 2-5, parallel with Phase 1)',
+                sections: {
+                    '2.1 User Data Protection': [
+                        'Encryption at Rest: Encrypt sensitive data in database (AES-256)',
+                        'Encryption in Transit: Force HTTPS only (SSL/TLS)',
+                        'Password Security: Hash with bcrypt or Argon2',
+                        'Minimum 8 characters, special chars required for passwords',
+                        'Add password reset via email/SMS',
+                        'Two-Factor Authentication (2FA): OTP via SMS/email',
+                        'Data masking: Don\'t show full phone numbers'
+                    ],
+                    '2.2 API Security': [
+                        'Add API key/token validation on every request',
+                        'CORS configuration (allowed domains only)',
+                        'Input validation (sanitize all user inputs)',
+                        'SQL injection prevention (use parameterized queries)',
+                        'Add CAPTCHA to prevent bot attacks',
+                        'Rate limit login attempts (5 tries = 15 min lockout)',
+                        'Add request signing (prevent tampering)'
+                    ],
+                    '2.3 Network Security': [
+                        'Certificate pinning (prevent man-in-the-middle attacks)',
+                        'VPN/proxy detection',
+                        'Disable screenshot in sensitive screens',
+                        'Add jailbreak/root detection (Android/iOS)',
+                        'Secure WebView configuration'
+                    ],
+                    '2.4 Compliance & Legal': [
+                        'Privacy Policy (GDPR, India DPA 2023 compliant)',
+                        'Terms & Conditions',
+                        'User data deletion request handling',
+                        'Data retention policy (how long data stored)',
+                        'Compliance with Indian regulations'
+                    ]
+                }
+            },
+            'phase3': {
+                title: 'PHASE 3: Native App Development',
+                subtitle: '(Weeks 3-12)',
+                sections: {
+                    '3.1 iOS App (Swift)': [
+                        'Set up Xcode project',
+                        'Implement UI matching browser design',
+                        'Integrate authentication',
+                        'Implement location services',
+                        'Add photo upload to server',
+                        'Implement push notifications',
+                        'Add offline caching (SQLite)',
+                        'Implement deep linking',
+                        'Add app analytics'
+                    ],
+                    '3.2 Android App (Kotlin/Java)': [
+                        'Set up Android Studio project',
+                        'Implement UI (Material Design 3)',
+                        'Firebase integration for push notifications',
+                        'Implement location services',
+                        'Add photo upload functionality',
+                        'Implement offline caching (Room database)',
+                        'Add app analytics',
+                        'Handle different Android versions (API 24+)'
+                    ],
+                    '3.3 Shared Features (Both Apps)': [
+                        'User authentication flow',
+                        'Browse listings with filters',
+                        'Create/edit listings',
+                        'Photo upload & compression',
+                        'Location picker & auto-detect',
+                        'Search functionality',
+                        'Trade/messages system',
+                        'Ratings & reviews',
+                        'User profiles',
+                        'Favorites/wishlist',
+                        'Push notifications',
+                        'Logout functionality'
+                    ]
+                }
+            },
+            'phase4': {
+                title: 'PHASE 4: Payment Integration',
+                subtitle: '(Weeks 4-6)',
+                sections: {
+                    '4.1 Payment Gateway Setup': [
+                        'Choose: Razorpay or PayU (popular in India)',
+                        'Set up merchant account',
+                        'PCI-DSS compliance for payment data',
+                        'Add order tracking system',
+                        'Implement refund mechanism',
+                        'Add payment receipt generation'
+                    ],
+                    '4.2 Payment Security': [
+                        'Never store card details (use tokenization)',
+                        'Use hosted payment pages',
+                        'Add encryption for payment endpoints',
+                        'Implement webhook verification',
+                        'Add fraud detection'
+                    ]
+                }
+            },
+            'phase5': {
+                title: 'PHASE 5: Testing',
+                subtitle: '(Weeks 6-10)',
+                sections: {
+                    '5.1 Security Testing': [
+                        'Penetration testing (hire ethical hacker)',
+                        'OWASP Top 10 vulnerability scan',
+                        'SQL injection testing',
+                        'Authentication bypass testing',
+                        'API security testing',
+                        'Certificate validation testing',
+                        'SSL/TLS testing'
+                    ],
+                    '5.2 Functional Testing': [
+                        'Unit tests (70%+ code coverage)',
+                        'Integration tests',
+                        'End-to-end testing (all user flows)',
+                        'Load testing (1000+ concurrent users)',
+                        'Performance testing (response times <2s)',
+                        'Offline functionality testing'
+                    ],
+                    '5.3 User Testing': [
+                        'Closed beta: 100 real users (1 week)',
+                        'Gather feedback',
+                        'Fix bugs found',
+                        'Test on different devices/OS versions',
+                        'iOS: iPhone 12+ and iPhone 13+',
+                        'Android: Samsung, OnePlus, Xiaomi, Google Pixel'
+                    ],
+                    '5.4 Compatibility Testing': [
+                        'iOS: 14.0+ (test minimum 2 latest versions)',
+                        'Android: Android 8.0+ (test 5.0-latest)',
+                        'Different screen sizes',
+                        'Different network speeds (4G, 5G, WiFi)',
+                        'Low storage devices (<2GB free)'
+                    ]
+                }
+            },
+            'phase6': {
+                title: 'PHASE 6: Server Infrastructure',
+                subtitle: '(Weeks 4-8)',
+                sections: {
+                    '6.1 Hosting Setup': [
+                        'Choose: AWS, Google Cloud, or DigitalOcean',
+                        'Set up load balancer (handle traffic spikes)',
+                        'Configure auto-scaling',
+                        'Set up CDN for images (Cloudflare or AWS CloudFront)',
+                        'Database replication (primary + replica)',
+                        'Backup systems (daily + weekly)'
+                    ],
+                    '6.2 Monitoring & Logging': [
+                        'Set up error tracking (Sentry or similar)',
+                        'Application performance monitoring (APM)',
+                        'Server monitoring (CPU, memory, disk)',
+                        'Database monitoring',
+                        'API response time tracking',
+                        'User crash reporting',
+                        'Centralized logging (ELK stack or AWS CloudWatch)'
+                    ],
+                    '6.3 Disaster Recovery': [
+                        'Database backup strategy',
+                        'Disaster recovery plan (RTO/RPO)',
+                        'Regular backup restoration testing',
+                        'Failover mechanism',
+                        'Incident response plan'
+                    ]
+                }
+            },
+            'phase7': {
+                title: 'PHASE 7: Deployment Setup',
+                subtitle: '(Weeks 8-10)',
+                sections: {
+                    '7.1 iOS Deployment': [
+                        'Register Apple Developer Account ($99/year)',
+                        'Create App ID',
+                        'Set up certificates & provisioning profiles',
+                        'Add privacy labels (location, contacts, photos)',
+                        'App Store optimization (screenshots, description)',
+                        'Prepare for App Store review',
+                        'Submit to App Store (review takes 1-3 days)'
+                    ],
+                    '7.2 Android Deployment': [
+                        'Register Google Play Developer Account ($25 one-time)',
+                        'Create app listing',
+                        'Add privacy policy link',
+                        'Add screenshots & description',
+                        'Set up Play Console for distribution',
+                        'Add privacy labels (location, SMS, etc.)',
+                        'Prepare APK/AAB for upload',
+                        'Submit to Play Store (automated review, live in hours)'
+                    ],
+                    '7.3 Analytics Setup': [
+                        'Firebase Analytics',
+                        'Crash reporting setup',
+                        'User funnel tracking',
+                        'Revenue tracking',
+                        'Retention metrics'
+                    ]
+                }
+            },
+            'phase8': {
+                title: 'PHASE 8: Pre-Launch Checklist',
+                subtitle: '(Week 10-11)',
+                sections: {
+                    '8.1 Security Final Check': [
+                        'All data encrypted (at rest & transit)',
+                        'HTTPS enforced',
+                        'API rate limiting enabled',
+                        'Authentication tokens expiring',
+                        'Passwords hashed',
+                        '2FA enabled',
+                        'Certificate pinning active',
+                        'Jailbreak detection working',
+                        'No hardcoded secrets in code',
+                        'Privacy policy published',
+                        'Terms accepted by use'
+                    ],
+                    '8.2 Performance Check': [
+                        'App startup time <3 seconds',
+                        'Image loading optimized',
+                        'Database queries optimized',
+                        'API response time <2 seconds',
+                        'Battery usage acceptable (<5% per hour)',
+                        'Memory usage <150MB',
+                        'Offline mode working'
+                    ],
+                    '8.3 Quality Check': [
+                        'No crashes in testing',
+                        'All features working',
+                        'UI/UX polished',
+                        'Notifications working',
+                        'Location working',
+                        'Photo upload/display working',
+                        'Search working',
+                        'Messages working',
+                        'Ratings working',
+                        'Logout working properly'
+                    ],
+                    '8.4 Legal/Compliance': [
+                        'Privacy policy (GDPR, India DPA compliant)',
+                        'Terms of Service reviewed by lawyer',
+                        'User data deletion policy',
+                        'Refund policy',
+                        'Dispute resolution policy',
+                        'Age verification (if needed)',
+                        'Compliance with app store rules'
+                    ],
+                    '8.5 Support Ready': [
+                        'Customer support email setup',
+                        'FAQ page created',
+                        'Help documentation written',
+                        'Support ticket system ready',
+                        'Response SLA defined'
+                    ]
+                }
+            }
+        };
+
+        let allItems = [];
+        let completedItems = [];
+
+        function initializeData() {
+            const saved = localStorage.getItem('baganto_complete_roadmap_completed');
+            if (saved) {
+                completedItems = JSON.parse(saved);
+            }
+
+            allItems = [];
+            Object.keys(PHASES).forEach(phaseKey => {
+                const phase = PHASES[phaseKey];
+                Object.keys(phase.sections).forEach(sectionKey => {
+                    phase.sections[sectionKey].forEach((item, index) => {
+                        allItems.push({
+                            id: `${phaseKey}_${sectionKey}_${index}`,
+                            phaseKey: phaseKey,
+                            sectionKey: sectionKey,
+                            text: item
+                        });
+                    });
+                });
+            });
+        }
+
+        function renderContent() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+
+            Object.keys(PHASES).forEach(phaseKey => {
+                const phase = PHASES[phaseKey];
+                const phaseId = `phase_${phaseKey}`;
+
+                const totalPhaseItems = Object.keys(phase.sections).reduce((sum, sectionKey) =>
+                    sum + phase.sections[sectionKey].length, 0);
+                const completedPhaseItems = allItems.filter(item =>
+                    item.phaseKey === phaseKey && completedItems.includes(item.id)
+                ).length;
+
+                const phaseEl = document.createElement('div');
+                phaseEl.className = `phase ${completedPhaseItems === totalPhaseItems && totalPhaseItems > 0 ? 'completed' : ''}`;
+
+                const headerEl = document.createElement('div');
+                headerEl.className = 'phase-header';
+                headerEl.onclick = () => togglePhase(phaseId);
+
+                const toggleEl = document.createElement('div');
+                toggleEl.className = 'phase-toggle';
+                const itemsContainer = document.getElementById(`${phaseId}_items`);
+                toggleEl.textContent = itemsContainer?.classList.contains('show') ? '▼' : '▶';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'phase-title';
+                titleEl.innerHTML = `
+                    <h2>${phase.title}</h2>
+                    <p>${phase.subtitle}</p>
+                `;
+
+                const countEl = document.createElement('div');
+                countEl.className = `phase-count ${completedPhaseItems === totalPhaseItems && totalPhaseItems > 0 ? 'completed' : ''}`;
+                countEl.textContent = `${completedPhaseItems}/${totalPhaseItems}`;
+
+                headerEl.appendChild(toggleEl);
+                headerEl.appendChild(titleEl);
+                headerEl.appendChild(countEl);
+
+                const itemsContainerEl = document.createElement('div');
+                itemsContainerEl.id = `${phaseId}_items`;
+                itemsContainerEl.className = 'phase-items';
+
+                Object.keys(phase.sections).forEach(sectionKey => {
+                    const sectionItems = phase.sections[sectionKey];
+
+                    sectionItems.forEach((item, idx) => {
+                        const itemId = `${phaseKey}_${sectionKey}_${idx}`;
+                        const isCompleted = completedItems.includes(itemId);
+
+                        const itemEl = document.createElement('div');
+                        itemEl.className = `item ${isCompleted ? 'done' : ''}`;
+
+                        const checkboxEl = document.createElement('input');
+                        checkboxEl.type = 'checkbox';
+                        checkboxEl.id = itemId;
+                        checkboxEl.checked = isCompleted;
+                        checkboxEl.onchange = () => toggleItem(itemId);
+
+                        const labelEl = document.createElement('label');
+                        labelEl.className = 'item-label';
+                        labelEl.htmlFor = itemId;
+                        labelEl.textContent = item;
+
+                        itemEl.appendChild(checkboxEl);
+                        itemEl.appendChild(labelEl);
+                        itemsContainerEl.appendChild(itemEl);
+                    });
+                });
+
+                phaseEl.appendChild(headerEl);
+                phaseEl.appendChild(itemsContainerEl);
+                content.appendChild(phaseEl);
+            });
+
+            updateStats();
+        }
+
+        function togglePhase(phaseId) {
+            const items = document.getElementById(`${phaseId}_items`);
+            items.classList.toggle('show');
+        }
+
+        function toggleItem(itemId) {
+            const index = completedItems.indexOf(itemId);
+            if (index > -1) {
+                completedItems.splice(index, 1);
+            } else {
+                completedItems.push(itemId);
+            }
+            saveProgress();
+            renderContent();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('baganto_complete_roadmap_completed', JSON.stringify(completedItems));
+        }
+
+        function updateStats() {
+            const total = allItems.length;
+            const completed = completedItems.length;
+            const pending = total - completed;
+            const percentage = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('statCompleted').textContent = completed;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statPercentage').textContent = percentage + '%';
+            document.getElementById('footerTotal').textContent = total;
+
+            let completedPhases = 0;
+            Object.keys(PHASES).forEach(phaseKey => {
+                const phase = PHASES[phaseKey];
+                const totalPhaseItems = Object.keys(phase.sections).reduce((sum, sectionKey) =>
+                    sum + phase.sections[sectionKey].length, 0);
+                const completedPhaseItems = allItems.filter(item =>
+                    item.phaseKey === phaseKey && completedItems.includes(item.id)
+                ).length;
+                if (completedPhaseItems === totalPhaseItems && totalPhaseItems > 0) {
+                    completedPhases++;
+                }
+            });
+            document.getElementById('statPhases').textContent = completedPhases;
+
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+        }
+
+        function expandAll() {
+            Object.keys(PHASES).forEach(phaseKey => {
+                document.getElementById(`phase_phase_${phaseKey}_items`).classList.add('show');
+            });
+        }
+
+        function collapseAll() {
+            Object.keys(PHASES).forEach(phaseKey => {
+                document.getElementById(`phase_phase_${phaseKey}_items`).classList.remove('show');
+            });
+        }
+
+        function markAllCompleted() {
+            if (confirm('Mark ALL items as completed?')) {
+                completedItems = allItems.map(item => item.id);
+                saveProgress();
+                renderContent();
+            }
+        }
+
+        function clearAllCompleted() {
+            if (confirm('Clear ALL completed items?')) {
+                completedItems = [];
+                saveProgress();
+                renderContent();
+            }
+        }
+
+        function exportProgress() {
+            const completed = completedItems.length;
+            const total = allItems.length;
+            const percentage = Math.round((completed / total) * 100);
+
+            let text = `
+BAGANTO COMPLETE BACKEND & DEPLOYMENT ROADMAP
+==============================================
+Generated: ${new Date().toLocaleString()}
+
+OVERALL PROGRESS:
+- Completed: ${completed} / ${total} items (${percentage}%)
+- Weeks: 1-11
+- Status: ${percentage < 25 ? 'Just Starting' : percentage < 50 ? 'In Progress' : percentage < 75 ? 'Good Progress' : 'Nearly Complete'}
+
+PHASE-BY-PHASE BREAKDOWN:
+`;
+
+            Object.keys(PHASES).forEach(phaseKey => {
+                const phase = PHASES[phaseKey];
+                const totalPhaseItems = Object.keys(phase.sections).reduce((sum, sectionKey) =>
+                    sum + phase.sections[sectionKey].length, 0);
+                const completedPhaseItems = allItems.filter(item =>
+                    item.phaseKey === phaseKey && completedItems.includes(item.id)
+                ).length;
+
+                text += `\n${phase.title}
+${phase.subtitle}
+Progress: ${completedPhaseItems}/${totalPhaseItems} (${Math.round((completedPhaseItems/totalPhaseItems)*100)}%)
+`;
+            });
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `baganto_complete_roadmap_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+        }
+
+        initializeData();
+        renderContent();
+    </script>
+</body>
+</html>
