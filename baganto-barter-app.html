@@ -992,6 +992,7 @@
     savedTab: false,           // show saved ads in profile
     notifOpen: false,          // notification panel open
     myAdsTab: "active",        // "active" | "sold"
+    billingPeriod: storageGet("baganto_billing_period") || "monthly",  // "monthly" | "annual" (saved preference)
     editingItemId: null,       // item being edited (null = add new)
     newListingCategory: "",    // tracks selected category in new listing form
     newListingImages: [],       // base64 images for new listing
@@ -1249,8 +1250,8 @@
       features:["3 ads per month","Each ad runs for 30 days","Chat with buyers and sellers"] },
     { id:"growth", name:"Growth", price:199, ads:25, boosts:2, badge:"Popular", tagline:"For regular sellers",
       features:["25 ads per month","Each ad runs for 30 days","2 free boosts every month","Ad performance stats"] },
-    { id:"professional", name:"Professional", price:499, ads:60, boosts:4, badge:"", tagline:"For small dealers",
-      features:["60 ads per month","Each ad runs for 30 days","4 free boosts every month","Ad performance stats"] },
+    { id:"professional", name:"Professional", price:499, ads:50, boosts:4, badge:"", tagline:"For small dealers",
+      features:["50 ads per month","Each ad runs for 30 days","4 free boosts every month","Ad performance stats"] },
     { id:"business", name:"Business", price:899, ads:100, boosts:8, badge:"Best value", tagline:"For professional dealers",
       features:["100 ads per month","Each ad runs for 30 days","8 free boosts every month","Ad performance stats","Verified business badge"] }
   ];
@@ -3857,6 +3858,7 @@
     var u = loggedIn ? refreshBillingPeriod(currentUser()) : null;
     var active = loggedIn ? (u.plan||"free") : "";
     var plan = planById(active||"free");
+    var isAnnual = UI.billingPeriod === "annual";
 
     var usageHtml = '';
     if(loggedIn){
@@ -3874,8 +3876,30 @@
         '<button class="btn btn-sm btn-primary" data-action="goto-login-screen" style="margin-left:8px;">Login</button></div></div>';
     }
 
+    var monthlyBg = isAnnual ? 'var(--border)' : 'var(--primary)';
+    var monthlyCol = isAnnual ? 'var(--ink)' : '#fff';
+    var annualBg = isAnnual ? 'var(--primary)' : 'var(--border)';
+    var annualCol = isAnnual ? '#fff' : 'var(--ink)';
+    var savingCol = isAnnual ? '#10b981' : 'var(--muted)';
+    var billingToggle = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;justify-content:center;">' +
+      '<button class="btn btn-sm" data-action="set-billing-period" data-period="monthly" style="padding:8px 18px;background:'+monthlyBg+';color:'+monthlyCol+';border:none;border-radius:8px 0 0 8px;font-weight:700;font-size:13px;cursor:pointer;">Monthly</button>' +
+      '<button class="btn btn-sm" data-action="set-billing-period" data-period="annual" style="padding:8px 18px;background:'+annualBg+';color:'+annualCol+';border:none;border-radius:0 8px 8px 0;font-weight:700;font-size:13px;cursor:pointer;">Annual <span style="color:'+savingCol+';font-size:11px;margin-left:4px;">-15%</span></button>' +
+    '</div>';
+
     var plansHtml = '<div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:22px;">' +
-      PRICING_PLANS.map(function(p){ return renderPricingCard(p, active); }).join("") + '</div>';
+      PRICING_PLANS.map(function(p){
+        var displayPrice = p.price;
+        if(isAnnual && p.price > 0) displayPrice = Math.round(p.price * 12 * 0.85); // 15% annual discount
+        var priceHtml = displayPrice === 0 ? formatINR(0) : (isAnnual ? formatINR(displayPrice)+'/year' : formatINR(displayPrice)+'/month');
+        var cardHtml = renderPricingCard(p, active);
+        if(p.price > 0){
+          cardHtml = cardHtml.replace(
+            '<div style="font-size:28px;font-weight:800;">'+formatINR(p.price)+'<span style="font-size:13px;font-weight:500;color:var(--muted);">/month</span></div>',
+            '<div style="font-size:28px;font-weight:800;">'+priceHtml+'</div>' + (isAnnual ? '<div style="font-size:11px;color:#10b981;font-weight:700;">Save ₹'+Math.round(p.price*12*0.15)+'</div>' : '')
+          );
+        }
+        return cardHtml;
+      }).join("") + '</div>';
 
     var boostAddons = PRICING_ADDONS.filter(function(a){ return a.type==="boost"; });
     var premAddons  = PRICING_ADDONS.filter(function(a){ return a.type==="premium"; });
@@ -3963,6 +3987,7 @@
       '<div class="section-title">Plans &amp; Pricing</div>' +
       '<div class="section-sub">Free to browse and barter. Pay only when you want to sell more or stand out.</div>' +
       usageHtml +
+      billingToggle +
       plansHtml +
       addonsHtml +
       compareHtml +
@@ -4544,6 +4569,7 @@
     if(action==="goto-pricing"){ UI.tab="pricing"; UI.modal=null; UI.legalPage=null; render(); window.scrollTo(0,0); return; }
     if(action==="goto-support"){ UI.supportReturnTab = (UI.tab!=="support") ? UI.tab : (UI.supportReturnTab||"market"); UI.tab="support"; UI.modal=null; UI.legalPage=null; render(); window.scrollTo(0,0); return; }
     if(action==="select-plan"){ selectPlan(t.dataset.plan); render(); return; }
+    if(action==="set-billing-period"){ UI.billingPeriod = t.dataset.period || "monthly"; storageSet("baganto_billing_period", UI.billingPeriod); render(); return; }
     if(action==="buy-addon"){ buyAddon(t.dataset.addon); render(); return; }
     if(action==="boost-listing"){ applyBoostToItem(t.dataset.id); render(); return; }
     if(action==="premium-listing"){ applyPremiumToItem(t.dataset.id); render(); return; }
