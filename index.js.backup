@@ -1,0 +1,224 @@
+const express = require('express');
+require('dotenv').config();
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Supabase REST API config
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+
+// Helper function for Supabase REST API calls
+async function supabaseCall(table, method = 'GET', data = null, filters = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'apikey': SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    }
+  };
+  if (data) options.body = JSON.stringify(data);
+
+  const response = await fetch(url, options);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || JSON.stringify(result));
+  return result;
+}
+
+// ============ HEALTH ============
+app.get('/health', (req, res) => {
+  res.json({ status: 'Backend is running!', timestamp: new Date().toISOString() });
+});
+
+// ============ ITEMS (Listings) ============
+app.get('/items', async (req, res) => {
+  try {
+    const data = await supabaseCall('items');
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/items/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('items', 'GET', null, `?id=eq.${req.params.id}`);
+    res.json(data[0] || null);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/items', async (req, res) => {
+  try {
+    const { owner_id, title, description, category, price, condition, listing_type } = req.body;
+    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/items/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('items', 'PATCH', req.body, `?id=eq.${req.params.id}`);
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.delete('/items/:id', async (req, res) => {
+  try {
+    await supabaseCall('items', 'DELETE', null, `?id=eq.${req.params.id}`);
+    res.json({ message: 'Item deleted' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ TRADES (Proposals) ============
+app.get('/trades', async (req, res) => {
+  try {
+    const data = await supabaseCall('trades');
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/trades', async (req, res) => {
+  try {
+    const { from_user_id, to_user_id, item_id, kind, status } = req.body;
+    const data = await supabaseCall('trades', 'POST', { from_user_id, to_user_id, item_id, kind, status });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/trades/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('trades', 'PATCH', req.body, `?id=eq.${req.params.id}`);
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ MESSAGES ============
+app.get('/messages/:tradeId', async (req, res) => {
+  try {
+    const data = await supabaseCall('messages', 'GET', null, `?trade_id=eq.${req.params.tradeId}&order=created_at.asc`);
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/messages', async (req, res) => {
+  try {
+    const { trade_id, sender_id, content, photo } = req.body;
+    const data = await supabaseCall('messages', 'POST', { trade_id, sender_id, content, photo });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ RATINGS ============
+app.get('/ratings/:userId', async (req, res) => {
+  try {
+    const data = await supabaseCall('ratings', 'GET', null, `?to_user_id=eq.${req.params.userId}`);
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/ratings', async (req, res) => {
+  try {
+    const { from_user_id, to_user_id, trade_id, rating, review } = req.body;
+    const data = await supabaseCall('ratings', 'POST', { from_user_id, to_user_id, trade_id, rating, review });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ USERS ============
+app.get('/users/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('users', 'GET', null, `?id=eq.${req.params.id}`);
+    res.json(data[0] || null);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/users', async (req, res) => {
+  try {
+    const { id, email, phone, name, city, bio } = req.body;
+    const data = await supabaseCall('users', 'POST', { id, email, phone, name, city, bio });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/users/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('users', 'PATCH', req.body, `?id=eq.${req.params.id}`);
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ SUPPORT TICKETS ============
+app.get('/support', async (req, res) => {
+  try {
+    const data = await supabaseCall('support_tickets', 'GET', null, '?order=created_at.desc');
+    res.json(data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/support', async (req, res) => {
+  try {
+    const { user_id, contact_email, category, subject, message } = req.body;
+    const data = await supabaseCall('support_tickets', 'POST', { user_id, contact_email, category, subject, message, status: 'open' });
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/support/:id', async (req, res) => {
+  try {
+    const data = await supabaseCall('support_tickets', 'PATCH', req.body, `?id=eq.${req.params.id}`);
+    res.json(data[0] || data);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ============ START SERVER ============
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`\n✓ Backend running on http://localhost:${PORT}`);
+  console.log(`\n📍 API Endpoints:`);
+  console.log(`   Health: GET /health`);
+  console.log(`   Items: GET/POST /items, GET/PUT/DELETE /items/:id`);
+  console.log(`   Trades: GET/POST /trades, PUT /trades/:id`);
+  console.log(`   Messages: GET /messages/:tradeId, POST /messages`);
+  console.log(`   Ratings: GET /ratings/:userId, POST /ratings`);
+  console.log(`   Users: GET/POST /users/:id, PUT /users/:id`);
+  console.log(`   Support: GET/POST /support, PUT /support/:id\n`);
+});
