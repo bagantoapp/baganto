@@ -1,582 +1,375 @@
-# Baganto — Project Handoff Document
-_Last updated: August 10, 2026. Continue from this document in the next session._
+# Baganto — Project Handoff
+
+**Last updated:** 7 September 2026
+**Owner:** Kiran (kirangowda3636@gmail.com), Mysore, Karnataka, India
+**Product:** Baganto — a barter + resale marketplace for India ("Sell. Exchange. Save.")
 
 ---
 
-## 1. What Is Baganto
+## 1. What Baganto is
 
-Baganto is an Indian barter-and-trade marketplace app (like OLX but focused on barter/exchange). Tagline: **"Sell · Exchange · Save"**. Built for Indian users — cities, INR pricing, local barter culture.
+A marketplace where users can **list items**, then either **sell** them or **barter/exchange** them with other users. Includes chat between traders, ratings after a deal, a support/contact system, and a freemium subscription model that limits how many ads a user can post.
 
-**Current state:** A fully functional single-file HTML app (`baganto-barter-app.html`) with no build step, no npm, no frameworks. Pure HTML + vanilla ES5 JavaScript + CSS. All data stored in `localStorage`. 40 automated tests pass.
+**Tagline:** Sell. Exchange. Save.
+**Brand colour:** Orange `#f97316` (primary), dark orange `#c2500a`
+**Font:** Baloo 2 (logo/headings), system sans (body)
+**Contact email:** contact@baganto.com
+**Grievance Officer:** Kiran, contact@baganto.com, Vijayanagar, Mysore
 
 ---
 
-## 2. File Locations
+## 2. Where the files live
 
-| File | Path | Purpose |
-|------|------|---------|
-| **Main app** | `/Users/kiranr/Desktop/baganto/baganto-barter-app.html` | The entire app — ~2900 lines, ~304KB (includes embedded base64 logo) |
-| **Logo PNG** | `/Users/kiranr/Desktop/baganto/baganto-logo.png` | Orange "b" icon — already embedded as base64 in the HTML |
-| **Test runner** | `/Users/kiranr/Desktop/baganto/_test_runner.js` | jsdom-based test suite, 40 tests — now lives in the baganto folder |
-| **Outputs dir** | `/Users/kiranr/Library/Application Support/Claude/local-agent-mode-sessions/.../outputs/` | Temp working directory (non-persistent between sessions) |
+| What | Path |
+|---|---|
+| Frontend (single-file app) | `~/Desktop/baganto/baganto-barter-app.html` (~408 KB) |
+| Regression test suite | `~/Desktop/baganto/baganto-regression-tests.js` (143 tests, all passing) |
+| Backend (Node/Express) | `~/Desktop/baganto-backend/` |
+| Backend entry point | `~/Desktop/baganto-backend/index.js` |
+| Backend env vars | `~/Desktop/baganto-backend/.env` |
+| Backup copies of frontend | `~/Desktop/baganto/` (several `baganto barter app.backup...` files) |
+| This handoff | `~/Desktop/baganto/HANDOFF.md` |
 
-**Shell path mapping (for bash commands):**
-- `/Users/kiranr/Desktop/baganto/` → `/sessions/magical-intelligent-feynman/mnt/baganto/`
-- outputs dir → `/sessions/magical-intelligent-feynman/mnt/outputs/`
+Other docs already in `~/Desktop/baganto/`: `CLAUDE.md` (instructions), `Project roadmap.md`, `Trust safety complete.md`, `Features complete.md`, `Baganto complete backend roadmap`, `Baganto interactive roadmap`, `Baganto logo.png`.
 
-**How to run tests:**
+---
+
+## 3. Current status — the honest version
+
+**Backend: working.** Express server runs on `http://localhost:3000`, talks to Supabase over the REST API, and has been verified end-to-end — a user and an item were both created successfully and are sitting in the database right now.
+
+**Frontend: not yet connected.** It still runs entirely on `localStorage`. This is the single biggest remaining task.
+
+**Payments: not started.** No Razorpay account, no company bank details yet. This is a deliberate hold — Kiran flagged that company registration and bank account are still pending, so deployment is on hold until payments can be wired up properly.
+
+---
+
+## 4. Backend — full detail
+
+### 4.1 Stack
+- Node.js + Express 5
+- Supabase (PostgreSQL) accessed via **direct REST API calls with `fetch`**, *not* the `@supabase/supabase-js` client
+- `dotenv` for env vars, `cors` for cross-origin
+
+### 4.2 Why REST instead of the JS client
+The Supabase JS client kept throwing `TypeError: fetch failed`. After a long debugging session (see §7) the root cause turned out to be a typo in the project URL, but by then the code had already been rewritten to call the REST API directly via a single helper function. **Leave it this way** — it works, it's transparent, and it's easier to debug.
+
+The helper in `index.js`:
+
+```js
+async function supabaseCall(table, method = 'GET', data = null, filters = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'apikey': SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    }
+  };
+  if (data) options.body = JSON.stringify(data);
+  const response = await fetch(url, options);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.message || JSON.stringify(result));
+  return result;
+}
+```
+
+Note: Supabase REST uses `PATCH` for updates (not `PUT`), and filters are query strings like `?id=eq.<uuid>` or `?order=created_at.desc`.
+
+### 4.3 Supabase project
+- **Project name:** bagantoapp's Project
+- **Org:** baganto (Free tier)
+- **Project URL:** `https://sobvkkqqlovgaatpoyyg.supabase.co`
+  ⚠️ **Note the double `y` in `poyyg`.** An earlier single-`y` typo (`poyg`) cost hours of debugging with `NXDOMAIN` DNS errors. Always copy this from the dashboard, never retype it.
+- **Region:** Northeast Asia (Seoul), `ap-northeast-2`, `t3.nano` — chosen for low latency to India
+- **Status:** Healthy. No GitHub repo connected, no migrations, no backups yet.
+
+### 4.4 `.env` file (`~/Desktop/baganto-backend/.env`)
+```
+SUPABASE_URL=https://sobvkkqqlovgaatpoyyg.supabase.co
+SUPABASE_ANON_KEY=<anon public key from Supabase dashboard>
+SUPABASE_SERVICE_ROLE_KEY=<service role key from Supabase dashboard>
+PORT=3000
+```
+Keys live only in this file. **Never paste keys into chat, screenshots, or commits.** If the backend is ever pushed to GitHub, add `.env` to `.gitignore` first.
+
+### 4.5 `package.json` scripts
+```json
+"scripts": {
+  "start": "node index.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+}
+```
+(The `start` script was missing initially and had to be added — `npm start` failed with `Missing script: "start"` until then.)
+
+### 4.6 Dependencies installed
+`express`, `@supabase/supabase-js` (installed but no longer used), `dotenv`, `cors`, `node-fetch` (installed but unused — Node 18+ has native `fetch`).
+
+### 4.7 Running it
 ```bash
-cp /sessions/magical-intelligent-feynman/mnt/baganto/baganto-barter-app.html /sessions/magical-intelligent-feynman/mnt/outputs/baganto-barter-app.html
-cp /sessions/magical-intelligent-feynman/mnt/baganto/_test_runner.js /sessions/magical-intelligent-feynman/mnt/outputs/_test_runner.js
-cd /sessions/magical-intelligent-feynman/mnt/outputs && node _test_runner.js 2>&1 | grep -v 'Could not load\|Not implemented'
+cd ~/Desktop/baganto-backend
+npm start
 ```
-The test runner handles the two-step login automatically (phone+password → OTP "123456").
-
----
-
-## 3. Architecture — Single-File App
-
-### Pattern
-- **One HTML file** — `<style>`, `<div id="app">`, one `<script>` block
-- **IIFE** wrapping all JS: `(function(){ ... })()`
-- **Full re-render** on every state change: `render()` sets `document.getElementById("app").innerHTML`
-- **Event delegation**: single `onClick`, `onChange`, `onInput`, `onSubmit` listeners on `#app`
-- **`data-action` attributes** drive all interactions (list below)
-- **ES5 compatible** (no arrow functions, no template literals, no `let`/`const` in most places)
-- **localStorage only** — no external dependencies, no network required to function
-
-### Key Constants
-```js
-var STORAGE_KEY = "baganto_db_v4";   // DB in localStorage
-var USER_KEY    = "baganto_user_v2"; // logged-in userId in localStorage
-var DAY  = 86400000;
-var HOUR = 3600000;
-var API_BASE = (window.BAGANTO_API_BASE || "").replace(/\/+$/, ""); // optional backend
+Expected output:
 ```
-
-### Storage Functions
-```js
-storageGet(key)     // localStorage.getItem with try/catch
-storageSet(key, v)  // localStorage.setItem with try/catch
-storageRemove(key)  // localStorage.removeItem
+✓ Backend running on http://localhost:3000
+📍 API Endpoints: ...
 ```
 
 ---
 
-## 4. CSS Design System
+## 5. Database schema (Supabase, `public` schema)
 
-### Color Variables (`:root`)
-```css
---bg: #f6f4f0          /* warm off-white page background */
---surface: #ffffff      /* card/panel backgrounds */
---ink: #1f2937          /* primary text */
---muted: #6b7280        /* secondary text */
---border: #e6e1d8       /* card borders */
---primary: #f97316      /* orange — buttons, accents */
---primary-dark: #c2500a
---primary-light: #fff7ed
---accent: #f97316       /* same as primary */
---accent-dark: #ea580c
---danger: #dc2626
---danger-light: #fdecec
---success: #16a34a      /* barter green */
---success-light: #f0fdf4
---barter: #16a34a
---barter-light: #f0fdf4
+Six tables. All six are **exposed to the Data API** (this was a blocker — see §7).
+
+### `users`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK |
+| email | text | |
+| phone | text | nullable |
+| name | text | |
+| avatar | text | nullable |
+| city | text | |
+| bio | text | |
+| is_verified | bool | default false |
+| created_at | timestamp | now() |
+| updated_at | timestamp | now() |
+
+### `items`
+| Column | Type | Notes |
+|---|---|---|
+| id | uuid | PK, `gen_random_uuid()` |
+| owner_id | uuid | **FK → `public.users.id`** (constraint `items_owner_id_fkey`) |
+| title | text | |
+| description | text | |
+| category | text | |
+| icon | text | nullable |
+| price | numeric | |
+| condition | text | nullable |
+| listing_type | text | nullable — sale vs barter |
+| photos | text | nullable |
+| created_at | timestamp | now() |
+| expires_at | timestamp | `now() + '30 days'::interval` |
+
+### `trades`
+`id`, `from_user_id`, `to_user_id`, `item_id`, `kind`, `status`, `created_at`, `updated_at`
+
+### `messages`
+`id`, `trade_id`, `sender_id`, `content`, `photo`, `is_read`, `created_at`
+
+### `ratings`
+`id`, `from_user_id`, `to_user_id`, `trade_id`, `rating` (1–5), `review`, `created_at`
+
+### `support_tickets`
+`id`, `user_id`, `contact_email`, `category`, `subject`, `message`, `status`, `admin_reply`, `created_at`
+
+### Important database facts
+- **RLS is currently DISABLED** on the tables. They are publicly readable and writable. This is fine for local development and **must be fixed before launch** (see §8, Phase 2).
+- **Data API exposure:** Supabase → Integrations → Data API → Exposed tables. All 6 are on. "Automatically expose new tables" is OFF, so **any new table must be exposed manually** or it will return `permission denied`.
+- `items.owner_id` has a foreign key to `users.id`, so **a user must exist before an item can be created for them.**
+- All IDs are UUIDs. Passing a string like `"user123"` returns `invalid input syntax for type uuid`.
+
+### Verified test data currently in the database
 ```
+User:  550e8400-e29b-41d4-a716-446655440000
+       kiran@baganto.com / Kiran / Mysore / "Baganto founder"
 
-### Key CSS Classes
-```css
-.nav              /* top navigation bar */
-.nav-logo         /* logo + wordmark container */
-.nav-logo-icon-wrap  /* dark #1a1a2e rounded box holding the logo img */
-.nav-logo-words   /* "Baganto" + tagline */
-.post-btn         /* orange "+ Post" button in nav */
-.login-btn        /* dark "#1a1a2e" Login button in nav (guests only) */
-.card             /* white rounded card */
-.item-card        /* listing card */
-.item-card-img    /* photo thumbnail (140px tall) when listing has images */
-.item-icon        /* emoji icon when no images */
-.modal-overlay    /* full-screen modal backdrop */
-.modal-box        /* modal content box */
-.modal-gallery    /* horizontal scrollable image gallery in modal */
-.modal-icon-big   /* 46px emoji fallback in modal when no images */
-.auth-screen      /* full-page login/signup overlay */
-.auth-card        /* white card on auth screen */
-.auth-dismiss     /* "← Continue browsing" button at top of auth card */
-.cat-tile         /* category browse tile on home */
-.cat-grid         /* 4-column grid of category tiles */
-.pill-sale        /* "Sale" badge */
-.pill-barter      /* "Barter" badge (green) */
-.img-upload-area  /* dashed upload zone in listing form */
-.img-previews     /* flex row of image thumbnails */
-.img-preview-wrap /* single preview: 80×80px relative container */
-.img-remove-btn   /* red ✕ button overlaid on preview */
-```
-
-### Nav Logo HTML (inside `renderNav()`)
-```js
-'<div class="nav-logo" data-action="goto-tab" data-tab="market">' +
-  '<div class="nav-logo-icon-wrap"><img src="[BASE64]" alt="Baganto"></div>' +
-  '<div class="nav-logo-words">' +
-    '<span class="w1"><span class="ob">B</span>aganto</span>' +
-    '<span class="w2">Sell &middot; Exchange &middot; Save</span>' +
-  '</div>' +
-'</div>'
-```
-(The `[BASE64]` is the full embedded base64 of `baganto-logo.png` — the orange "b" icon.)
-
----
-
-## 5. Data Model (DB)
-
-`DB` is loaded from `localStorage` via `loadDB()`, or seeded fresh via `seedDB()`.
-
-```js
-DB = {
-  users:     [...],   // User objects
-  items:     [...],   // Item/listing objects
-  deals:     [...],   // Barter proposals / purchase records
-  messages:  [...],   // Chat messages per deal
-  ratings:   [...],   // User reviews
-  savedItems:[...],   // Saved/hearted listings
-  reports:   [...]    // Reported ads
-}
-```
-
-### User Object
-```js
-{
-  id: "u1",
-  name: "You",
-  phone: "9876541001",   // used as login credential
-  password: "demo123",   // plaintext (demo only)
-  avatar: "🙂",
-  city: "Mumbai, Maharashtra",
-  memberSince: <timestamp>
-}
-```
-
-### Seed Users (all password: `demo123`)
-| id | name | phone | city |
-|----|------|-------|------|
-| u1 | You | 9876541001 | Mumbai, Maharashtra |
-| u2 | Aarav Mehta | 9876541002 | Bengaluru, Karnataka |
-| u3 | Priya Sharma | 9876541003 | Delhi |
-| u4 | Rohan Verma | 9876541004 | Chennai, Tamil Nadu |
-| u5 | Ananya Iyer | 9876541005 | Pune, Maharashtra |
-| u6 | (6th user) | 9876541006 | (varies) |
-
-### Item Object
-```js
-{
-  id: "i1",
-  ownerId: "u1",
-  title: "...",
-  icon: "🚲",            // emoji icon (shown when no images)
-  category: "Bicycles",  // must match a sub in CATEGORY_TREE
-  description: "...",
-  forSale: true,
-  price: 1500,           // null if not for sale
-  negotiable: false,
-  forBarter: true,
-  wantInExchange: "Sci-fi books",
-  city: "Mumbai, Maharashtra",
-  status: "available",   // "available" | "sold" | "bartered"
-  images: [],            // array of base64 data URIs (up to 5)
-  views: 0,
-  isFeatured: false,
-  createdAt: <timestamp>
-}
-```
-
-### Deal Object
-```js
-{
-  id: "d1",
-  type: "barter",          // "barter" | "buy" | "offer"
-  status: "pending",       // "pending" | "accepted" | "completed" | "rejected" | "withdrawn"
-  fromUserId: "u2",
-  toUserId: "u1",
-  offeredItemId: "i3",     // item offered in barter
-  requestedItemId: "i1",   // item being requested
-  message: "...",
-  offerPrice: null,        // for type="offer"
-  createdAt: <timestamp>
-}
-```
-
-### Other Collections
-- **Message**: `{ id, dealId, fromUserId, text, createdAt }`
-- **Rating**: `{ id, fromUserId, toUserId, dealId, stars, review, createdAt }`
-- **SavedItem**: `{ id, userId, itemId, createdAt }`
-- **Report**: `{ id, itemId, reportedBy, reason, createdAt }`
-
----
-
-## 6. Category Tree
-
-All categories are barter-eligible (`isNoBarter()` always returns `false`).
-
-```js
-var CATEGORY_TREE = [
-  { id:"cars",        label:"Cars",                     icon:"🚗",
-    subs:["Cars","Used Cars"] },
-  { id:"bikes",       label:"Bikes",                    icon:"🏍️",
-    subs:["Motorcycles","Scooters","Bicycles","Bike Spare Parts"] },
-  { id:"mobiles",     label:"Mobiles",                  icon:"📱",
-    subs:["Mobile Phones","Mobile Accessories","Tablets"] },
-  { id:"electronics", label:"Electronics & Appliances", icon:"💻",
-    subs:["TVs & Audio","Kitchen Appliances","Computers & Laptops","Cameras & Lenses",
-          "Games & Entertainment","Fridges & ACs","Washing Machines","Computer Accessories","Other Electronics"] },
-  { id:"furniture",   label:"Furniture",                icon:"🛋️",
-    subs:["Sofa & Dining","Beds & Wardrobes","Home Decor & Garden","Kids Furniture",
-          "Tools & Equipment","Other Household Items"] },
-  { id:"fashion",     label:"Fashion",                  icon:"👗",
-    subs:["Men","Women","Kids Fashion"] },
-  { id:"pets",        label:"Pets",                     icon:"🐾",
-    subs:["Dogs & Cats","Fish & Aquarium","Pet Food & Accessories","Other Pets"] },
-  { id:"books",       label:"Books, Sports & Hobbies",  icon:"📚",
-    subs:["Books","Gym & Fitness","Musical Instruments","Sports Equipment","Toys & Baby","Other Hobbies"] }
-];
-// Removed: Properties, Commercial Vehicles, Jobs, Services
-```
-
-`CATEGORIES` (flat array of subcategory strings) is derived from `CATEGORY_TREE`.
-
----
-
-## 7. UI State Object
-
-```js
-var UI = {
-  tab: "market",                  // "market" | "listings" | "trades" | "profile"
-  currentUserId: storageGet(USER_KEY) || "",  // "" = guest (not logged in)
-  filters: {
-    q: "", category: "all", city: "all",
-    listingType: "all",           // "all" | "sale" | "barter"
-    sort: "newest",               // "newest" | "price-asc" | "price-desc" | "distance"
-    showTraded: false,
-    priceMin: "", priceMax: ""
-  },
-  modal: null,                    // null | {type:"item"|"propose"|"buy"|"offer"|"report"|"trade"|"rate", itemId/dealId}
-  toast: null,                    // null | {msg:"..."}
-  listingFormOpen: false,
-  profileFormOpen: false,
-  legalPage: null,                // null | "terms"|"privacy"|"refund"|"grievance"
-  recentlyViewed: [],             // array of itemIds
-  homeSection: null,              // null=home grid, "cat:CATID" for drill-down
-  savedTab: false,
-  myAdsTab: "active",             // "active" | "sold"
-  editingItemId: null,
-  newListingCategory: "",         // tracks selected category in listing form
-  newListingImages: [],           // base64 strings for new listing (up to 5)
-  authScreen: false,              // true = show auth overlay instead of app
-  authPage: "login",              // "login" | "signup"
-  authReturnTab: null,            // tab to navigate to after successful login
-  authReturnAction: null,         // action to execute after login ("start-sell" etc.)
-  recentSearches: [],
-  chatsFilter: "all"              // "all" | "barter" | "sale" | "offer"
-};
+Item:  982ba000-34d3-4354-8b44-e35005baef01
+       Bicycle / "Good condition" / sports / ₹5000
+       owner_id → the user above
 ```
 
 ---
 
-## 8. Auth System
+## 6. API reference (all live and tested)
 
-### Login Flow (guests can browse freely)
-1. App opens → `currentUserId = storageGet(USER_KEY) || ""` → if empty, **guest mode** (no redirect)
-2. Guests see all listings, categories, item modals
-3. Write actions trigger login: posting, save/heart, propose, buy, make offer, clicking My Ads/Chats/Profile tabs
-4. Login screen shows with `UI.authScreen = true`
-5. Auth screen has **"← Continue browsing"** dismiss button (`data-action="dismiss-auth"`)
+Base URL: `http://localhost:3000`
 
-### Auth Screen
-- `renderAuth()` renders login, signup, forgot-password, and otp-verify pages (toggled by `UI.authPage`)
-- **Login flow (two steps)**:
-  1. Phone + password → `onSubmit "auth-login"` → looks up user → if found, sets demo OTP `"123456"`, shows `UI.authPage = "otp-verify"`
-  2. OTP entry → `onSubmit "auth-otp-verify"` → validates OTP → sets `UI.currentUserId`, saves to `USER_KEY`, `UI.authScreen = false`
-- **Signup**: name + email + phone + city + password → validates → creates user → logs in directly (no OTP step)
-- **Forgot password**: email or phone → sets demo OTP `"654321"`, shows otp-verify with `UI.otpVerifyMode = "forgot-password"`
-- Login mode toggle: phone vs email (radio buttons, `UI.loginMode = "phone"|"email"`)
-- After login: if `UI.authReturnAction === "start-sell"` → go to listings tab with form open; else if `UI.authReturnTab` → go to that tab
-- **Startup auth guard**: `DOMContentLoaded` sets `UI.authScreen = true` if no saved user ID. Guests can dismiss it with "← Continue browsing".
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/health` | Liveness check, returns status + timestamp |
+| GET | `/items` | List all items |
+| GET | `/items/:id` | One item |
+| POST | `/items` | Create item — needs `owner_id` (existing user uuid), `title`, `description`, `category`, `price`, optional `condition`, `listing_type` |
+| PUT | `/items/:id` | Update item |
+| DELETE | `/items/:id` | Delete item |
+| GET | `/trades` | List all trades |
+| POST | `/trades` | Create trade — `from_user_id`, `to_user_id`, `item_id`, `kind`, `status` |
+| PUT | `/trades/:id` | Update trade (e.g. change status) |
+| GET | `/messages/:tradeId` | Messages for a trade, oldest first |
+| POST | `/messages` | Send message — `trade_id`, `sender_id`, `content`, optional `photo` |
+| GET | `/ratings/:userId` | Ratings received by a user |
+| POST | `/ratings` | Leave rating — `from_user_id`, `to_user_id`, `trade_id`, `rating`, `review` |
+| GET | `/users/:id` | One user |
+| POST | `/users` | Create user — `id` (uuid), `email`, `phone`, `name`, `city`, `bio` |
+| PUT | `/users/:id` | Update user |
+| GET | `/support` | All support tickets, newest first |
+| POST | `/support` | Create ticket — `user_id`, `contact_email`, `category`, `subject`, `message` (status auto-set to `open`) |
+| PUT | `/support/:id` | Update ticket (e.g. add `admin_reply`, change `status`) |
 
-### Logout
-- `data-action="logout"` → clears `UI.currentUserId`, clears `USER_KEY`, sets `UI.tab = "market"`, `UI.authScreen = false` (stays on home)
-- Logout button is inside `renderProfile()` (inside the profile-head card, after the stat-row)
+### Auth endpoints — REMOVED
+`/auth/signup` and `/auth/login` were written but **removed** during the REST rewrite. They also used `supabase.auth.signUpWithPassword()`, which **is not a real method** — the correct one is `signUp()`. Auth needs to be rebuilt from scratch (see §8, Phase 2).
 
-### Guest-Safe `currentUser()`
-```js
-function currentUser(){
-  var GUEST = {id:"", name:"Guest", city:"", avatar:"👤", phone:"", password:"", memberSince:0};
-  if(!UI.currentUserId) return GUEST;
-  var u = userById(UI.currentUserId);
-  return u && u.id ? u : GUEST;
-}
+### Working curl examples
+```bash
+# health
+curl http://localhost:3000/health
+
+# create user (must come first — FK constraint)
+curl -X POST http://localhost:3000/users \
+  -H "Content-Type: application/json" \
+  -d '{"id":"550e8400-e29b-41d4-a716-446655440000","email":"kiran@baganto.com","name":"Kiran","city":"Mysore","bio":"Baganto founder"}'
+
+# create item
+curl -X POST http://localhost:3000/items \
+  -H "Content-Type: application/json" \
+  -d '{"owner_id":"550e8400-e29b-41d4-a716-446655440000","title":"Bicycle","description":"Good condition","category":"sports","price":5000}'
 ```
 
-### Tab Guards
-- Clicking "My Ads", "Chats", or "Profile" as guest → `UI.authScreen=true`, `UI.authReturnTab = dest`
-- Home tab always accessible
-
-### Nav (logged in vs. guest)
-- **Logged in**: shows `+ Post` button + demo user switcher
-- **Guest**: shows dark `Login` button (`data-action="goto-login-screen"`) + no user switcher
+**Tip for testing:** run the server in one Terminal tab and curl in a *second* tab (`Cmd+T`). Running curl in the same tab as the server won't work — the server is holding that shell.
 
 ---
 
-## 9. Image Upload
+## 7. Bugs already solved — do not re-debug these
 
-### In Listing Form (`renderListingForm`)
-- File input (`id="imgFileInput"`, `accept="image/*"`, `multiple`)
-- Clicking "📷 Add Photos" button triggers `document.getElementById('imgFileInput').click()`
-- `FileReader` in a **document-level** `change` listener (not `#app` — survives re-renders)
-- Up to 5 images; new images append to `UI.newListingImages[]`
-- Preview thumbnails at 80×80px with red ✕ remove button per image
-- Remove handled by a **document-level** click listener on `.img-remove-btn`
-- On form submit: `images: UI.newListingImages` passed to `addListing()`; then `UI.newListingImages = []`
+1. **`Missing script: "start"`** — `package.json` had no `start` script. Added `"start": "node index.js"`.
 
-### In Item Cards (`renderItemCard`)
-```js
-(it.images && it.images.length
-  ? '<div class="item-card-img"><img src="'+it.images[0]+'" alt=""></div>'
-  : '<div class="item-icon">'+it.icon+'</div>')
-```
+2. **`TypeError: fetch failed` / `NXDOMAIN`** — The Supabase URL in `.env` was `sobvkkqqlovgaatpoyg` (one `y`). The real URL is `sobvkkqqlovgaatpoyyg` (two `y`s). Everything downstream — DNS failures, `/etc/hosts` edits, `dns.setServers()` calls, switching from mobile hotspot to WiFi — was chasing this one typo. **Fixed.**
+   - Leftover from that hunt: a line was added to `/etc/hosts` mapping `34.120.177.193 sobvkkqqlovgaatpoyg.supabase.co`. It's harmless (points at the misspelled domain) but **should be removed** for cleanliness: `sudo nano /etc/hosts`, delete that line.
 
-### In Item Modal (`renderItemModalBody`)
-```js
-var galleryHtml = (it.images && it.images.length)
-  ? '<div class="modal-gallery">' + it.images.map(function(src){ return '<img src="'+src+'" alt="">'; }).join("") + '</div>'
-  : '<div class="modal-icon-big">'+it.icon+'</div>';
-// galleryHtml used at top of modal return
-```
+3. **`permission denied for table items` / `... for table users`** — Tables existed but were not exposed to the Data API. Fixed in Supabase → Integrations → Data API → Exposed tables → enabled all 6. Remember: "Automatically expose new tables" is OFF.
+
+4. **`invalid input syntax for type uuid: "user123"`** — `owner_id` must be a real UUID, not an arbitrary string.
+
+5. **`violates foreign key constraint "items_owner_id_fkey"`** — Can't create an item for a user that doesn't exist. Create the user first.
+
+6. **GitHub push failure (session 1)** — Username mismatch (`bagantoapp` vs `bagantoappp`) plus GitHub having disabled password auth. Fixed by correcting the remote URL and authenticating with a personal access token via `gh auth`.
+
+7. **Pricing inconsistency (session 1)** — The Growth plan said 25 ads in `PRICING_PLANS` but 22 in the comparison table (`compareRows`). Two separate data structures were out of sync. Fixed to 25 in both. **Watch for this class of bug** — the frontend has duplicated pricing data in more than one place.
+
+### Environment quirks worth knowing
+- Kiran uses a **MacBook Air**, zsh, Terminal.
+- `nano` on this machine opens as **UW PICO 5.09**. Save is `Ctrl+X` → `Y` → `Enter`. Ctrl+F does *not* search in this build.
+- Mobile hotspot was suspected of blocking DNS at one point; it wasn't the cause, but WiFi is the safer bet for dev work.
 
 ---
 
-## 10. All `data-action` Values
+## 8. What still needs doing
 
-| Action | Description |
-|--------|-------------|
-| `goto-tab` | Navigate tab (guarded for guests on non-market tabs) |
-| `start-sell` | Open listing form (guarded — requires login) |
-| `open-item` | Open item detail modal |
-| `toggle-save` | Heart/save an item (guarded) |
-| `open-propose` | Open barter propose modal (guarded) |
-| `open-buy` | Open buy modal (guarded) |
-| `open-offer` | Open make-offer modal (guarded) |
-| `open-deal` | Open trade/deal modal |
-| `open-rate` | Open rate-trade modal |
-| `open-report` | Open report-ad modal |
-| `close-modal` | Close any modal |
-| `close-modal-overlay` | Click backdrop to close modal |
-| `close-legal` | Close legal page |
-| `open-legal` | Open legal page |
-| `dismiss-auth` | Dismiss auth screen, continue browsing as guest |
-| `goto-login-screen` | Show auth screen (login page) |
-| `goto-login` | Switch auth screen to login page |
-| `goto-signup` | Switch auth screen to signup page |
-| `logout` | Log out, return to home as guest |
-| `browse-category` | Drill into parent category |
-| `browse-subcategory` | Drill into subcategory results |
-| `clear-home-section` | Back to home from category drill-down |
-| `accept-deal` / `reject-deal` / `withdraw-deal` / `complete-deal` | Deal lifecycle |
-| `confirm-buy` | Confirm purchase |
-| `send-available` | Send "Is this still available?" message |
-| `share-item` | Share item (clipboard/native share) |
-| `edit-listing` / `delete-listing` / `cancel-edit` | Listing CRUD |
-| `mark-sold` | Mark item as sold |
-| `delete-profile` | Delete current profile |
-| `switch-user` | Demo user switcher (select element) |
-| `toggle-listing-form` / `toggle-profile-form` | Toggle forms open/close |
-| `toggle-sale-field` / `toggle-barter-field` | Toggle price/want row in listing form |
-| `pick-icon` / `pick-avatar` / `pick-star` | Picker selections |
-| `profile-tab-reviews` / `profile-tab-saved` | Profile sub-tabs |
-| `my-ads-tab` | My Ads sub-tab (active/sold) |
-| `chats-filter` | Filter trades by type |
-| `see-all-featured` / `see-all-fresh` / `see-all-nearby` | Home "See All" links |
-| `apply-recent-search` | Re-apply a saved search |
-| `reset-demo` | Reset all data to seed state |
+### Phase 1 — Connect the frontend to the backend ← **START HERE**
+The frontend is a single ~408 KB HTML file running on `localStorage`. It needs to talk to the API instead.
 
----
+1. Add near the top of the main `<script>` block:
+   ```js
+   const API_BASE_URL = 'http://localhost:3000';
+   ```
+2. Replace the `localStorage` read/write layer with `fetch()` calls to the endpoints in §6. The app is built as a single IIFE with a persistence layer — find that layer and swap its implementation rather than rewriting call sites throughout.
+3. Handle the async shift: `localStorage` is synchronous, `fetch` is not. Functions that read data will need `async/await` and the UI will need loading states.
+4. Map frontend concepts to backend tables: listings → `items`, proposals/deals → `trades`, chats → `messages`, reviews → `ratings`, contact form → `support_tickets`.
+5. Re-run `baganto-regression-tests.js` (143 tests) after the change. Some will need rewriting for async.
 
-## 11. Key Functions
+**Practical note:** the file is too large to read in one pass with a file tool (~30k tokens). Work on it in slices with offset/limit, or grep for the specific functions to change.
 
-### Render Pipeline
-```
-render()
-  ├── if UI.authScreen → renderAuth() [replaces entire #app]
-  └── else → renderNav() + renderTabContent() + renderModal() + renderToast() + renderFooter()
-               └── renderTabContent() dispatches to:
-                     market   → renderMarket()
-                     listings → renderListings()
-                     trades   → renderTrades()
-                     profile  → renderProfile()
-```
+### Phase 2 — Security and auth (before any real user touches this)
+- **Enable RLS** on all 6 tables and write proper policies. Right now anyone with the anon key can read and write everything. Policies needed: users edit only their own profile; items writable only by `owner_id`; messages readable only by trade participants; support tickets readable only by their author and admins.
+- **Rebuild authentication.** Email/password via Supabase Auth (`signUp()` / `signInWithPassword()` — note the correct method names). Session/JWT handling on the frontend.
+- **Phone OTP via Twilio** — deferred, was always Phase 2.
+- Move to the **service role key** for server-side writes that must bypass RLS, keeping the anon key for anything client-facing.
+- Add input validation and rate limiting on the API.
 
-### Data Helpers
-```js
-currentUser()            // current user object (or GUEST object if not logged in)
-userById(id)             // User by id
-itemById(id)             // Item by id
-myItems()                // items owned by currentUser
-myAvailableItems()       // available items owned by currentUser
-dealsFor(userId)         // all deals involving userId
-pendingIncomingCount(id) // count of pending incoming proposals (for badge)
-userRating(userId)       // {avg, count} star rating
-isSaved(itemId)          // whether currentUser has saved this item
-savedCount(userId)       // count of saved items
-distanceKm(cityA, cityB) // approximate distance between cities
-```
+### Phase 3 — Payments (blocked on business setup)
+- Company registration and business bank account — **pending, this is the actual blocker**
+- Razorpay account + API keys
+- Wire subscription tiers to real payments
+- Handle the annual (15% off) vs monthly billing distinction server-side
+- Webhooks for payment success/failure; subscription state stored against the user
 
-### Write Operations
-```js
-addListing(data)          // creates item, pushes to DB, saves
-deleteListing(itemId)     // removes item, withdraws related deals
-saveEditedListing(id, data)
-createProfile(data)       // creates new user
-deleteProfile()           // deletes currentUser + cascade
-createBarterProposal(requestedId, offeredId, message)
-acceptDeal(dealId) / rejectDeal / withdrawDeal / completeDeal
-buyItem(itemId)
-makeOffer(itemId, price, message)
-sendMessage(dealId, text)
-submitRating(dealId, toUserId, stars, review)
-toggleSave(itemId)
-reportItem(itemId, reason)
-markItemSold(itemId)
-```
+### Phase 4 — Deployment
+- Push backend to GitHub (with `.env` gitignored)
+- Deploy to **Render** or **Railway** (both have free tiers; build `npm install`, start `npm start`)
+- Set env vars in the host's dashboard, not in the repo
+- Update the frontend's `API_BASE_URL` from `localhost:3000` to the public URL
+- Host the frontend (Netlify/Vercel/Cloudflare Pages all fine for a single HTML file)
+- Configure CORS on the backend to allow only the real frontend origin
+- Custom domain + HTTPS
 
-### Utility
-```js
-uid(prefix)         // generates unique IDs like "u_abc123"
-esc(str)            // HTML-escape a string
-formatINR(n)        // formats number as ₹1,23,456
-timeAgo(ts)         // "2 hours ago", "3 days ago"
-showToast(msg)      // shows toast notification
-```
+### Phase 5 — Polish and scale
+- Image upload and storage (Supabase Storage) — `items.photos` is a text column doing nothing yet
+- Search and filtering on listings
+- Push/email notifications
+- Admin dashboard for support tickets
+- Enforce the ad limits per plan (currently only displayed, not enforced)
+- Database backups (currently none)
+- Monitoring and error tracking
 
 ---
 
-## 12. Optional Backend
+## 9. Pricing model (already built in the frontend)
 
-The app has stub support for an optional REST backend:
-- `window.BAGANTO_API_BASE` — set this to enable server sync
-- `syncToServer()` — `PUT /api/db` with full DB JSON
-- `syncFromServer()` — `GET /api/db`
-- A sync status pill (`renderSyncPill()`) appears in the nav when API is configured
-- Currently used as localhost prototype only; Firebase migration is planned
+| Plan | Monthly | Ads |
+|---|---|---|
+| Free | ₹0 | 3 |
+| Growth | ₹199 | 25 |
+| Professional | ₹499 | 50 |
+| Business | ₹899 | 100 |
 
----
-
-## 13. What Has Been Built (Completed Features)
-
-- [x] OLX-style marketplace UI (cards, modals, filters, sort, search)
-- [x] Category tree with 8 parent categories, subcategories drill-down
-- [x] Barter + Sale dual-mode listings
-- [x] Trade proposal → chat → accept/reject → complete → rate flow
-- [x] Buy / Make Offer / Free claim flows
-- [x] Profile page with stats, reviews, saved ads, edit listing
-- [x] Save/heart ads
-- [x] Recently viewed, recent searches
-- [x] Distance-based sorting and nearby listings
-- [x] Featured items ribbon
-- [x] "Is this still available?" quick message
-- [x] Safe Deal Tips accordion in modal
-- [x] Share item (native share / clipboard)
-- [x] Report ad
-- [x] Legal pages (Terms, Privacy, Refund, Grievance)
-- [x] Hero banner on home
-- [x] Baganto logo (orange "b") embedded as base64 — visible in nav + hero + auth screen
-- [x] Orange color scheme throughout
-- [x] Login / Signup / Logout pages (phone + password auth)
-- [x] Guest browsing — no login required to view app
-- [x] Login only required for: Post ad, Save, Propose, Buy, Offer, My Ads, Chats, Profile tabs
-- [x] "← Continue browsing" button on auth screen
-- [x] After-login redirect (back to where user was trying to go)
-- [x] Image upload in listing form (up to 5 photos, base64, live preview, remove)
-- [x] Photo thumbnail in item cards
-- [x] Photo gallery in item modal
-- [x] 40 automated tests passing (jsdom-based)
-- [x] Demo user switcher (for testing multiple users)
-- [x] Reset demo data button
+- **Annual billing gives 15% off**, with a Monthly/Annual toggle in the UI (segmented-control style, like a settings switch).
+- Ad limits are **displayed but not enforced** — enforcement is a Phase 5 task.
+- Watch for the duplicated-pricing-data bug described in §7.7.
 
 ---
 
-## 14. Planned / Next Steps
+## 10. Frontend features already built and passing tests
 
-### High Priority
-- **Firebase integration** — replace localStorage with Firestore; migrate `DB` schema; real-time updates
-  - Collections: `users`, `items`, `deals`, `messages`, `ratings`, `savedItems`
-  - Auth: replace phone+password demo auth with Firebase Phone Auth (OTP)
-- **Real phone OTP auth** — currently phone+password is plaintext demo; needs Firebase Auth
-- **Image hosting** — currently images are stored as base64 in DB (huge); move to Firebase Storage
-- **Push notifications** — for trade proposals, chat messages, deal updates
+All 143 regression tests pass as of the last frontend change.
 
-### Medium Priority
-- **Search improvements** — full-text search, search by image category
-- **Map view** — show listings on a map (Google Maps or Leaflet)
-- **User verification** — verified badge, Aadhaar/phone verification
-- **In-app notifications center** — beyond badge count
-- **Admin panel** — approve featured listings, moderate reports
-
-### Nice to Have
-- **PWA** — make installable (service worker, manifest)
-- **Dark mode**
-- **Multi-language** — Hindi, Kannada, Tamil
-- **Shipping integration** — Shiprocket or Delhivery for items that can be shipped
+- Item listing, browsing, categories
+- Barter proposals and sale flow
+- Chat between traders
+- Ratings and reviews after a deal
+- **Contact Us page** — full page with category selection, message history, and an admin interface for replying. Note: Kiran asked for a *dedicated page*, not a row in the pricing table — an earlier attempt got this wrong. Also reachable from the header.
+- Pricing page with the Monthly/Annual toggle
+- Grievance Officer details (Kiran, contact@baganto.com, Vijayanagar Mysore)
+- Trust & safety content
 
 ---
 
-## 15. Known Issues / Gotchas
+## 11. Decisions made, and why
 
-1. **Base64 images in DB** — images stored as base64 in localStorage will hit the ~5MB limit quickly. Must move to cloud storage before production.
-2. **`data-group` not `data-super`** — `data-super` is a JS reserved word; the browse action uses `data-group` for category grouping.
-3. **Duplicate phone key bug** (fixed) — seed users originally had a trailing `phone:"[your phone]"` that overwrote the real phone. Fixed by removing duplicates.
-4. **Unescaped apostrophe** (fixed) — `India's` inside a JS single-quoted string caused a SyntaxError. Must escape as `India\'s`.
-5. **FileReader delegation** — image file input is inside `#app` which re-renders. FileReader listener is on `document` (not `#app`) so it survives re-renders.
-6. **`galleryHtml` scope** — must be declared as `var galleryHtml` inside `renderItemModalBody()` before the `return` statement.
-7. **Test runner reads from outputs copy** — always `cp` the main file to outputs before running tests.
-8. **Auth flow** — `onSubmit` handles: `auth-login` (→ OTP), `auth-signup` (direct login), `auth-otp-verify`, `auth-forgot-password`. `onClick` handles: `goto-login`, `goto-signup`, `goto-login-screen`, `logout`, `dismiss-auth`, `goto-forgot-password`, `back-from-otp`, `resend-otp`, `set-login-mode`.
-9. **`migrateDB`** — if seed user lacks `phone` field, `migrateDB` sets it to `"[hidden]"`. Old localStorage saves from before the phone/password update will have missing credentials. Tell user to reset demo data (reset-demo button).
-10. **`var logoSrc` in `renderAuth()`** — must be a quoted string: `var logoSrc = "data:image/png;base64,...";`. The base64 value is extracted from the nav logo. If this ever breaks (SyntaxError), fix by wrapping the raw data URI in `"..."`.
-11. **Test runner login** — uses two-step flow: submit `auth-login` form → OTP screen appears → submit `auth-otp-verify` with value `"123456"`. jsdom's `FormData` DOES work for programmatically-set input values (verified). The old single-step form submit silently failed because the login now shows OTP screen instead of immediately logging in.
+- **Custom Node.js REST APIs over Supabase's auto-generated endpoints** — chosen for full control over business logic.
+- **Supabase over Firebase** — Postgres, and the free tier is generous. Firebase was considered and set aside.
+- **Seoul region** — lowest latency to India among available Supabase regions.
+- **`contact@baganto.com`** — chosen over `support@` because it works for both business enquiries and user complaints.
+- **Direct REST calls over the Supabase JS client** — emerged from debugging, kept because it's simpler to reason about.
+- **Deployment deferred until payments are ready** — Kiran's call, and the right one; no point shipping a marketplace that can't take money.
 
 ---
 
-## 16. How to Make Changes (Workflow)
+## 12. Fastest way to pick this up in a new session
 
-Since the file is large (~297KB with embedded base64), **always use Python scripts for edits** — never use `sed` with long lines.
+```bash
+# 1. Start the backend
+cd ~/Desktop/baganto-backend
+npm start
 
-```python
-# Pattern for all edits:
-with open('/sessions/.../baganto/baganto-barter-app.html', 'r') as f:
-    html = f.read()
+# 2. In a SECOND terminal tab (Cmd+T), confirm it's alive
+curl http://localhost:3000/health
+curl http://localhost:3000/items     # should show the Bicycle
 
-html = html.replace(OLD_STRING, NEW_STRING)  # be exact and unique
-
-with open('/sessions/.../baganto/baganto-barter-app.html', 'w') as f:
-    f.write(html)
+# 3. Open the frontend to see current state
+open ~/Desktop/baganto/baganto-barter-app.html
 ```
 
-After changes:
-1. `cp /sessions/magical-intelligent-feynman/mnt/baganto/baganto-barter-app.html /sessions/magical-intelligent-feynman/mnt/outputs/`
-2. `cp /sessions/magical-intelligent-feynman/mnt/baganto/_test_runner.js /sessions/magical-intelligent-feynman/mnt/outputs/`
-3. `cd /sessions/magical-intelligent-feynman/mnt/outputs && node _test_runner.js 2>&1 | grep -v 'Could not load\|Not implemented'`
-4. All 40 tests must pass before considering work done
+Then start on **Phase 1** — connecting the frontend to the API.
 
 ---
 
-## 17. Tech Stack Summary
+## 13. Working notes for whoever picks this up
 
-| Layer | Technology |
-|-------|-----------|
-| UI | Vanilla HTML + CSS + ES5 JS |
-| State | In-memory JS object (`UI`) |
-| Persistence | `localStorage` (key: `baganto_db_v4`) |
-| Auth | Phone + password in `DB.users` (demo); `USER_KEY` in localStorage |
-| Images | base64 data URIs embedded in `DB.items[].images[]` |
-| Testing | Node.js + jsdom (40 tests) |
-| Fonts | Google Fonts — Baloo 2 (via CDN link) |
-| Backend | Optional REST API stub (not yet built) — Firebase planned |
-| Hosting | Static file — open in browser directly |
+- Kiran is not a developer. Give one command at a time, say exactly which Terminal tab it goes in, and wait for the result before moving on. Screenshots are the usual way results come back.
+- Kiran is security-conscious in a good way — asked before pasting the Mac password, cropped screenshots to hide keys. **Never ask for API keys, passwords, or anything sensitive in chat.** Direct him to copy from the Supabase dashboard into the file himself.
+- When something breaks, check the simple things first: correct directory, correct spelling of the URL, correct Terminal tab, server actually restarted after a file change. Every bug in §7 was one of those.
+- The frontend file is very large. Don't try to read it whole.
