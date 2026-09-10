@@ -453,6 +453,8 @@
   .auth-switch a{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:none;}
   .auth-error{background:#fdecec;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
   .auth-error.show{display:block;}
+  .pw-wrap{position:relative;}
+  .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280;padding:4px;}
   .auth-divider{text-align:center;color:var(--muted);font-size:12px;margin:16px 0;position:relative;}
   .auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
   .auth-divider::before{left:0;} .auth-divider::after{right:0;}
@@ -466,7 +468,7 @@
   // Point this at your running Baganto backend (see baganto-backend/) so listings,
   // proposals, chats and purchases sync across every device instead of staying
   // local to one browser. Leave it as "" to run fully offline/local-only.
-  window.BAGANTO_API_BASE = "http://localhost:3000";
+  window.BAGANTO_API_BASE = "https://api.baganto.com";
 </script>
 <script>
 (function(){
@@ -1140,10 +1142,60 @@
     }).then(function(r){
       apiOnline = !!(r && r.ok); apiChecked = true; renderSyncPill();
     }).catch(function(){
-      apiOnline = false; apiChecked = true; renderSyncPill();
+      apiOnline = false; apiChecked = true; renderSyncPill(); console.error('SYNC FAILED:', arguments[0]);
     });
   }
-  function syncFromServer(){
+  
+function mapBackendData(data){
+  function mapItem(it){
+    return {
+      id: it.id,
+      ownerId: it.owner_id,
+      title: it.title,
+      icon: it.icon || "[]",
+      photos: (function(){ try { return it.photos ? JSON.parse(it.photos) : []; } catch(e){ return []; } })(),
+      category: it.category,
+      description: it.description,
+      forSale: it.listing_type !== 'barter',
+      price: it.price,
+      forBarter: it.listing_type === 'barter' || it.listing_type === 'both',
+      wantInExchange: it.want_in_exchange || '',
+      city: it.city || 'Mumbai, Maharashtra',
+      condition: it.condition || 'good',
+      status: it.status || 'available',
+      negotiable: false,
+      views: it.views || 0,
+      isFeatured: false,
+      createdAt: it.created_at ? new Date(it.created_at).getTime() : Date.now()
+    };
+  }
+  function mapUser(u){
+    return {
+      id: u.id,
+      email: u.email,
+      phone: u.phone,
+      name: u.name,
+      avatar: u.avatar,
+      city: u.city,
+      bio: u.bio,
+      isVerified: !!u.is_verified
+    };
+  }
+  return {
+    items: (data.items || []).map(mapItem),
+    users: (data.users || []).map(mapUser),
+    deals: data.trades || [],
+    messages: data.messages || [],
+    ratings: data.ratings || [],
+    supportTickets: data.support || [],
+    notifications: [],
+    purchases: [],
+    reports: [],
+    savedItems: []
+  };
+}
+
+function syncFromServer(){
     if(!API_BASE || typeof fetch !== "function") return;
     fetch(API_BASE + "/api/db").then(function(r){
       if(!r.ok) throw new Error("bad status");
@@ -1151,14 +1203,14 @@
     }).then(function(data){
       apiOnline = true; apiChecked = true;
       if(data && Array.isArray(data.users) && Array.isArray(data.items)){
-        DB = data;
+        DB = mapBackendData(data);
         persistLocal();
         render();
       } else {
         renderSyncPill();
       }
     }).catch(function(){
-      apiOnline = false; apiChecked = true; renderSyncPill();
+      apiOnline = false; apiChecked = true; renderSyncPill(); console.error('SYNC FAILED:', arguments[0]);
     });
   }
   // Single source of truth for the pill\'s look, used both by the full render()
@@ -2177,6 +2229,23 @@
     DB.items.push(item);
     if(quotaUser && quotaUser.id) quotaUser.adsUsedThisPeriod = (quotaUser.adsUsedThisPeriod||0) + 1;
     saveDB();
+    if(API_BASE && typeof fetch==="function"){
+      var listingType = (item.forSale && item.forBarter) ? "both" : (item.forBarter ? "barter" : "sale");
+      fetch(API_BASE + "/items", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          owner_id: item.ownerId,
+          title: item.title,
+          description: item.description,
+          category: item.category,
+          price: item.price,
+          condition: item.condition,
+          listing_type: listingType,
+          photos: JSON.stringify(item.photos || [])
+        })
+      }).then(function(r){ if(!r.ok) console.error("Item sync to backend failed:", r.status); }).catch(function(e){ console.error("Item sync to backend error:", e); });
+    }
     var left = quotaUser && quotaUser.id ? adsRemaining(quotaUser.id) : null;
     showToast("Ad posted! Check My Listings." + (left!==null ? " ("+left+" ad"+(left===1?"":"s")+" left this month)" : ""));
     return true;
@@ -2739,9 +2808,9 @@
               ? '<div class="auth-field"><label>Email Address</label>'+
                   '<input type="email" name="email" placeholder="Enter your email" required></div>'
               : '<div class="auth-field"><label>Phone Number</label>'+
-                  '<input type="tel" name="phone" placeholder="Enter your phone number" required></div>')+
+                  '<input type="tel" name="phone" placeholder="Enter your phone number" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,\`\`).slice(0,10)" required></div>')+
             '<div class="auth-field"><label>Password</label>'+
-              '<input type="password" name="password" placeholder="Enter password" value="'+esc(UI.loginPassDraft||"")+'" required></div>'+
+              '<div class="pw-wrap"><input type="password" name="password" id="loginPassField" placeholder="Enter password" value="'+esc(UI.loginPassDraft||"")+'" required><button type="button" class="pw-toggle" data-action="toggle-pw" data-target="loginPassField">show</button></div></div>'+
             '<button type="button" class="auth-btn" data-action="submit-login">Login</button>'+
             '<div style="text-align:center;margin-top:12px;">'+
               '<button type="button" class="auth-link" data-action="goto-forgot-password" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;text-decoration:underline;">Forgot Password?</button>'+
@@ -2816,11 +2885,11 @@
             '<div class="auth-field"><label>Email Address</label>'+
               '<input type="email" name="email" placeholder="your@email.com" required></div>'+
             '<div class="auth-field"><label>Phone Number</label>'+
-              '<input type="tel" name="phone" placeholder="10-digit phone number" required></div>'+
+              '<input type="tel" name="phone" placeholder="10-digit phone number" inputmode="numeric" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,\`\`).slice(0,10)" required></div>'+
             '<div class="auth-field"><label>City</label>'+
               '<select name="city">'+CITIES.map(function(c){ return '<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>'; }).join("")+'</select></div>'+
             '<div class="auth-field"><label>Password</label>'+
-              '<input type="password" name="password" placeholder="Create a password" required></div>'+
+              '<div class="pw-wrap"><input type="password" name="password" id="signupPassField" placeholder="Create a password" required><button type="button" class="pw-toggle" data-action="toggle-pw" data-target="signupPassField">show</button></div></div>'+
             '<button type="submit" class="auth-btn">Create Account</button>'+
           '</form>'+
           '<div class="auth-switch" style="margin-top:16px;">Already have an account? <a data-action="goto-login">Login</a></div>'+
@@ -4577,6 +4646,7 @@
     if(action==="open-legal"){ UI.legalPage = t.dataset.page; UI.modal=null; render(); window.scrollTo(0,0); return; }
     if(action==="close-legal"){ UI.legalPage = null; render(); return; }
     if(action==="dismiss-auth"){ UI.authScreen=false; UI.authReturnTab=null; UI.authReturnAction=null; render(); return; }
+    if(action==="toggle-pw"){ var pf=document.getElementById(t.dataset.target); if(pf){ pf.type = pf.type==="password" ? "text" : "password"; t.textContent = pf.type==="password" ? "show" : "hide"; } return; }
     if(action==="goto-login-screen"){ UI.authScreen=true; UI.authPage="login"; render(); return; }
     if(action==="goto-signup"){ UI.authScreen=true; UI.authPage="signup"; render(); return; }
     if(action==="goto-login"){ UI.authPage="login"; render(); return; }
@@ -4618,26 +4688,52 @@
       var emailOrPhone = (UI.loginMode==="email") ? (emailField ? emailField.value : "").trim() : (phoneField ? phoneField.value : "").trim();
       var pass = (passField ? passField.value : "").trim();
       var errEl = document.getElementById("authError");
-      var match = null;
-      if(UI.loginMode==="email"){
-        match = DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0];
+      function finishLogin(match){
+        UI.currentUserId = match.id;
+        UI.authScreen = false;
+        UI.loginPassDraft = "";
+        storageSet(USER_KEY, match.id);
+        if(UI.authReturnAction==="start-sell"){
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+        } else if(UI.authReturnTab){
+          UI.tab=UI.authReturnTab; UI.authReturnTab=null;
+        }
+        render();
+      }
+      if(API_BASE && typeof fetch==="function"){
+        var body = (UI.loginMode==="email") ? {email: emailOrPhone, password: pass} : {phone: emailOrPhone, password: pass};
+        fetch(API_BASE + "/auth/login", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(body)
+        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+        .then(function(res){
+          if(res.ok && res.body && res.body.user){
+            var u = res.body.user;
+            var existing = DB.users.filter(function(x){ return x.id===u.id; })[0];
+            if(!existing){
+              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar, memberSince: nowTs() });
+              saveDB();
+            }
+            finishLogin({id: u.id});
+          } else {
+            if(errEl) { errEl.textContent = (res.body && res.body.error) ? res.body.error : "Incorrect "+UI.loginMode+" or password."; errEl.classList.add("show"); }
+          }
+        }).catch(function(e){
+          console.error("Login backend error:", e);
+          var match = (UI.loginMode==="email")
+            ? DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0]
+            : DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+          if(!match){ if(errEl) { errEl.textContent = "Incorrect "+UI.loginMode+" or password."; errEl.classList.add("show"); } return; }
+          finishLogin(match);
+        });
       } else {
-        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        var match = (UI.loginMode==="email")
+          ? DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0]
+          : DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        if(!match){ if(errEl) { errEl.textContent = "Incorrect "+UI.loginMode+" or password."; errEl.classList.add("show"); } return; }
+        finishLogin(match);
       }
-      if(!match){
-        if(errEl) errEl.textContent = "Incorrect "+UI.loginMode+" or password.";
-        return;
-      }
-      UI.currentUserId = match.id;
-      UI.authScreen = false;
-      UI.loginPassDraft = "";
-      storageSet(USER_KEY, match.id);
-      if(UI.authReturnAction==="start-sell"){
-        UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
-      } else if(UI.authReturnTab){
-        UI.tab=UI.authReturnTab; UI.authReturnTab=null;
-      }
-      render();
       return;
     }
     if(action==="logout"){ UI.currentUserId=""; UI.authScreen=true; UI.authPage="login"; UI.loginMode="phone"; UI.loginPassDraft=""; UI.notifOpen=false; storageSet(USER_KEY,""); render(); return; }
@@ -5200,26 +5296,52 @@
       var emailOrPhone = (UI.loginMode==="email") ? (fdL.get("email")||"").trim() : (fdL.get("phone")||"").trim();
       var pass  = (fdL.get("password")||"").trim();
       var errEl = document.getElementById("authError");
-      var match = null;
-      if(UI.loginMode==="email"){
-        match = DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0];
+      function finishRealLogin(match){
+        UI.currentUserId = match.id;
+        UI.authScreen    = false;
+        storageSet(USER_KEY, match.id);
+        if(UI.authReturnAction==="start-sell"){
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+        } else if(UI.authReturnTab){
+          UI.tab=UI.authReturnTab; UI.authReturnTab=null;
+        }
+        render();
+      }
+      if(API_BASE && typeof fetch==="function"){
+        var loginBody = (UI.loginMode==="email") ? {email: emailOrPhone, password: pass} : {phone: emailOrPhone, password: pass};
+        fetch(API_BASE + "/auth/login", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(loginBody)
+        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+        .then(function(res){
+          if(res.ok && res.body && res.body.user){
+            var u = res.body.user;
+            var existing = DB.users.filter(function(x){ return x.id===u.id; })[0];
+            if(!existing){
+              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar, memberSince: nowTs() });
+              saveDB();
+            }
+            finishRealLogin({id: u.id});
+          } else {
+            var errEl2 = document.getElementById("authError");
+            if(errEl2) { errEl2.textContent = (res.body && res.body.error) ? res.body.error : ("Incorrect "+UI.loginMode+" or password."); errEl2.classList.add("show"); }
+          }
+        }).catch(function(e){
+          console.error("Login backend error:", e);
+          var match = (UI.loginMode==="email")
+            ? DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0]
+            : DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+          if(!match){ var errEl3 = document.getElementById("authError"); if(errEl3) { errEl3.textContent = "Incorrect "+UI.loginMode+" or password."; errEl3.classList.add("show"); } return; }
+          finishRealLogin(match);
+        });
       } else {
-        match = DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        var match = (UI.loginMode==="email")
+          ? DB.users.filter(function(u){ return u.email===emailOrPhone && checkPassword(u, pass); })[0]
+          : DB.users.filter(function(u){ return u.phone===emailOrPhone && checkPassword(u, pass); })[0];
+        if(!match){ if(errEl) { errEl.textContent = "Incorrect "+UI.loginMode+" or password."; errEl.classList.add("show"); } return; }
+        finishRealLogin(match);
       }
-      if(!match){
-        if(errEl) errEl.textContent = "Incorrect "+UI.loginMode+" or password.";
-        return;
-      }
-      // Direct login — no OTP step
-      UI.currentUserId = match.id;
-      UI.authScreen    = false;
-      storageSet(USER_KEY, match.id);
-      if(UI.authReturnAction==="start-sell"){
-        UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
-      } else if(UI.authReturnTab){
-        UI.tab=UI.authReturnTab; UI.authReturnTab=null;
-      }
-      render();
       return;
     }
     if(type==="auth-signup"){
@@ -5240,24 +5362,42 @@
       if(DB.users.filter(function(u){ return u.email===sEmail; }).length){
         if(sErr) sErr.textContent="That email is already registered."; return;
       }
-      var newUser = {
-        id: uid("u"), name: sName, phone: sPhone, email: sEmail,
-        city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
-        memberSince: nowTs()
-      };
-      setUserPassword(newUser, sPass);   // stored as a salted hash, never plain
-      DB.users.push(newUser);
-      migrateDB(DB);
-      saveDB();
-      UI.currentUserId = newUser.id;
-      UI.authScreen    = false;
-      storageSet(USER_KEY, newUser.id);
-      if(UI.authReturnAction==="start-sell"){
-        UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
-      } else if(UI.authReturnTab){
-        UI.tab=UI.authReturnTab; UI.authReturnTab=null;
+      function finishSignup(newUser){
+        setUserPassword(newUser, sPass);
+        DB.users.push(newUser);
+        migrateDB(DB);
+        saveDB();
+        UI.currentUserId = newUser.id;
+        UI.authScreen    = false;
+        storageSet(USER_KEY, newUser.id);
+        if(UI.authReturnAction==="start-sell"){
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+        } else if(UI.authReturnTab){
+          UI.tab=UI.authReturnTab; UI.authReturnTab=null;
+        }
+        render();
       }
-      render();
+      if(API_BASE && typeof fetch==="function"){
+        fetch(API_BASE + "/auth/signup", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass })
+        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+        .then(function(res){
+          if(res.ok && res.body && res.body.user){
+            var u = res.body.user;
+            finishSignup({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
+          } else {
+            var msg = (res.body && res.body.error) ? res.body.error : "Signup failed. Try again.";
+            if(sErr) sErr.textContent = msg;
+          }
+        }).catch(function(e){
+          console.error("Signup backend error:", e);
+          finishSignup({ id: uid("u"), name: sName, phone: sPhone, email: sEmail, city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
+        });
+      } else {
+        finishSignup({ id: uid("u"), name: sName, phone: sPhone, email: sEmail, city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
+      }
       return;
     }
     if(type==="auth-forgot-password"){
@@ -5568,7 +5708,7 @@
     if(API_BASE){
       syncFromServer();
       setInterval(function(){
-        if(UI.modal || UI.listingFormOpen) return;
+        if(UI.modal || UI.listingFormOpen || UI.authScreen) return;
         syncFromServer();
       }, 6000);
     }
