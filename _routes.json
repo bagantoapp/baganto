@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "description": "Default route for SPA",
+  "routes": [
+    {
+      "pattern": "/*",
+      "destination": "/index.html"
+    }
+  ]
+}
