@@ -3,7 +3,7 @@ require('dotenv').config();
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: 'https://baganto.com' }));
 const bcrypt = require('bcrypt');
 
 app.use(express.json());
