@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors({ origin: 'https://baganto.com' }));
-const bcrypt = require('bcrypt');
+const bcryptjs = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 
 const loginLimiter = rateLimit({
@@ -269,7 +269,7 @@ app.post('/auth/signup', async (req, res) => {
     return res.status(400).json({ error: 'invalid email format' });
     }
     const userId = require('crypto').randomUUID();
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcryptjs.hash(password, 10);
     const newUser = {
       id: userId,
       email: email || null,
@@ -301,7 +301,7 @@ app.post('/auth/login', loginLimiter, async (req, res) => {
       : `?phone=eq.${encodeURIComponent(phone)}`;
     const users = await supabaseCall('users', 'GET', null, filter);
     const match = (users || [])[0];
-    if (!match || !await bcrypt.compare(password, match.password || '')) {
+    if (!match || !await bcryptjs.compare(password, match.password || '')) {
       return res.status(401).json({ error: 'Incorrect email/phone or password' });
     }
     delete match.password;
