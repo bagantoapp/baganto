@@ -33,6 +33,18 @@ async function supabaseCall(table, method = 'GET', data = null, filters = '') {
   return result;
 }
 
+// ============ INPUT VALIDATION ============
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validatePassword(password) {
+  return password && password.length >= 8;
+}
+
+function validateString(str, minLength = 1, maxLength = 500) {
+  return typeof str === 'string' && str.length >= minLength && str.length <= maxLength;
+}
 // ============ HEALTH ============
 app.get('/health', (req, res) => {
   res.json({ status: 'Backend is running!', timestamp: new Date().toISOString() });
