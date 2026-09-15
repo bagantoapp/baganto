@@ -249,8 +249,15 @@ app.put('/api/db', async (req, res) => {
 app.post('/auth/signup', async (req, res) => {
   try {
     const { email, phone, name, city, bio, password } = req.body;
-    if (!password || !name) {
-      return res.status(400).json({ error: 'name and password are required' });
+    // Validate input
+    if (!validateString(name, 1, 100)) {
+    return res.status(400).json({ error: 'name must be 1-100 characters' });
+    }
+    if (!validatePassword(password)) {
+    return res.status(400).json({ error: 'password must be at least 8 characters' });
+    }
+    if (email && !validateEmail(email)) {
+    return res.status(400).json({ error: 'invalid email format' });
     }
     const userId = require('crypto').randomUUID();
     const hashedPassword = await bcrypt.hash(password, 10);
