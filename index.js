@@ -20,7 +20,7 @@ app.set('etag', false);
 
 // Supabase REST API config
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.anon_public;
 
 // Helper function for Supabase REST API calls
 async function supabaseCall(table, method = 'GET', data = null, filters = '') {
