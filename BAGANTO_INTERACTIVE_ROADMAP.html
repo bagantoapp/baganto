@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Baganto Project Roadmap - Interactive Checklist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4ade80;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .content {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .phase {
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+            padding-left: 20px;
+        }
+
+        .phase.completed {
+            border-left-color: #4ade80;
+            opacity: 0.7;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phase-toggle {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .phase-title {
+            flex: 1;
+        }
+
+        .phase-title h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .phase-title p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .phase-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .phase-count.completed {
+            background: #4ade80;
+        }
+
+        .phase-items {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .phase-items.show {
+            display: block;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .item:hover {
+            background: #f0f1f3;
+        }
+
+        .item.done {
+            background: #f0fdf4;
+        }
+
+        .item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #667eea;
+            flex-shrink: 0;
+        }
+
+        .item input[type="checkbox"]:checked {
+            accent-color: #4ade80;
+        }
+
+        .item-label {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .item.done .item-label {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .status-done {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .footer {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .controls {
+                display: none;
+            }
+            .content {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            .content {
+                padding: 15px;
+            }
+            .phase {
+                padding-left: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Baganto Project Roadmap</h1>
+            <p>Interactive Checklist - Track Your Progress</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text">
+                <span id="completedCount">0</span> of <span id="totalCount">0</span> items completed
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="expandAll()">📂 Expand All</button>
+            <button class="btn btn-secondary" onclick="collapseAll()">📁 Collapse All</button>
+            <button class="btn btn-secondary" onclick="markAllCompleted()">✅ Mark All Done</button>
+            <button class="btn btn-secondary" onclick="clearAllCompleted()">❌ Clear All</button>
+            <button class="btn btn-secondary" onclick="exportProgress()">📥 Export Progress</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="statCompleted">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPending">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPercentage">0%</div>
+                <div class="stat-label">Progress</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="statPhases">0</div>
+                <div class="stat-label">Phases Done</div>
+            </div>
+        </div>
+
+        <div class="content" id="content"></div>
+
+        <div class="footer">
+            <p>💡 Click checkboxes to mark items as done. Your progress is saved automatically!</p>
+            <p style="margin-top: 10px; font-size: 11px;">Last Updated: August 12, 2026 | Version 1.0</p>
+        </div>
+    </div>
+
+    <script>
+        const PHASES = {
+            'completed': {
+                title: '✅ COMPLETED PHASES',
+                color: '#4ade80',
+                status: 'done',
+                items: [
+                    'Phase 0: Core Features',
+                    'Phase 0.5: Advanced Features & Trust & Safety'
+                ]
+            },
+            'phase1': {
+                title: 'PHASE 1: Backend Infrastructure',
+                subtitle: '(Weeks 1-4) - Database, APIs, SMS Gateway',
+                color: '#667eea',
+                status: 'pending',
+                items: [
+                    'Create Firebase project',
+                    'Configure Firestore Database',
+                    'Set up Firebase Authentication',
+                    'Configure Firebase Cloud Functions',
+                    'Set up Cloud Storage',
+                    'Choose SMS provider (Razorpay)',
+                    'Configure OTP system',
+                    'Build Authentication APIs (8 endpoints)',
+                    'Build User APIs (6 endpoints)',
+                    'Build Listing APIs (7 endpoints)',
+                    'Build Trading/Deals APIs (7 endpoints)',
+                    'Build Rating APIs (3 endpoints)',
+                    'Build Notification APIs (4 endpoints)',
+                    'Build Admin APIs (5 endpoints)',
+                    'Design Database Schema',
+                    'Set up Firestore Security Rules',
+                    'Set up Cloud Storage Rules',
+                    'Test OTP generation & SMS delivery',
+                    'Test API endpoints (Postman)',
+                    'Test authentication flow',
+                    'Load test (1000 users)',
+                    'Create API documentation',
+                    'Create deployment guide'
+                ]
+            },
+            'phase2': {
+                title: 'PHASE 2: Advanced Features with Backend',
+                subtitle: '(Weeks 5-8) - Frontend-Backend Integration',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Replace localStorage with Firestore',
+                    'Implement real OTP SMS flow',
+                    'Implement JWT token management',
+                    'Set up session persistence',
+                    'Set up auto-login on app load',
+                    'Implement Firestore listeners for deals',
+                    'Implement Firestore listeners for messages',
+                    'Implement Firestore listeners for notifications',
+                    'Add network error retry logic',
+                    'Add timeout handling',
+                    'Add user-friendly error messages',
+                    'Upload item photos to Cloud Storage',
+                    'Generate image thumbnails',
+                    'Generate full-size images',
+                    'Upload ID documents securely',
+                    'Set up Firebase Cloud Messaging (FCM)',
+                    'Send test notifications',
+                    'Handle notification permissions',
+                    'Add message notifications',
+                    'Add deal status notifications',
+                    'Add review notifications',
+                    'Save price alerts',
+                    'Implement price alert notifications',
+                    'Create user verification queue',
+                    'Create fraud detection automation',
+                    'Create analytics dashboard',
+                    'Optimize image compression',
+                    'Optimize database queries',
+                    'Set up CDN for static assets',
+                    'Set up caching strategy',
+                    'Monitor Firebase performance',
+                    'Run integration tests',
+                    'Run end-to-end tests',
+                    'Run load testing',
+                    'Run security testing',
+                    'Conduct UAT'
+                ]
+            },
+            'phase3': {
+                title: 'PHASE 3: Testing & QA',
+                subtitle: '(Weeks 9-10) - Comprehensive Testing',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Test on Chrome browser',
+                    'Test on Firefox browser',
+                    'Test on Safari browser',
+                    'Test on Edge browser',
+                    'Test on mobile (375x667)',
+                    'Test on tablet (768x1024)',
+                    'Test on desktop (1920x1080)',
+                    'Test offline functionality',
+                    'Test page load time < 3s',
+                    'Test API response time < 1s',
+                    'Test database query time < 500ms',
+                    'Optimize image loading',
+                    'Ensure bundle size < 5MB',
+                    'Test SQL injection prevention',
+                    'Test XSS prevention',
+                    'Test CSRF protection',
+                    'Test authentication security',
+                    'Test authorization checks',
+                    'Test data encryption in transit',
+                    'Test data encryption at rest',
+                    'Conduct user interviews (10 users)',
+                    'Identify pain points',
+                    'Collect user feedback',
+                    'Make iterative improvements',
+                    'Fix all critical bugs',
+                    'Fix all high-priority bugs',
+                    'Document low-priority bugs',
+                    'Re-test after bug fixes',
+                    'Write user manual',
+                    'Create FAQ document',
+                    'Write Terms of Service',
+                    'Write Privacy Policy',
+                    'Write Safety guidelines'
+                ]
+            },
+            'phase4': {
+                title: 'PHASE 4: Language & Accessibility',
+                subtitle: '(Weeks 11-13) - Reach 10x More Users',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Set up i18n framework',
+                    'Implement language switcher',
+                    'Translate UI to English (baseline)',
+                    'Translate UI to Hindi',
+                    'Translate UI to Tamil',
+                    'Translate UI to Telugu',
+                    'Translate UI to Kannada',
+                    'Translate UI to Marathi',
+                    'Translate all categories',
+                    'Translate all city names',
+                    'Implement date localization',
+                    'Implement number localization',
+                    'Implement time zones handling',
+                    'Implement dark mode',
+                    'Add dark mode toggle',
+                    'Implement large text mode (125%)',
+                    'Implement large text mode (150%)',
+                    'Implement large text mode (200%)',
+                    'Implement voice search',
+                    'Add microphone permissions',
+                    'Test voice transcription',
+                    'Add ARIA labels to buttons',
+                    'Add form field labels',
+                    'Add image alt text',
+                    'Test with screen readers',
+                    'Test keyboard navigation',
+                    'Test focus indicators',
+                    'Test Escape to close modals',
+                    'Test each language end-to-end',
+                    'Test accessibility features',
+                    'Gather user feedback on translations'
+                ]
+            },
+            'phase5': {
+                title: 'PHASE 5: Android Native App',
+                subtitle: '(Weeks 14-20) - Native Android Development',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Create Android project (Android Studio)',
+                    'Set min SDK to 24 (Android 7.0)',
+                    'Set target SDK to 34 (Android 14)',
+                    'Install Android SDK',
+                    'Configure emulator',
+                    'Test on physical device',
+                    'Configure Firebase for Android',
+                    'Add google-services.json',
+                    'Set up CI/CD (GitHub Actions)',
+                    'Implement user authentication',
+                    'Implement phone OTP flow',
+                    'Implement email OTP flow',
+                    'Implement session management',
+                    'Build marketplace browse feature',
+                    'Build search & filter feature',
+                    'Build item details view',
+                    'Build save favorites feature',
+                    'Build create listing flow',
+                    'Build photo capture integration',
+                    'Build photo gallery integration',
+                    'Build category selection',
+                    'Build location detection',
+                    'Build publish listing feature',
+                    'Build propose trade feature',
+                    'Build send offer feature',
+                    'Build accept/reject feature',
+                    'Build complete trade feature',
+                    'Build messaging system',
+                    'Build real-time chat',
+                    'Build typing indicators',
+                    'Build message history',
+                    'Add push notification support',
+                    'Build user profile view',
+                    'Build profile edit feature',
+                    'Build verification UI',
+                    'Build trust badges display',
+                    'Implement offline support (Room)',
+                    'Implement sync when online',
+                    'Implement conflict handling',
+                    'Implement camera integration',
+                    'Implement photo compression',
+                    'Handle permissions',
+                    'Implement location services',
+                    'Implement GPS location',
+                    'Integrate Google Maps',
+                    'Implement FCM token management',
+                    'Handle notification clicks',
+                    'Handle notification permissions',
+                    'Implement biometric authentication',
+                    'Implement fingerprint login',
+                    'Implement deep linking',
+                    'Implement app shortcuts',
+                    'Implement Material Design 3',
+                    'Create design system',
+                    'Create home/marketplace screen',
+                    'Create search results screen',
+                    'Create listing details screen',
+                    'Create create listing flow',
+                    'Create messaging screen',
+                    'Create profile screen',
+                    'Create settings screen',
+                    'Implement responsive UI (phones)',
+                    'Implement responsive UI (tablets)',
+                    'Implement landscape mode',
+                    'Write unit tests (JUnit)',
+                    'Write integration tests (Espresso)',
+                    'Write UI tests',
+                    'Test app startup time < 2s',
+                    'Test scrolling FPS > 60',
+                    'Test memory usage < 200MB',
+                    'Run battery drain testing',
+                    'Test on WiFi network',
+                    'Test on 4G network',
+                    'Test offline functionality',
+                    'Test on 5 different devices',
+                    'Test on multiple Android versions',
+                    'Test on different screen sizes',
+                    'Internal team testing',
+                    'Beta testing with 50-100 users',
+                    'Collect user feedback',
+                    'Fix critical issues',
+                    'Reduce APK size',
+                    'Optimize battery usage',
+                    'Improve startup time'
+                ]
+            },
+            'phase6': {
+                title: 'PHASE 6: iOS Native App',
+                subtitle: '(Weeks 21-27) - Native iOS Development',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Create iOS project (Xcode)',
+                    'Set min iOS version to 14',
+                    'Set target iOS version to 17',
+                    'Install Xcode',
+                    'Set up provisioning profiles',
+                    'Create Apple Developer account',
+                    'Test on iPhone simulator',
+                    'Test on physical iPhone',
+                    'Configure Firebase for iOS',
+                    'Add GoogleService-Info.plist',
+                    'Set up CI/CD (GitHub Actions)',
+                    'Implement user authentication',
+                    'Implement phone OTP flow',
+                    'Implement email OTP flow',
+                    'Implement session management',
+                    'Build marketplace browse feature',
+                    'Build search & filter feature',
+                    'Build item details view',
+                    'Build save favorites feature',
+                    'Build create listing flow',
+                    'Build photo capture integration',
+                    'Build photo gallery integration',
+                    'Build category selection',
+                    'Build location detection',
+                    'Build publish listing feature',
+                    'Build propose trade feature',
+                    'Build send offer feature',
+                    'Build accept/reject feature',
+                    'Build complete trade feature',
+                    'Build messaging system',
+                    'Build real-time chat',
+                    'Build typing indicators',
+                    'Build message history',
+                    'Add push notification support',
+                    'Build user profile view',
+                    'Build profile edit feature',
+                    'Build verification UI',
+                    'Build trust badges display',
+                    'Implement offline support (Core Data)',
+                    'Implement sync when online',
+                    'Implement conflict handling',
+                    'Implement camera integration',
+                    'Implement photo compression',
+                    'Implement location services (Core Location)',
+                    'Integrate MapKit',
+                    'Implement APNs setup',
+                    'Implement User Notifications',
+                    'Implement Face ID support',
+                    'Implement Touch ID support',
+                    'Implement Siri Shortcuts',
+                    'Implement App Clips',
+                    'Implement lock screen widgets',
+                    'Implement home screen widgets',
+                    'Ensure HIG compliance',
+                    'Use SwiftUI or UIKit',
+                    'Create design system',
+                    'Create home/marketplace screen',
+                    'Create search results screen',
+                    'Create listing details screen',
+                    'Create create listing flow',
+                    'Create messaging screen',
+                    'Create profile screen',
+                    'Create settings screen',
+                    'Test on iPhone 13 mini (5.4")',
+                    'Test on iPhone 15 (6.1")',
+                    'Test on iPhone 15 Plus (6.7")',
+                    'Write unit tests (XCTest)',
+                    'Write integration tests',
+                    'Write UI tests (XCUITest)',
+                    'Test app performance',
+                    'Test battery usage',
+                    'Test network connectivity',
+                    'Test on multiple iPhones',
+                    'Internal team testing',
+                    'TestFlight beta testing',
+                    'Collect user feedback',
+                    'Fix critical issues',
+                    'Optimize app performance'
+                ]
+            },
+            'phase7': {
+                title: 'PHASE 7: App Store Deployment',
+                subtitle: '(Weeks 28-30) - Launch on Both Stores',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Create Google Play Developer account',
+                    'Create app listing on Google Play',
+                    'Write app name and description',
+                    'Upload 8 screenshots per language',
+                    'Create promo video',
+                    'Create feature graphic',
+                    'Add privacy policy link',
+                    'Select category & content rating',
+                    'Test on minimum SDK device',
+                    'Ensure no crashes',
+                    'Verify all permissions are justified',
+                    'Fill content rating questionnaire',
+                    'Submit Android app for review',
+                    'Monitor review status',
+                    'Address any rejection reasons',
+                    'Publish to Google Play Store',
+                    'Set up Google Analytics 4',
+                    'Set up Firebase Analytics',
+                    'Set up Firebase Crashlytics',
+                    'Monitor reviews & ratings',
+                    'Monitor crash rates',
+                    'Track user retention',
+                    'Create Apple Developer account',
+                    'Create app on App Store Connect',
+                    'Write app information',
+                    'Upload 5 screenshots per language',
+                    'Create preview video',
+                    'Upload app icon',
+                    'Add privacy policy link',
+                    'Select category, keywords, rating',
+                    'Ensure no App Store violations',
+                    'Test on minimum iOS device',
+                    'Verify privacy compliance',
+                    'Check age rating',
+                    'Submit iOS app for review',
+                    'Monitor review status',
+                    'Address any rejection reasons',
+                    'Publish to App Store',
+                    'Set up Apple Analytics',
+                    'Set up Firebase Analytics',
+                    'Set up crash reporting',
+                    'Monitor performance',
+                    'Write press release',
+                    'Post on LinkedIn',
+                    'Post on Twitter',
+                    'Post on Instagram',
+                    'Post on Facebook',
+                    'Send email campaign',
+                    'Update website',
+                    'Research keywords for ASO',
+                    'Manage ratings & reviews',
+                    'Monitor crash reports (first week)',
+                    'Respond to user reviews',
+                    'Fix urgent issues immediately',
+                    'Monitor metrics (first month)',
+                    'Plan regular updates'
+                ]
+            },
+            'phase8': {
+                title: 'PHASE 8: Growth & Scale',
+                subtitle: '(Ongoing) - Post-Launch Growth',
+                color: '#f59e0b',
+                status: 'pending',
+                items: [
+                    'Optimize App Store listings',
+                    'Set up referral program',
+                    'Implement social sharing',
+                    'Track referrals',
+                    'Partner with influencers',
+                    'Write blog posts',
+                    'Create YouTube channel',
+                    'Run Google Ads campaign',
+                    'Run Facebook Ads campaign',
+                    'Run Instagram Ads campaign',
+                    'Collect analytics data',
+                    'Implement user feedback features',
+                    'Run A/B tests',
+                    'Release monthly updates',
+                    'Add new features',
+                    'Monitor uptime (99.9% SLA)',
+                    'Optimize database performance',
+                    'Monitor API performance',
+                    'Set up automated alerting',
+                    'Create incident response plan',
+                    'Run security audits',
+                    'Run penetration testing',
+                    'Ensure GDPR compliance',
+                    'Set up data backup & recovery',
+                    'Implement DDoS protection',
+                    'Improve trust system',
+                    'Write community guidelines',
+                    'Enhance moderation tools',
+                    'Set up in-app chat support',
+                    'Set up email support',
+                    'Create help center/FAQ',
+                    'Implement premium features',
+                    'Set up featured listings (paid)',
+                    'Set up promoted listings',
+                    'Implement commission system',
+                    'Set up payment processing',
+                    'Create seller subscription',
+                    'Expand to new cities/regions',
+                    'Add new categories',
+                    'Plan international expansion',
+                    'Develop API for partners',
+                    'Create white-label solution'
+                ]
+            }
+        };
+
+        let allItems = [];
+        let completedItems = [];
+
+        function initializeData() {
+            // Load completed items from localStorage
+            const saved = localStorage.getItem('baganto_roadmap_completed');
+            if (saved) {
+                completedItems = JSON.parse(saved);
+            }
+
+            // Create flat list of all items
+            allItems = [];
+            Object.keys(PHASES).forEach(key => {
+                PHASES[key].items.forEach((item, index) => {
+                    allItems.push({
+                        id: `${key}_${index}`,
+                        phase: key,
+                        text: item
+                    });
+                });
+            });
+        }
+
+        function renderContent() {
+            const content = document.getElementById('content');
+            content.innerHTML = '';
+
+            Object.keys(PHASES).forEach(key => {
+                const phase = PHASES[key];
+                const phaseItems = phase.items;
+                const phaseId = `phase_${key}`;
+
+                const phaseCompleted = phaseItems.filter((_, idx) =>
+                    completedItems.includes(`${key}_${idx}`)
+                ).length;
+
+                const phaseEl = document.createElement('div');
+                phaseEl.className = `phase ${phaseCompleted === phaseItems.length ? 'completed' : ''}`;
+
+                const headerEl = document.createElement('div');
+                headerEl.className = 'phase-header';
+                headerEl.onclick = () => togglePhase(phaseId);
+
+                const toggleEl = document.createElement('div');
+                toggleEl.className = 'phase-toggle';
+                toggleEl.textContent = document.getElementById(`${phaseId}_items`)?.classList.contains('show') ? '▼' : '▶';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'phase-title';
+                titleEl.innerHTML = `
+                    <h2>${phase.title}</h2>
+                    ${phase.subtitle ? `<p>${phase.subtitle}</p>` : ''}
+                `;
+
+                const countEl = document.createElement('div');
+                countEl.className = `phase-count ${phaseCompleted === phaseItems.length ? 'completed' : ''}`;
+                countEl.textContent = `${phaseCompleted}/${phaseItems.length}`;
+
+                headerEl.appendChild(toggleEl);
+                headerEl.appendChild(titleEl);
+                headerEl.appendChild(countEl);
+
+                const itemsContainerEl = document.createElement('div');
+                itemsContainerEl.id = `${phaseId}_items`;
+                itemsContainerEl.className = 'phase-items';
+
+                phaseItems.forEach((item, idx) => {
+                    const itemId = `${key}_${idx}`;
+                    const isCompleted = completedItems.includes(itemId);
+
+                    const itemEl = document.createElement('div');
+                    itemEl.className = `item ${isCompleted ? 'done' : ''}`;
+
+                    const checkboxEl = document.createElement('input');
+                    checkboxEl.type = 'checkbox';
+                    checkboxEl.id = itemId;
+                    checkboxEl.checked = isCompleted;
+                    checkboxEl.onchange = () => toggleItem(itemId);
+
+                    const labelEl = document.createElement('label');
+                    labelEl.className = 'item-label';
+                    labelEl.htmlFor = itemId;
+                    labelEl.textContent = item;
+
+                    itemEl.appendChild(checkboxEl);
+                    itemEl.appendChild(labelEl);
+                    itemsContainerEl.appendChild(itemEl);
+                });
+
+                phaseEl.appendChild(headerEl);
+                phaseEl.appendChild(itemsContainerEl);
+                content.appendChild(phaseEl);
+            });
+
+            updateStats();
+        }
+
+        function togglePhase(phaseId) {
+            const items = document.getElementById(`${phaseId}_items`);
+            items.classList.toggle('show');
+        }
+
+        function toggleItem(itemId) {
+            const index = completedItems.indexOf(itemId);
+            if (index > -1) {
+                completedItems.splice(index, 1);
+            } else {
+                completedItems.push(itemId);
+            }
+            saveProgress();
+            renderContent();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('baganto_roadmap_completed', JSON.stringify(completedItems));
+        }
+
+        function updateStats() {
+            const total = allItems.length;
+            const completed = completedItems.length;
+            const pending = total - completed;
+            const percentage = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('statCompleted').textContent = completed;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statPercentage').textContent = percentage + '%';
+
+            // Count completed phases
+            let completedPhases = 0;
+            Object.keys(PHASES).forEach(key => {
+                const phase = PHASES[key];
+                const phaseItems = phase.items;
+                const phaseCompleted = phaseItems.filter((_, idx) =>
+                    completedItems.includes(`${key}_${idx}`)
+                ).length;
+                if (phaseCompleted === phaseItems.length) {
+                    completedPhases++;
+                }
+            });
+            document.getElementById('statPhases').textContent = completedPhases;
+
+            // Update progress bar
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+        }
+
+        function expandAll() {
+            Object.keys(PHASES).forEach(key => {
+                document.getElementById(`phase_${key}_items`).classList.add('show');
+            });
+        }
+
+        function collapseAll() {
+            Object.keys(PHASES).forEach(key => {
+                document.getElementById(`phase_${key}_items`).classList.remove('show');
+            });
+        }
+
+        function markAllCompleted() {
+            if (confirm('Mark ALL items as completed?')) {
+                completedItems = allItems.map(item => item.id);
+                saveProgress();
+                renderContent();
+            }
+        }
+
+        function clearAllCompleted() {
+            if (confirm('Clear ALL completed items?')) {
+                completedItems = [];
+                saveProgress();
+                renderContent();
+            }
+        }
+
+        function exportProgress() {
+            const completed = completedItems.length;
+            const total = allItems.length;
+            const percentage = Math.round((completed / total) * 100);
+
+            const text = `
+BAGANTO PROJECT PROGRESS REPORT
+================================
+Date: ${new Date().toLocaleString()}
+
+SUMMARY:
+- Completed: ${completed} / ${total} items
+- Progress: ${percentage}%
+- Completed Phases: ${Object.keys(PHASES).filter(key => {
+                const phase = PHASES[key];
+                const phaseCompleted = phase.items.filter((_, idx) =>
+                    completedItems.includes(`${key}_${idx}`)
+                ).length;
+                return phaseCompleted === phase.items.length;
+            }).length} / ${Object.keys(PHASES).length}
+
+DETAILS:
+${Object.keys(PHASES).map(key => {
+                const phase = PHASES[key];
+                const phaseCompleted = phase.items.filter((_, idx) =>
+                    completedItems.includes(`${key}_${idx}`)
+                ).length;
+                return `
+${phase.title}
+${phase.subtitle ? phase.subtitle : ''}
+Status: ${phaseCompleted}/${phase.items.length} (${Math.round((phaseCompleted/phase.items.length)*100)}%)
+                `;
+            }).join('\n')}
+            `;
+
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `baganto_progress_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+        }
+
+        // Initialize
+        initializeData();
+        renderContent();
+    </script>
+</body>
+</html>
