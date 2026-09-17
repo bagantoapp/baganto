@@ -486,7 +486,7 @@
   var apiChecked = false;
 
   var CITIES = [
-    {name:"Mysore, Karnataka", lat:19.0760, lng:72.8777},
+    {name:"Mumbai, Maharashtra", lat:19.0760, lng:72.8777},
     {name:"Delhi", lat:28.7041, lng:77.1025},
     {name:"Bengaluru, Karnataka", lat:12.9716, lng:77.5946},
     {name:"Hyderabad, Telangana", lat:17.3850, lng:78.4867},
@@ -1160,7 +1160,7 @@ function mapBackendData(data){
       price: it.price,
       forBarter: it.listing_type === 'barter' || it.listing_type === 'both',
       wantInExchange: it.want_in_exchange || '',
-      city: it.city || 'Mumbai, Maharashtra',
+      city: it.city || 'Mysore, Karnataka',
       condition: it.condition || 'good',
       status: it.status || 'available',
       negotiable: false,
@@ -1233,7 +1233,7 @@ function syncFromServer(){
   function seedDB(){
     var now = nowTs();
     var users = [
-      {id:"u1", name:"You", phone:"9876541001", email:"you@baganto.com", password:"demo123", avatar:"🙂", city:"Mysore, Karnataka", memberSince:now-420*DAY, isAdmin:true, phoneVerified:true, emailVerified:true, isVerified:true, idVerified:true, blockedUsers:[], reputationScore:98, dealCompletionRate:100, responseTimeHours:2, fraudFlags:0},
+      {id:"u1", name:"You", phone:"9876541001", email:"you@baganto.com", password:"demo123", avatar:"🙂", city:"Mumbai, Maharashtra", memberSince:now-420*DAY, isAdmin:true, phoneVerified:true, emailVerified:true, isVerified:true, idVerified:true, blockedUsers:[], reputationScore:98, dealCompletionRate:100, responseTimeHours:2, fraudFlags:0},
       {id:"u2", name:"Aarav Mehta", phone:"9876541002", email:"aarav@baganto.com", password:"demo123", avatar:"🧑‍💻", city:"Bengaluru, Karnataka", memberSince:now-310*DAY, phoneVerified:true, emailVerified:true, isVerified:true, blockedUsers:[], reputationScore:92, dealCompletionRate:95, responseTimeHours:4, fraudFlags:0},
       {id:"u3", name:"Priya Sharma", phone:"9876541003", email:"priya@baganto.com", password:"demo123", avatar:"👩‍🎨", city:"Delhi", memberSince:now-180*DAY, phoneVerified:true, blockedUsers:[], reputationScore:85, dealCompletionRate:87, responseTimeHours:6, fraudFlags:0},
       {id:"u4", name:"Rohan Verma", phone:"9876541004", email:"rohan@baganto.com", password:"demo123", avatar:"🧑‍🔧", city:"Chennai, Tamil Nadu", memberSince:now-90*DAY, blockedUsers:[], reputationScore:78, dealCompletionRate:80, responseTimeHours:8, fraudFlags:0},
@@ -1242,8 +1242,8 @@ function syncFromServer(){
     ];
 
     var items = [
-      {id:"i1",  ownerId:"u1", title:"Hero Sprint Mountain Bike",   icon:"🚲", category:"Bicycles",   description:"Hardtail mountain bike, 21-speed, lightly used. New tyres fitted last month.", forSale:true,  price:4500, forBarter:true,  wantInExchange:"Camera, camping gear, or open to offers",       city:"Mysore, Karnataka",   condition:"good", status:"available",     negotiable:true,  views:184, isFeatured:true,  createdAt:now-2*DAY},
-      {id:"i2",  ownerId:"u1", title:"Acoustic Guitar",             icon:"🎸", category:"Musical Instruments",        description:"Full-size acoustic guitar, warm tone, comes with a gig bag and spare strings.",    forSale:false, price:null, forBarter:true,  wantInExchange:"Keyboard, amp, or open to offers",             city:"Mysore, Karnataka",   condition:"good", status:"available",     negotiable:false, views:92,  isFeatured:false, createdAt:now-6*DAY},
+      {id:"i1",  ownerId:"u1", title:"Hero Sprint Mountain Bike",   icon:"🚲", category:"Bicycles",   description:"Hardtail mountain bike, 21-speed, lightly used. New tyres fitted last month.", forSale:true,  price:4500, forBarter:true,  wantInExchange:"Camera, camping gear, or open to offers",       city:"Mumbai, Maharashtra",   condition:"good", status:"available",     negotiable:true,  views:184, isFeatured:true,  createdAt:now-2*DAY},
+      {id:"i2",  ownerId:"u1", title:"Acoustic Guitar",             icon:"🎸", category:"Musical Instruments",        description:"Full-size acoustic guitar, warm tone, comes with a gig bag and spare strings.",    forSale:false, price:null, forBarter:true,  wantInExchange:"Keyboard, amp, or open to offers",             city:"Mumbai, Maharashtra",   condition:"good", status:"available",     negotiable:false, views:92,  isFeatured:false, createdAt:now-6*DAY},
       {id:"i3",  ownerId:"u2", title:"DSLR Camera Kit",             icon:"📷", category:"Cameras & Lenses",  description:"Entry-level DSLR with 2 lenses and a carrying case. All working perfectly.",       forSale:true,  price:9500, forBarter:true,  wantInExchange:"Mountain bike or camping gear",                city:"Bengaluru, Karnataka",  condition:"like_new", status:"available",     negotiable:true,  views:237, isFeatured:true,  createdAt:now-4*DAY},
       {id:"i4",  ownerId:"u2", title:"Instant Polaroid Camera",     icon:"📷", category:"Cameras & Lenses",  description:"Instant camera, barely used, comes with 2 packs of film.",                          forSale:true,  price:2200, forBarter:true,  wantInExchange:"Vinyl records or board games",                 city:"Bengaluru, Karnataka",  condition:"like_new", status:"available", negotiable:false, views:58,  isFeatured:false, createdAt:now-5*HOUR},
       {id:"i5",  ownerId:"u2", title:"Adjustable Standing Desk",    icon:"🪑", category:"Other Household Items",                 description:"Manual crank standing desk, sturdy, minor desk-edge scuff.",                       forSale:true,  price:3000, forBarter:false, wantInExchange:"",                                             city:"Bengaluru, Karnataka",  condition:"fair", status:"available",     negotiable:true,  views:115, isFeatured:false, createdAt:now-9*DAY},
@@ -1259,10 +1259,10 @@ function syncFromServer(){
       {id:"i15", ownerId:"u6", title:"Electric Guitar + Gig Bag",   icon:"🎸", category:"Musical Instruments",        description:"Solid-body electric guitar with gig bag, no amp included.",                         forSale:true,  price:5500, forBarter:true,  wantInExchange:"Synth or drum machine",                        city:"Jaipur, Rajasthan",     condition:"good", status:"available",     negotiable:true,  views:143, isFeatured:false, createdAt:now-3*DAY},
       {id:"i16", ownerId:"u6", title:"3-Piece Hardshell Suitcase",  icon:"🧳", category:"Other Hobbies",                     description:"3-piece hardshell suitcase set, like new, only used once.",                         forSale:true,  price:4200, forBarter:true,  wantInExchange:"Backpacking gear",                             city:"Jaipur, Rajasthan",     condition:"good", status:"available", negotiable:true,  views:96,  isFeatured:false, createdAt:now-11*DAY},
       {id:"i17", ownerId:"u6", title:"Smart Watch + Charger",       icon:"⌚", category:"Other Electronics",  description:"Fitness smart watch, 1 year old, fully functional, includes original charger.",      forSale:true,  price:2500, forBarter:true,  wantInExchange:"Wireless earbuds or tablet",                   city:"Jaipur, Rajasthan",     condition:"good", status:"available",     negotiable:true,  views:211, isFeatured:true,  createdAt:now-30*HOUR},
-      {id:"i18", ownerId:"u1", title:"Vintage Typewriter",          icon:"📝", category:"Other Household Items",                     description:"Working vintage typewriter, recently serviced.",                                    forSale:false, price:null, forBarter:true,  wantInExchange:"(already traded)",                             city:"Mysore, Karnataka",   condition:"good", status:"traded",     negotiable:false, views:77,  isFeatured:false, createdAt:now-10*DAY},
+      {id:"i18", ownerId:"u1", title:"Vintage Typewriter",          icon:"📝", category:"Other Household Items",                     description:"Working vintage typewriter, recently serviced.",                                    forSale:false, price:null, forBarter:true,  wantInExchange:"(already traded)",                             city:"Mumbai, Maharashtra",   condition:"good", status:"traded",     negotiable:false, views:77,  isFeatured:false, createdAt:now-10*DAY},
       {id:"i19", ownerId:"u3", title:"Yoga Mat & Weights Set",      icon:"🏋️", category:"Gym & Fitness",   description:"Yoga mat plus a set of hand weights.",                                             forSale:false, price:null, forBarter:true,  wantInExchange:"(already traded)",                             city:"Delhi",                 condition:"good", status:"traded",     negotiable:false, views:51,  isFeatured:false, createdAt:now-10*DAY},
       {id:"i20", ownerId:"u6", title:"Bluetooth Speaker",           icon:"🔊", category:"TVs & Audio",  description:"Portable Bluetooth speaker, great bass, barely used.",                             forSale:true,  price:1500, forBarter:false, wantInExchange:"",                                             city:"Jaipur, Rajasthan",     condition:"good", status:"sold", negotiable:false, views:189, isFeatured:false, createdAt:now-15*DAY},
-      {id:"i21", ownerId:"u1", title:"Samsung Galaxy Smartphone",   icon:"📱", category:"Mobile Phones",                   description:"6 months old, 128GB, no scratches, comes with original box and charger.",           forSale:true,  price:8000, forBarter:true,  wantInExchange:"iPhone, laptop, or open to offers",            city:"Mysore, Karnataka",   condition:"good", status:"available", negotiable:true,  views:320, isFeatured:true,  createdAt:now-16*HOUR}
+      {id:"i21", ownerId:"u1", title:"Samsung Galaxy Smartphone",   icon:"📱", category:"Mobile Phones",                   description:"6 months old, 128GB, no scratches, comes with original box and charger.",           forSale:true,  price:8000, forBarter:true,  wantInExchange:"iPhone, laptop, or open to offers",            city:"Mumbai, Maharashtra",   condition:"good", status:"available", negotiable:true,  views:320, isFeatured:true,  createdAt:now-16*HOUR}
     ];
 
     var deals = [
@@ -3645,9 +3645,10 @@ function syncFromServer(){
       : (it.status==="available"
           ? '<span style="font-size:12px;color:'+(left<=3?'#b45309':'var(--muted)')+';">⏳ '+(left===0?'Expires today':(left+' day'+(left===1?'':'s')+' left'))+'</span>'
           : '');
+    var photoDisplay = (it.photos && it.photos.length) ? '<div style="width:80px;height:80px;background-size:cover;background-position:center;border-radius:6px;flex-shrink:0;background-image:url('+it.photos[0]+');"></div>' : '<div class="item-icon" style="font-size:32px;flex-shrink:0;">'+it.icon+(it.isFeatured?' <span style="font-size:14px;">⭐</span>':'')+'</div>';
     return '' +
       '<div class="card my-ad-row">' +
-        '<div class="item-icon" style="font-size:32px;flex-shrink:0;">'+it.icon+(it.isFeatured?' <span style="font-size:14px;">⭐</span>':'')+'</div>' +
+        photoDisplay +
         '<div style="flex:1;min-width:0;">' +
           '<div class="item-title">'+esc(it.title)+'</div>' +
           '<div class="my-ad-meta">'+statusPillForItem(it.status)+modeBadges+'</div>' +
@@ -5701,42 +5702,6 @@ function syncFromServer(){
     if(UI.currentUserId) loadUserSearches();
 
     render();
-
-    // AUTO-GEOLOCATION: Request users location on page load
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        var lat = position.coords.latitude;
-        var lng = position.coords.longitude;
-        
-        // Reverse geocode using free Open Street Map Nominatim API
-        fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lng)
-          .then(function(resp) { return resp.json(); })
-          .then(function(data) {
-            var address = data.address || {};
-            var city = address.city || address.town || address.village || address.county || 'Unknown';
-            var state = address.state || '';
-            var detectedLocation = state ? city + ', ' + state : city;
-            
-            var locInput = document.getElementById('navLocationInput');
-            if (locInput) {
-              locInput.value = detectedLocation;
-            }
-            
-            if (UI.currentUserId) {
-              var user = userById(UI.currentUserId);
-              if (user) {
-                user.city = detectedLocation;
-                saveDB();
-              }
-            }
-          })
-          .catch(function(err) {
-            console.log('Geolocation reverse geocoding failed', err);
-          });
-      }, function(error) {
-        console.log('Geolocation permission denied', error.message);
-      });
-    }
 
     // Pull the latest shared state once on load, then poll lightly so changes
     // made on other devices show up here too. Skipped while a modal/form is
