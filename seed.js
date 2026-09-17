@@ -7,7 +7,7 @@ function buildSeed() {
   const DAY = 86400000, HOUR = 3600000;
 
   const users = [
-    { id: "u1", name: "You", avatar: "🙂", city: "Mumbai, Maharashtra" },
+    { id: "u1", name: "You", avatar: "🙂", city: "Mysore, Karnataka" },
     { id: "u2", name: "Aarav Mehta", avatar: "🧑‍💻", city: "Bengaluru, Karnataka" },
     { id: "u3", name: "Priya Sharma", avatar: "👩‍🎨", city: "Delhi" },
     { id: "u4", name: "Rohan Verma", avatar: "🧑‍🔧", city: "Chennai, Tamil Nadu" },
@@ -16,8 +16,8 @@ function buildSeed() {
   ];
 
   const items = [
-    { id: "i1", ownerId: "u1", title: "Hero Sprint Mountain Bike", icon: "🚲", category: "Books, Sports & Hobbies", description: "Hardtail mountain bike, 21-speed, lightly used. New tyres.", forSale: true, price: 4500, forBarter: true, wantInExchange: "Camera, camping gear, or open to offers", city: "Mumbai, Maharashtra", status: "available", createdAt: now - 2 * DAY },
-    { id: "i2", ownerId: "u1", title: "Acoustic Guitar", icon: "🎸", category: "Musical Instruments", description: "Full-size acoustic guitar, warm tone, comes with a gig bag and spare strings.", forSale: false, price: null, forBarter: true, wantInExchange: "Keyboard, amp, or open to offers", city: "Mumbai, Maharashtra", status: "available", createdAt: now - 6 * DAY },
+    { id: "i1", ownerId: "u1", title: "Hero Sprint Mountain Bike", icon: "🚲", category: "Books, Sports & Hobbies", description: "Hardtail mountain bike, 21-speed, lightly used. New tyres.", forSale: true, price: 4500, forBarter: true, wantInExchange: "Camera, camping gear, or open to offers", city: "Mysore, Karnataka", status: "available", createdAt: now - 2 * DAY },
+    { id: "i2", ownerId: "u1", title: "Acoustic Guitar", icon: "🎸", category: "Musical Instruments", description: "Full-size acoustic guitar, warm tone, comes with a gig bag and spare strings.", forSale: false, price: null, forBarter: true, wantInExchange: "Keyboard, amp, or open to offers", city: "Mysore, Karnataka", status: "available", createdAt: now - 6 * DAY },
     { id: "i3", ownerId: "u2", title: "DSLR Camera Kit", icon: "📷", category: "Electronics & Appliances", description: "Entry-level DSLR with 2 lenses and a carrying case.", forSale: false, price: null, forBarter: true, wantInExchange: "Mountain bike or camping gear", city: "Bengaluru, Karnataka", status: "available", createdAt: now - 4 * DAY },
     { id: "i4", ownerId: "u2", title: "Instant Polaroid Camera", icon: "📷", category: "Electronics & Appliances", description: "Instant camera, barely used, comes with 2 packs of film.", forSale: false, price: null, forBarter: true, wantInExchange: "Vinyl records or board games", city: "Bengaluru, Karnataka", status: "available", createdAt: now - 5 * HOUR },
     { id: "i5", ownerId: "u2", title: "Adjustable Standing Desk", icon: "🪑", category: "Furniture", description: "Manual crank standing desk, sturdy, minor desk-edge scuff.", forSale: true, price: 3000, forBarter: false, wantInExchange: "", city: "Bengaluru, Karnataka", status: "available", createdAt: now - 9 * DAY },
@@ -33,10 +33,10 @@ function buildSeed() {
     { id: "i15", ownerId: "u6", title: "Electric Guitar", icon: "🎸", category: "Musical Instruments", description: "Solid-body electric guitar with gig bag, no amp included.", forSale: false, price: null, forBarter: true, wantInExchange: "Synth or drum machine", city: "Jaipur, Rajasthan", status: "available", createdAt: now - 3 * DAY },
     { id: "i16", ownerId: "u6", title: "Suitcase Set", icon: "🧳", category: "Other", description: "3-piece hardshell suitcase set, like new.", forSale: false, price: null, forBarter: true, wantInExchange: "Backpacking gear", city: "Jaipur, Rajasthan", status: "available", createdAt: now - 11 * DAY },
     { id: "i17", ownerId: "u6", title: "Smart Watch", icon: "⌚", category: "Electronics & Appliances", description: "Fitness smart watch, 1 year old, includes charger.", forSale: true, price: 2500, forBarter: true, wantInExchange: "Wireless earbuds or tablet", city: "Jaipur, Rajasthan", status: "available", createdAt: now - 30 * HOUR },
-    { id: "i18", ownerId: "u1", title: "Vintage Typewriter", icon: "📝", category: "Other", description: "Working vintage typewriter, recently serviced.", forSale: false, price: null, forBarter: true, wantInExchange: "(already traded)", city: "Mumbai, Maharashtra", status: "traded", createdAt: now - 10 * DAY },
+    { id: "i18", ownerId: "u1", title: "Vintage Typewriter", icon: "📝", category: "Other", description: "Working vintage typewriter, recently serviced.", forSale: false, price: null, forBarter: true, wantInExchange: "(already traded)", city: "Mysore, Karnataka", status: "traded", createdAt: now - 10 * DAY },
     { id: "i19", ownerId: "u3", title: "Yoga Mat & Weights Set", icon: "🏋️", category: "Books, Sports & Hobbies", description: "Yoga mat plus a set of hand weights.", forSale: false, price: null, forBarter: true, wantInExchange: "(already traded)", city: "Delhi", status: "traded", createdAt: now - 10 * DAY },
     { id: "i20", ownerId: "u6", title: "Bluetooth Speaker", icon: "🔊", category: "Electronics & Appliances", description: "Portable Bluetooth speaker, great bass, barely used.", forSale: true, price: 1500, forBarter: false, wantInExchange: "", city: "Jaipur, Rajasthan", status: "sold", createdAt: now - 15 * DAY },
-    { id: "i21", ownerId: "u1", title: "Samsung Galaxy Smartphone", icon: "📱", category: "Mobiles", description: "6 months old, 128GB, no scratches, comes with box and charger.", forSale: true, price: 8000, forBarter: true, wantInExchange: "iPhone, laptop, or open to offers", city: "Mumbai, Maharashtra", status: "available", createdAt: now - 16 * HOUR }
+    { id: "i21", ownerId: "u1", title: "Samsung Galaxy Smartphone", icon: "📱", category: "Mobiles", description: "6 months old, 128GB, no scratches, comes with box and charger.", forSale: true, price: 8000, forBarter: true, wantInExchange: "iPhone, laptop, or open to offers", city: "Mysore, Karnataka", status: "available", createdAt: now - 16 * HOUR }
   ];
 
   const deals = [
