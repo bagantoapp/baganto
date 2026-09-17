@@ -1,11 +1,9 @@
-// Baganto backend — simplified auth using db.json
 "use strict";
 
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const bcryptjs = require("bcryptjs");
 
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, "db.json");
@@ -14,7 +12,6 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
-// Read database
 function readDb() {
   if (!fs.existsSync(DB_FILE)) {
     return { users: [], items: [], deals: [], messages: [], purchases: [], ratings: [] };
@@ -26,31 +23,18 @@ function readDb() {
   }
 }
 
-// Write database
 function writeDb(data) {
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// Hash/check password
-function hashPassword(password) {
-  return bcryptjs.hashSync(password, 10);
-}
-
-function checkPassword(hashed, plain) {
-  return bcryptjs.compareSync(plain, hashed);
-}
-
-// Health check
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, time: Date.now() });
 });
 
-// Get full database
 app.get("/api/db", (req, res) => {
   res.json(readDb());
 });
 
-// Update full database
 app.put("/api/db", (req, res) => {
   const body = req.body;
   if (!body || !Array.isArray(body.users) || !Array.isArray(body.items)) {
@@ -64,9 +48,6 @@ app.put("/api/db", (req, res) => {
   }
 });
 
-// ---- AUTH ENDPOINTS ----
-
-// Signup
 app.post("/auth/signup", (req, res) => {
   const { name, email, phone, city, password } = req.body;
 
@@ -76,7 +57,6 @@ app.post("/auth/signup", (req, res) => {
 
   const db = readDb();
 
-  // Check if user exists
   if (db.users.some((u) => u.email === email)) {
     return res.status(400).json({ error: "Email already registered" });
   }
@@ -84,7 +64,6 @@ app.post("/auth/signup", (req, res) => {
     return res.status(400).json({ error: "Phone already registered" });
   }
 
-  // Create user
   const newUser = {
     id: "u" + Math.random().toString(36).substr(2, 9),
     name: name,
@@ -93,7 +72,7 @@ app.post("/auth/signup", (req, res) => {
     city: city || "Mysore, Karnataka",
     avatar: "🙂",
     memberSince: Date.now(),
-    pwHash: hashPassword(password),
+    password: password,
     phoneVerified: false,
     emailVerified: false,
     isVerified: false,
@@ -120,7 +99,6 @@ app.post("/auth/signup", (req, res) => {
   });
 });
 
-// Login
 app.post("/auth/login", (req, res) => {
   const { email, phone, password } = req.body;
 
@@ -135,7 +113,7 @@ app.post("/auth/login", (req, res) => {
     return res.status(401).json({ error: "User not found" });
   }
 
-  if (!checkPassword(user.pwHash, password)) {
+  if (user.password !== password) {
     return res.status(401).json({ error: "Incorrect password" });
   }
 
