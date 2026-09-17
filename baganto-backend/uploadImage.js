@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.service_role_secret);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.anon_public);
 
 async function uploadBase64Image(base64Data, fileName) {
   if (!base64Data || !base64Data.startsWith('data:')) return null;
