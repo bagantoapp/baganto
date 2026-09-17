@@ -15,7 +15,7 @@ const loginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.set('etag', false);
 
 // Supabase REST API config
