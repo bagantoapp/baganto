@@ -37,12 +37,33 @@ app.get("/api/db", (req, res) => {
 });
 
 app.put("/api/db", (req, res) => {
-  const body = req.body;
-  if (!body || !Array.isArray(body.users) || !Array.isArray(body.items)) {
+  const incoming = req.body;
+  if (!incoming || !Array.isArray(incoming.users) || !Array.isArray(incoming.items)) {
     return res.status(400).json({ error: "Malformed DB payload" });
   }
   try {
-    writeDb(body);
+    const current = readDb();
+
+    // --- users: incoming fields win, but the server's pwHash is never clobbered
+    const serverUsers = new Map((current.users || []).map((u) => [u.id, u]));
+    const mergedUsers = incoming.users.map((u) => {
+      const existing = serverUsers.get(u.id);
+      if (!existing) return u;
+      serverUsers.delete(u.id);
+      return Object.assign({}, existing, u, { pwHash: existing.pwHash || u.pwHash });
+    });
+    for (const leftover of serverUsers.values()) mergedUsers.push(leftover);
+
+    // --- items: union by id so another session's listings aren't wiped
+    const byId = new Map((current.items || []).map((it) => [it.id, it]));
+    for (const it of incoming.items) byId.set(it.id, it);
+
+    const merged = Object.assign({}, current, incoming, {
+      users: mergedUsers,
+      items: Array.from(byId.values())
+    });
+
+    writeDb(merged);
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: "Failed to persist", detail: String(e) });
