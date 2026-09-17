@@ -81,7 +81,9 @@ app.get('/items/:id', async (req, res) => {
 app.post('/items', async (req, res) => {
   try {
     const { owner_id, title, description, category, price, condition, listing_type, photos } = req.body;
-    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos });
+    // Strip out base64-encoded images; only accept URLs
+    const cleanPhotos = photos ? photos.filter(p => typeof p === 'string' && p.startsWith('http')) : null;
+    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: cleanPhotos });
     res.json(data[0] || data);
   } catch (err) {
     res.status(400).json({ error: err.message });
