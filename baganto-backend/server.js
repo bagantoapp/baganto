@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const bcryptjs = require("bcryptjs");
 
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, "db.json");
@@ -72,7 +73,7 @@ app.post("/auth/signup", (req, res) => {
     city: city || "Mysore, Karnataka",
     avatar: "🙂",
     memberSince: Date.now(),
-    password: password,
+    pwHash: bcryptjs.hashSync(password, 10),
     phoneVerified: false,
     emailVerified: false,
     isVerified: false,
@@ -113,7 +114,7 @@ app.post("/auth/login", (req, res) => {
     return res.status(401).json({ error: "User not found" });
   }
 
-  if (user.password !== password) {
+  if (!bcryptjs.compareSync(password, user.pwHash)) {
     return res.status(401).json({ error: "Incorrect password" });
   }
 
