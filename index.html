@@ -2251,14 +2251,20 @@ function syncFromServer(){
     return true;
   }
 
-  function deleteListing(itemId){
+  async function deleteListing(itemId){
     if(!window.confirm("Remove this listing?")) return;
-    DB.items = DB.items.filter(function(it){ return it.id!==itemId; });
-    DB.deals.forEach(function(d){
-      if(d.status==="pending" && (d.offeredItemId===itemId || d.requestedItemId===itemId)) d.status="withdrawn";
-    });
-    saveDB();
-    showToast("Listing removed.");
+    try {
+      const response = await fetch('https://api.baganto.com/items/' + itemId, { method: 'DELETE' });
+      if(!response.ok) throw new Error('Delete failed');
+      DB.items = DB.items.filter(function(it){ return it.id!==itemId; });
+      DB.deals.forEach(function(d){
+        if(d.status==="pending" && (d.offeredItemId===itemId || d.requestedItemId===itemId)) d.status="withdrawn";
+      });
+      saveDB();
+      showToast("Listing removed.");
+    } catch(e) {
+      showToast("Error deleting listing: " + e.message);
+    }
   }
 
   function createProfile(data){
