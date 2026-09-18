@@ -315,6 +315,30 @@ app.post('/auth/login', loginLimiter, async (req, res) => {
 
 // ============ START SERVER ============
 const PORT = process.env.PORT || 3000;
+
+// ============ BULK DB SYNC (for frontend compatibility) ============
+app.get('/api/db', async (req, res) => {
+  try {
+    const items = await supabaseCall('items');
+    const users = await supabaseCall('users');
+    const trades = await supabaseCall('trades');
+    const messages = await supabaseCall('messages');
+    const ratings = await supabaseCall('ratings');
+    res.json({ items, users, trades, messages, ratings });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/db', (req, res) => {
+  res.status(501).json({ error: 'Frontend should not PUT entire DB. Use POST /items instead.' });
+});
+
+// ============ HEALTH CHECK ============
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, time: Date.now() });
+});
+
 app.listen(PORT, () => {
   console.log(`\n✓ Backend running on http://localhost:${PORT}`);
   console.log(`\n📍 API Endpoints:`);
