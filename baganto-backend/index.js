@@ -84,17 +84,28 @@ app.post('/items', async (req, res) => {
     const { owner_id, title, description, category, price, condition, listing_type, photos } = req.body;
     // Strip out base64-encoded images; only accept URLs
     let uploadedPhotos = null;
-    if (photos && Array.isArray(photos)) {
-      const urls = [];
-      for (const photo of photos) {
-        if (photo.startsWith('data:')) {
-          const url = await uploadBase64Image(photo);
-          if (url) urls.push(url);
-        } else if (photo.startsWith('http')) {
-          urls.push(photo);
+    if (photos) {
+      let photosArray = photos;
+      if (typeof photos === 'string') {
+        try {
+          photosArray = JSON.parse(photos);
+        } catch (e) {
+          photosArray = [];
         }
       }
-      uploadedPhotos = urls.length > 0 ? JSON.stringify(urls) : null;
+      
+      if (Array.isArray(photosArray)) {
+        const urls = [];
+        for (const photo of photosArray) {
+          if (photo.startsWith('data:')) {
+            const url = await uploadBase64Image(photo);
+            if (url) urls.push(url);
+          } else if (photo.startsWith('http')) {
+            urls.push(photo);
+          }
+        }
+        uploadedPhotos = urls.length > 0 ? JSON.stringify(urls) : null;
+      }
     }
     const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: uploadedPhotos });
     res.json(data[0] || data);
