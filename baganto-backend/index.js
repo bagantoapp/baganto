@@ -5,6 +5,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors({ origin: 'https://baganto.com' }));
 const bcryptjs = require('bcryptjs');
+const { uploadBase64Image } = require("./uploadImage");
 const rateLimit = require('express-rate-limit');
 
 const loginLimiter = rateLimit({
@@ -82,8 +83,20 @@ app.post('/items', async (req, res) => {
   try {
     const { owner_id, title, description, category, price, condition, listing_type, photos } = req.body;
     // Strip out base64-encoded images; only accept URLs
-    const cleanPhotos = photos && Array.isArray(photos) ? photos.filter(p => typeof p === 'string' && p.startsWith('http')) : null;
-    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: cleanPhotos });
+    let uploadedPhotos = null;
+    if (photos && Array.isArray(photos)) {
+      const urls = [];
+      for (const photo of photos) {
+        if (photo.startsWith('data:')) {
+          const url = await uploadBase64Image(photo);
+          if (url) urls.push(url);
+        } else if (photo.startsWith('http')) {
+          urls.push(photo);
+        }
+      }
+      uploadedPhotos = urls.length > 0 ? JSON.stringify(urls) : null;
+    }
+    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: uploadedPhotos });
     res.json(data[0] || data);
   } catch (err) {
     res.status(400).json({ error: err.message });
