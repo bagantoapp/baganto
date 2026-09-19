@@ -339,7 +339,11 @@ app.post('/items/upload', async (req, res) => {
       body: buffer
     });
     
-    if (!uploadRes.ok) return res.status(500).json({ error: 'Upload failed' });
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text();
+      console.error('Supabase error:', uploadRes.status, errText);
+      return res.status(uploadRes.status).json({ error: errText, status: uploadRes.status });
+    }
     
     res.json({ url: `${SUPABASE_URL}/storage/v1/object/public/item-photos/${storagePath}` });
   } catch (e) {
