@@ -73,7 +73,8 @@ app.get('/items/:id', async (req, res) => {
 app.post('/items', async (req, res) => {
   try {
     const { owner_id, title, description, category, price, condition, listing_type, photos } = req.body;
-    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos });
+    const photosArray = Array.isArray(photos) ? photos : [];
+    const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: photosArray });
     res.json(data[0] || data);
   } catch (err) {
     res.status(400).json({ error: err.message });
