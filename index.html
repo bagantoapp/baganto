@@ -5189,6 +5189,7 @@ function syncFromServer(){
   }
 
     if(type==="add-listing"){
+      (async function() {
       var fd = new FormData(form);
       // Get uploaded image files
       var imgInput = document.getElementById('imgFileInput');
@@ -5225,6 +5226,7 @@ function syncFromServer(){
       UI.listingFormOpen = false;
       UI.newListingImages = [];
       render();
+      })();
       return;
     }
     if(type==="propose-trade"){
