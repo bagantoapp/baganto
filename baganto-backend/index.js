@@ -332,8 +332,8 @@ app.post('/items/upload', async (req, res) => {
     const uploadRes = await fetch(uploadUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${process.env.service_role}`,
+        'apikey': process.env.service_role,
         'Content-Type': 'image/jpeg'
       },
       body: buffer
