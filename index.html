@@ -2242,7 +2242,7 @@ function syncFromServer(){
           price: item.price,
           condition: item.condition,
           listing_type: listingType,
-          photos: JSON.stringify(item.photos || [])
+          photos: item.photos || []
         })
       }).then(function(r){ if(!r.ok) console.error("Item sync to backend failed:", r.status); }).catch(function(e){ console.error("Item sync to backend error:", e); });
     }
