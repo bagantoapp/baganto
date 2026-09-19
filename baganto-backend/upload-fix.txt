@@ -1,0 +1,35 @@
+// Image upload endpoint - FIXED to use Supabase Storage REST API
+app.post('/items/upload', async (req, res) => {
+  try {
+    const { file, filename } = req.body;
+    if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });
+    
+    // Convert base64 to buffer
+    const buffer = Buffer.from(file.split(',')[1] || file, 'base64');
+    const timestamp = Date.now();
+    const storagePath = `${timestamp}-${filename}`;
+    
+    // Upload to Supabase Storage REST API
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/item-photos/${storagePath}`;
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'image/jpeg'
+      },
+      body: buffer
+    });
+    
+    if (!uploadRes.ok) {
+      const err = await uploadRes.text();
+      return res.status(500).json({ error: 'Upload failed: ' + err });
+    }
+    
+    // Return public URL
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/item-photos/${storagePath}`;
+    res.json({ url: publicUrl });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});

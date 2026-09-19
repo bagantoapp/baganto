@@ -325,26 +325,25 @@ app.post('/items/upload', async (req, res) => {
     const { file, filename } = req.body;
     if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });
     
-    // Convert base64 to buffer
     const buffer = Buffer.from(file.split(',')[1] || file, 'base64');
+    const storagePath = `${Date.now()}-${filename}`;
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/item-photos/${storagePath}`;
     
-    // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
-      .from('item-photos')
-      .upload(`${Date.now()}-${filename}`, buffer, {
-        contentType: 'image/jpeg',
-        upsert: false
-      });
+    const uploadRes = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'apikey': SUPABASE_KEY,
+        'Content-Type': 'image/jpeg'
+      },
+      body: buffer
+    });
     
-    if (error) return res.status(500).json({ error: error.message });
+    if (!uploadRes.ok) return res.status(500).json({ error: 'Upload failed' });
     
-    // Return public URL
-    const { data: publicUrl } = supabase.storage
-      .from('item-photos')
-      .getPublicUrl(data.path);
-    
-    res.json({ url: publicUrl.publicUrl });
+    res.json({ url: `${SUPABASE_URL}/storage/v1/object/public/item-photos/${storagePath}` });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
+
