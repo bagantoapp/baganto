@@ -326,7 +326,12 @@ app.post('/items/upload', async (req, res) => {
     if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });
     
     const buffer = Buffer.from(file.split(',')[1] || file, 'base64');
-    const storagePath = `${Date.now()}-${filename}`;
+    // Sanitize filename - remove spaces and special characters
+    const sanitized = filename
+      .toLowerCase()
+      .replace(/[^a-z0-9.-]/g, '_')
+      .substring(0, 50);
+    const storagePath = `${Date.now()}-${sanitized}`;
     const uploadUrl = `${SUPABASE_URL}/storage/v1/object/item-photos/${storagePath}`;
     
     const uploadRes = await fetch(uploadUrl, {
