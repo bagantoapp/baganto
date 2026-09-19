@@ -2228,7 +2228,7 @@ function syncFromServer(){
     };
     DB.items.push(item);
     if(quotaUser && quotaUser.id) quotaUser.adsUsedThisPeriod = (quotaUser.adsUsedThisPeriod||0) + 1;
-    saveDB();
+    // saveDB();
     if(API_BASE && typeof fetch==="function"){
       var listingType = (item.forSale && item.forBarter) ? "both" : (item.forBarter ? "barter" : "sale");
       fetch(API_BASE + "/items", {
