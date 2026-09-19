@@ -5222,12 +5222,11 @@ function syncFromServer(){
         icon: getCategoryIcon(newCat),
         photos: photoUrls
       });
-      })();
-      return;
       if(addOk===false){ render(); window.scrollTo(0,0); return; }
       UI.listingFormOpen = false;
       UI.newListingImages = [];
       render();
+      })();
       return;
     }
     if(type==="propose-trade"){
