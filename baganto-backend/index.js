@@ -7,7 +7,7 @@ app.use(cors({ origin: 'https://baganto.com' }));
 const bcryptjs = require('bcryptjs');
 
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.set('etag', false);
 
 // Supabase REST API config
