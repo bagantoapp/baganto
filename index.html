@@ -5179,7 +5179,13 @@ function syncFromServer(){
         });
         if (uploadRes.ok) {
           var data = await uploadRes.json();
-          if (data.url) urls.push(data.url);
+          console.log('Upload success:', data);
+          if (data.url) {
+            urls.push(data.url);
+            console.log('Added URL:', data.url, 'Total collected:', urls.length);
+          }
+        } else {
+          console.error('Upload failed with status:', uploadRes.status);
         }
       } catch (e) {
         console.error('Image upload error:', e);
