@@ -318,3 +318,33 @@ app.listen(PORT, () => {
   console.log(`   Users: GET/POST /users/:id, PUT /users/:id`);
   console.log(`   Support: GET/POST /support, PUT /support/:id\n`);
 });
+
+// Image upload endpoint
+app.post('/items/upload', async (req, res) => {
+  try {
+    const { file, filename } = req.body;
+    if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });
+    
+    // Convert base64 to buffer
+    const buffer = Buffer.from(file.split(',')[1] || file, 'base64');
+    
+    // Upload to Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('item-photos')
+      .upload(`${Date.now()}-${filename}`, buffer, {
+        contentType: 'image/jpeg',
+        upsert: false
+      });
+    
+    if (error) return res.status(500).json({ error: error.message });
+    
+    // Return public URL
+    const { data: publicUrl } = supabase.storage
+      .from('item-photos')
+      .getPublicUrl(data.path);
+    
+    res.json({ url: publicUrl.publicUrl });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
