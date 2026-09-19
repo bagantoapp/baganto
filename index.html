@@ -5134,7 +5134,7 @@ function syncFromServer(){
     if(e.target.id==="radiusFilter"){ UI.filters.radius = e.target.value; render(); }
   }
 
-  function onSubmit(e){
+  async function onSubmit(e){
     var form = e.target.closest("form[data-form]");
     if(!form) return;
     e.preventDefault();
