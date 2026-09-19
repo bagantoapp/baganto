@@ -5168,7 +5168,7 @@ function syncFromServer(){
         city: fd.get("city") || currentUser().city,
         condition: fd.get("condition") || "good",
         icon: getCategoryIcon(newCat),
-        photos: (UI.newListingImages || [])
+        photos: []
       });
       if(addOk===false){ render(); window.scrollTo(0,0); return; }
       UI.listingFormOpen = false;
