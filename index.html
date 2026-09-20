@@ -1153,7 +1153,7 @@ function mapBackendData(data){
       ownerId: it.owner_id,
       title: it.title,
       icon: it.icon || "[]",
-      photos: (function(){ try { return it.photos ? JSON.parse(it.photos) : []; } catch(e){ return []; } })(),
+      photos: Array.isArray(it.photos) ? it.photos : (it.photos ? JSON.parse(it.photos) : []),
       category: it.category,
       description: it.description,
       forSale: it.listing_type !== 'barter',
