@@ -333,7 +333,7 @@ app.post('/items/upload', async (req, res) => {
       .replace(/[^a-z0-9.-]/g, '_')
       .substring(0, 50);
     const storagePath = `${Date.now()}-${sanitized}`;
-    const uploadUrl = `${SUPABASE_URL}/storage/v1/object/item-photos/${storagePath}`;
+    const uploadUrl = `${SUPABASE_URL}/storage/v1/b/item-photos/o/${storagePath}`;
     
     const uploadRes = await fetch(uploadUrl, {
       method: 'POST',
