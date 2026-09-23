@@ -285,25 +285,34 @@ app.post('/auth/signup', async (req, res) => {
 });
 
 
-// Rate limit for login endpoint - in-memory tracker
-const loginAttempts = {};
-
-function checkLoginLimit(identifier) {
-  const now = Date.now();
-  const oneMinuteAgo = now - 60 * 1000;
-  
-  if (!loginAttempts[identifier]) {
-    loginAttempts[identifier] = [];
+// Rate limit for login endpoint - using Supabase for multi-instance support
+async function checkLoginLimit(identifier) {
+  try {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60 * 1000;
+    
+    // Query attempts in last 60 seconds
+    const { data } = await supabaseCall(
+      `login_attempts?identifier=eq.${encodeURIComponent(identifier)}&attempted_at=gt.${oneMinuteAgo}`,
+      'GET'
+    );
+    
+    if (data && data.length >= 5) {
+      return false; // blocked
+    }
+    
+    // Insert new attempt
+    await supabaseCall(
+      'login_attempts',
+      'POST',
+      { identifier, attempted_at: now }
+    );
+    
+    return true; // allowed
+  } catch (err) {
+    console.error('Rate limit check error:', err.message);
+    return true; // allow on error
   }
-  
-  loginAttempts[identifier] = loginAttempts[identifier].filter(t => t > oneMinuteAgo);
-  
-  if (loginAttempts[identifier].length >= 5) {
-    return false;
-  }
-  
-  loginAttempts[identifier].push(now);
-  return true;
 }
 
 // POST /auth/login - check email/phone + password
@@ -311,7 +320,7 @@ app.post('/auth/login', async (req, res) => {
   try {
     const { email, phone, password } = req.body;
     const identifier = email || phone;
-    if (!checkLoginLimit(identifier)) {
+    if (!await checkLoginLimit(identifier)) {
       return res.status(429).json({ error: "Too many login attempts, please try again later" });
     }
     if (!password || (!email && !phone)) {
