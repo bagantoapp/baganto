@@ -284,22 +284,36 @@ app.post('/auth/signup', async (req, res) => {
   }
 });
 
-// Rate limit for login endpoint
-const loginLimiter = rateLimit({
-  proxy: true,
-  keyGenerator: (req, res) => req.ip || req.connection.remoteAddress,
-  windowMs: 60 * 1000, // 1 minute
-  max: 5, // max 5 attempts per minute
-  message: 'Too many login attempts, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false,
 
-});
+// Rate limit for login endpoint - in-memory tracker
+const loginAttempts = {};
+
+function checkLoginLimit(identifier) {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60 * 1000;
+  
+  if (!loginAttempts[identifier]) {
+    loginAttempts[identifier] = [];
+  }
+  
+  loginAttempts[identifier] = loginAttempts[identifier].filter(t => t > oneMinuteAgo);
+  
+  if (loginAttempts[identifier].length >= 5) {
+    return false;
+  }
+  
+  loginAttempts[identifier].push(now);
+  return true;
+}
 
 // POST /auth/login - check email/phone + password
-app.post('/auth/login', loginLimiter, async (req, res) => {
+app.post('/auth/login', async (req, res) => {
   try {
     const { email, phone, password } = req.body;
+    const identifier = email || phone;
+    if (!checkLoginLimit(identifier)) {
+      return res.status(429).json({ error: "Too many login attempts, please try again later" });
+    }
     if (!password || (!email && !phone)) {
       return res.status(400).json({ error: 'email or phone, plus password, are required' });
     }
