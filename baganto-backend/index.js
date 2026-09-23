@@ -286,6 +286,7 @@ app.post('/auth/signup', async (req, res) => {
 
 // Rate limit for login endpoint
 const loginLimiter = rateLimit({
+  proxy: true,
   keyGenerator: (req, res) => req.ip || req.connection.remoteAddress,
   windowMs: 60 * 1000, // 1 minute
   max: 5, // max 5 attempts per minute
