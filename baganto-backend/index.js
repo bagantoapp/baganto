@@ -289,6 +289,7 @@ app.post('/auth/signup', async (req, res) => {
 async function checkLoginLimit(identifier) {
   try {
     const now = Date.now();
+    console.log(`Rate limit check for: ${identifier}`);
     const oneMinuteAgo = now - 60 * 1000;
     const serviceRoleKey = process.env.service_role;
     
