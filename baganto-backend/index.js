@@ -307,8 +307,10 @@ async function checkLoginLimit(identifier) {
     );
     
     const data = await response.json();
+    console.log(`Rate limit check - Status: ${response.status}, Data:`, data);
     
     if (Array.isArray(data) && data.length >= 5) {
+      console.log(`BLOCKED: Too many attempts (${data.length})`);
       return false;
     }
     
