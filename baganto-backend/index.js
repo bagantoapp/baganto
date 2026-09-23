@@ -290,28 +290,44 @@ async function checkLoginLimit(identifier) {
   try {
     const now = Date.now();
     const oneMinuteAgo = now - 60 * 1000;
+    const serviceRoleKey = process.env.service_role;
     
     // Query attempts in last 60 seconds
-    const { data } = await supabaseCall(
-      `login_attempts?identifier=eq.${encodeURIComponent(identifier)}&attempted_at=gt.${oneMinuteAgo}`,
-      'GET'
+    const response = await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/login_attempts?identifier=eq.${encodeURIComponent(identifier)}&attempted_at=gt.${oneMinuteAgo}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceRoleKey}`,
+          'apikey': serviceRoleKey
+        }
+      }
     );
     
-    if (data && data.length >= 5) {
-      return false; // blocked
+    const data = await response.json();
+    
+    if (Array.isArray(data) && data.length >= 5) {
+      return false;
     }
     
-    // Insert new attempt
-    await supabaseCall(
-      'login_attempts',
-      'POST',
-      { identifier, attempted_at: now }
+    await fetch(
+      `${process.env.SUPABASE_URL}/rest/v1/login_attempts`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceRoleKey}`,
+          'apikey': serviceRoleKey
+        },
+        body: JSON.stringify({ identifier, attempted_at: now })
+      }
     );
     
-    return true; // allowed
+    return true;
   } catch (err) {
     console.error('Rate limit check error:', err.message);
-    return true; // allow on error
+    return true;
   }
 }
 
