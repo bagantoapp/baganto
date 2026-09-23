@@ -291,7 +291,7 @@ const loginLimiter = rateLimit({
   message: 'Too many login attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req, res) => res.statusCode === 200 // don't count successful logins
+
 });
 
 // POST /auth/login - check email/phone + password
