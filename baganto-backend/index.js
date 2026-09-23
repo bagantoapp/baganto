@@ -5,7 +5,9 @@ const cors = require('cors');
 const app = express();
 app.use(cors({ origin: 'https://baganto.com' }));
 const bcryptjs = require('bcryptjs');
+app.set('trust proxy', 1);
 
+const rateLimit = require('express-rate-limit');
 
 app.use(express.json({ limit: '50mb' }));
 app.set('etag', false);
@@ -282,8 +284,18 @@ app.post('/auth/signup', async (req, res) => {
   }
 });
 
+// Rate limit for login endpoint
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // max 5 attempts per minute
+  message: 'Too many login attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req, res) => res.statusCode === 200 // don't count successful logins
+});
+
 // POST /auth/login - check email/phone + password
-app.post('/auth/login', async (req, res) => {
+app.post('/auth/login', loginLimiter, async (req, res) => {
   try {
     const { email, phone, password } = req.body;
     if (!password || (!email && !phone)) {
