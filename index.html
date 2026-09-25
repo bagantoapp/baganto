@@ -839,7 +839,7 @@
   var loginCountdownInterval = null;
   function startLoginCountdown(seconds) {
     var timerEl = document.getElementById("authTimer");
-    var loginBtn = document.querySelector("[data-action="submit-login"]");
+    var loginBtn = document.querySelector("[data-action='submit-login']");
     if(!timerEl || !loginBtn) return;
     
     clearInterval(loginCountdownInterval);
