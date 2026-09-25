@@ -454,6 +454,8 @@
   .auth-switch a{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:none;}
   .auth-error{background:#fdecec;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
   .auth-error.show{display:block;}
+  .auth-timer{background:#fff3cd;color:#856404;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;text-align:center;font-weight:bold;}
+  .auth-timer.show{display:block;}
   .pw-wrap{position:relative;}
   .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#6b7280;padding:4px;}
   .auth-divider{text-align:center;color:var(--muted);font-size:12px;margin:16px 0;position:relative;}
@@ -833,6 +835,30 @@
   function isNoBarter(cat){ return NO_BARTER_SUBS.indexOf(cat) >= 0; }
 
   function isNoBarterParent(pid){ return NO_BARTER_PARENTS.indexOf(pid) >= 0; }
+
+  var loginCountdownInterval = null;
+  function startLoginCountdown(seconds) {
+    var timerEl = document.getElementById("authTimer");
+    var loginBtn = document.querySelector("[data-action="submit-login"]");
+    if(!timerEl || !loginBtn) return;
+    
+    clearInterval(loginCountdownInterval);
+    var remaining = seconds;
+    timerEl.textContent = "Too many attempts. Try again in " + remaining + " seconds...";
+    timerEl.classList.add("show");
+    loginBtn.disabled = true;
+    
+    loginCountdownInterval = setInterval(function() {
+      remaining--;
+      if(remaining <= 0) {
+        clearInterval(loginCountdownInterval);
+        timerEl.classList.remove("show");
+        loginBtn.disabled = false;
+      } else {
+        timerEl.textContent = "Too many attempts. Try again in " + remaining + " seconds...";
+      }
+    }, 1000);
+  }
 
   // Jobs & Services: not for sale, not for barter - enquiry only
   function isNoTrade(cat){ return NO_TRADE_SUBS.indexOf(cat) >= 0; }
@@ -2803,6 +2829,7 @@ function syncFromServer(){
           '<div class="auth-title">Welcome to Baganto</div>'+
           '<div class="auth-sub">Buy, Sell &amp; Exchange</div>'+
           '<div class="auth-error" id="authError"></div>'+
+          '<div class="auth-timer" id="authTimer"></div>'+
           '<form data-form="auth-login">'+
             '<div class="form-row" style="margin-bottom:10px;">'+
               '<label>Login with:</label>'+
@@ -4725,7 +4752,16 @@ function syncFromServer(){
             }
             finishLogin({id: u.id});
           } else {
-            if(errEl) { errEl.textContent = (res.body && res.body.error) ? res.body.error : "Incorrect "+UI.loginMode+" or password."; errEl.classList.add("show"); }
+            if(errEl) { 
+              var errMsg = (res.body && res.body.error) ? res.body.error : "Incorrect "+UI.loginMode+" or password."; 
+              errEl.textContent = errMsg; 
+              errEl.classList.add("show"); 
+              
+              // Check if rate limited
+              if(errMsg.includes("Too many login attempts")) {
+                startLoginCountdown(60);
+              }
+            }
           }
         }).catch(function(e){
           console.error("Login backend error:", e);
