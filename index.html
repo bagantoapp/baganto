@@ -847,26 +847,26 @@
 
   function runLoginCountdown(until) {
     clearInterval(loginCountdownInterval);
-    var timerEl = document.getElementById("authTimer");
-    var loginBtn = document.querySelector("[data-action='submit-login']");
-    if(!timerEl || !loginBtn) return false;
-
     function tick() {
       var left = Math.ceil((until - Date.now()) / 1000);
+      var timerEl = document.getElementById("authTimer");
+      var loginBtn = document.querySelector("[data-action='submit-login']");
       if(left <= 0) {
         clearInterval(loginCountdownInterval);
-        timerEl.classList.remove("show");
-        loginBtn.disabled = false;
+        if(timerEl) timerEl.classList.remove("show");
+        if(loginBtn) loginBtn.disabled = false;
         try { localStorage.removeItem(RL_KEY); } catch(e) {}
-      } else {
+        return;
+      }
+      if(timerEl) {
         timerEl.textContent = "Too many attempts. Try again in " + left + " seconds...";
         timerEl.classList.add("show");
-        loginBtn.disabled = true;
       }
+      if(loginBtn) loginBtn.disabled = true;
     }
     tick();
     loginCountdownInterval = setInterval(tick, 1000);
-    return true;
+    return !!(document.getElementById("authTimer") && document.querySelector("[data-action='submit-login']"));
   }
 
   function resumeLoginCountdown() {
