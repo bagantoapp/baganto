@@ -837,28 +837,52 @@
   function isNoBarterParent(pid){ return NO_BARTER_PARENTS.indexOf(pid) >= 0; }
 
   var loginCountdownInterval = null;
+  var RL_KEY = "baganto_login_lock_until";
+
   function startLoginCountdown(seconds) {
+    var until = Date.now() + seconds * 1000;
+    try { localStorage.setItem(RL_KEY, String(until)); } catch(e) {}
+    runLoginCountdown(until);
+  }
+
+  function runLoginCountdown(until) {
+    clearInterval(loginCountdownInterval);
     var timerEl = document.getElementById("authTimer");
     var loginBtn = document.querySelector("[data-action='submit-login']");
-    if(!timerEl || !loginBtn) return;
-    
-    clearInterval(loginCountdownInterval);
-    var remaining = seconds;
-    timerEl.textContent = "Too many attempts. Try again in " + remaining + " seconds...";
-    timerEl.classList.add("show");
-    loginBtn.disabled = true;
-    
-    loginCountdownInterval = setInterval(function() {
-      remaining--;
-      if(remaining <= 0) {
+    if(!timerEl || !loginBtn) return false;
+
+    function tick() {
+      var left = Math.ceil((until - Date.now()) / 1000);
+      if(left <= 0) {
         clearInterval(loginCountdownInterval);
         timerEl.classList.remove("show");
         loginBtn.disabled = false;
+        try { localStorage.removeItem(RL_KEY); } catch(e) {}
       } else {
-        timerEl.textContent = "Too many attempts. Try again in " + remaining + " seconds...";
+        timerEl.textContent = "Too many attempts. Try again in " + left + " seconds...";
+        timerEl.classList.add("show");
+        loginBtn.disabled = true;
       }
-    }, 1000);
+    }
+    tick();
+    loginCountdownInterval = setInterval(tick, 1000);
+    return true;
   }
+
+  function resumeLoginCountdown() {
+    var until = 0;
+    try { until = Number(localStorage.getItem(RL_KEY)) || 0; } catch(e) {}
+    if(until <= Date.now()) return;
+    var tries = 0;
+    var poll = setInterval(function() {
+      tries++;
+      if(until <= Date.now() || runLoginCountdown(until) || tries > 300) {
+        clearInterval(poll);
+      }
+    }, 300);
+  }
+
+  resumeLoginCountdown();
 
   // Jobs & Services: not for sale, not for barter - enquiry only
   function isNoTrade(cat){ return NO_TRADE_SUBS.indexOf(cat) >= 0; }
