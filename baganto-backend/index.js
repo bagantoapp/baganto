@@ -338,7 +338,7 @@ async function checkLoginLimit(identifier) {
 app.post('/auth/login', async (req, res) => {
   try {
     const { email, phone, password } = req.body;
-    const identifier = email || phone;
+    const identifier = 'ip:' + req.ip;
     if (!await checkLoginLimit(identifier)) {
       return res.status(429).json({ error: "Too many login attempts, please try again later" });
     }
