@@ -250,6 +250,33 @@ app.put('/api/db', async (req, res) => {
 // ===== AUTH ENDPOINTS =====
 
 // POST /auth/signup - create a new user with a password
+function makeSignupToken(email) {
+  const exp = Date.now() + 15 * 60 * 1000;
+  const payload = `${email}|${exp}`;
+  const sig = require('crypto')
+    .createHmac('sha256', process.env.service_role || 'dev-only')
+    .update('signup-token:' + payload)
+    .digest('hex');
+  return Buffer.from(payload).toString('base64url') + '.' + sig;
+}
+
+function checkSignupToken(token, email) {
+  try {
+    const [b, sig] = String(token).split('.');
+    const payload = Buffer.from(b, 'base64url').toString();
+    const [tEmail, exp] = payload.split('|');
+    const expect = require('crypto')
+      .createHmac('sha256', process.env.service_role || 'dev-only')
+      .update('signup-token:' + payload)
+      .digest('hex');
+    if (!sig || sig.length !== expect.length) return false;
+    if (!require('crypto').timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return false;
+    return tEmail === email && Date.now() < Number(exp);
+  } catch (e) {
+    return false;
+  }
+}
+
 app.post('/auth/signup', async (req, res) => {
   try {
     const { email, phone, name, city, bio, password } = req.body;
@@ -262,6 +289,9 @@ app.post('/auth/signup', async (req, res) => {
     }
     if (email && !validateEmail(email)) {
     return res.status(400).json({ error: 'invalid email format' });
+    }
+    if (!checkSignupToken(req.body.signupToken, email)) {
+      return res.status(403).json({ error: 'Verify your email first' });
     }
     const userId = require('crypto').randomUUID();
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -448,7 +478,9 @@ app.post('/auth/otp/verify', async (req, res) => {
       const hashed = await bcryptjs.hash(newPassword, 10);
       await sbFetch(`users?email=eq.${encodeURIComponent(email)}`, 'PATCH', { password: hashed });
     }
-    res.json({ success: true });
+    res.json(purpose === 'signup'
+      ? { success: true, signupToken: makeSignupToken(email) }
+      : { success: true });
   } catch (err) {
     console.error('POST /auth/otp/verify error:', err.message);
     res.status(500).json({ error: 'Could not verify code, please try again' });
