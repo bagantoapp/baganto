@@ -334,6 +334,127 @@ async function checkLoginLimit(identifier) {
   }
 }
 
+// ---------- Email OTP (signup verification + password reset) ----------
+const OTP_TTL_MS = 10 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
+
+function otpHash(purpose, email, code) {
+  return require('crypto')
+    .createHmac('sha256', process.env.service_role || 'dev-only')
+    .update(`${purpose}:${email}:${code}`)
+    .digest('hex');
+}
+
+async function sbFetch(path, method, body) {
+  const key = process.env.service_role;
+  const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'apikey': key,
+      'Prefer': 'return=representation'
+    },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(`Supabase ${method} ${path} failed: ${res.status}`);
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+async function sendOtpEmail(to, code, purpose) {
+  const subject = purpose === 'reset'
+    ? 'Your Baganto password reset code'
+    : 'Your Baganto verification code';
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: process.env.OTP_FROM || 'Baganto <onboarding@resend.dev>',
+      to: [to],
+      subject,
+      html: `<p>Your code is <strong>${code}</strong>. It expires in 10 minutes.</p><p>If you did not request this, you can ignore this email.</p>`
+    })
+  });
+  if (!r.ok) throw new Error(`Resend send failed: ${r.status}`);
+}
+
+// POST /auth/otp/send - body: { email, purpose: 'signup' | 'reset' }
+app.post('/auth/otp/send', async (req, res) => {
+  try {
+    const { email, purpose } = req.body;
+    if (!['signup', 'reset'].includes(purpose) || !validateEmail(email)) {
+      return res.status(400).json({ error: 'valid email and purpose (signup or reset) required' });
+    }
+    if (!await checkLoginLimit('otp-send:' + req.ip)) {
+      return res.status(429).json({ error: 'Too many requests, please wait a minute' });
+    }
+    if (purpose === 'reset') {
+      const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`, 'GET');
+      // Same response whether or not the account exists, so emails can't be probed
+      if (!users.length) return res.json({ success: true });
+    }
+    // Invalidate older codes for this email and purpose
+    await sbFetch(`otp_codes?purpose=eq.${purpose}&email=eq.${encodeURIComponent(email)}`, 'DELETE');
+    const code = String(require('crypto').randomInt(100000, 1000000));
+    await sbFetch('otp_codes', 'POST', {
+      purpose,
+      email,
+      code_hash: otpHash(purpose, email, code),
+      expires_at: new Date(Date.now() + OTP_TTL_MS).toISOString()
+    });
+    await sendOtpEmail(email, code, purpose);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /auth/otp/send error:', err.message);
+    res.status(500).json({ error: 'Could not send code, please try again' });
+  }
+});
+
+// POST /auth/otp/verify - body: { email, purpose, code, newPassword? }
+app.post('/auth/otp/verify', async (req, res) => {
+  try {
+    const { email, purpose, code, newPassword } = req.body;
+    if (!['signup', 'reset'].includes(purpose) || !validateEmail(email) || !/^\d{6}$/.test(String(code))) {
+      return res.status(400).json({ error: 'valid email, purpose and 6-digit code required' });
+    }
+    const rows = await sbFetch(
+      `otp_codes?purpose=eq.${purpose}&email=eq.${encodeURIComponent(email)}&order=created_at.desc&limit=1`,
+      'GET'
+    );
+    const row = rows[0];
+    if (!row || new Date(row.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Code expired or not found, please request a new one' });
+    }
+    if (row.attempts >= OTP_MAX_ATTEMPTS) {
+      return res.status(400).json({ error: 'Too many wrong attempts, please request a new code' });
+    }
+    const expected = Buffer.from(row.code_hash);
+    const given = Buffer.from(otpHash(purpose, email, String(code)));
+    const ok = expected.length === given.length && require('crypto').timingSafeEqual(expected, given);
+    if (!ok) {
+      await sbFetch(`otp_codes?id=eq.${row.id}`, 'PATCH', { attempts: row.attempts + 1 });
+      return res.status(400).json({ error: 'Incorrect code' });
+    }
+    await sbFetch(`otp_codes?id=eq.${row.id}`, 'DELETE');
+
+    if (purpose === 'reset') {
+      if (!validatePassword(newPassword)) {
+        return res.status(400).json({ error: 'password must be at least 8 characters' });
+      }
+      const hashed = await bcryptjs.hash(newPassword, 10);
+      await sbFetch(`users?email=eq.${encodeURIComponent(email)}`, 'PATCH', { password: hashed });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /auth/otp/verify error:', err.message);
+    res.status(500).json({ error: 'Could not verify code, please try again' });
+  }
+});
+
 // POST /auth/login - check email/phone + password
 app.post('/auth/login', async (req, res) => {
   try {
