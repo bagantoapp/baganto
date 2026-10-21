@@ -5487,65 +5487,55 @@ function syncFromServer(){
       if(DB.users.filter(function(u){ return u.email===sEmail; }).length){
         if(sErr) sErr.textContent="That email is already registered."; return;
       }
-      function finishSignup(newUser){
-        setUserPassword(newUser, sPass);
-        DB.users.push(newUser);
-        migrateDB(DB);
-        saveDB();
-        UI.currentUserId = newUser.id;
-        UI.authScreen    = false;
-        storageSet(USER_KEY, newUser.id);
-        if(UI.authReturnAction==="start-sell"){
-          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
-        } else if(UI.authReturnTab){
-          UI.tab=UI.authReturnTab; UI.authReturnTab=null;
-        }
+      if(!API_BASE || typeof fetch!=="function"){
+        if(sErr) sErr.textContent="Cannot reach the server. Try again later."; return;
+      }
+      if(sErr) sErr.textContent="";
+      fetch(API_BASE + "/auth/otp/send", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email: sEmail, purpose: "signup" })
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+      .then(function(res){
+        if(!res.ok){ if(sErr) sErr.textContent = (res.body && res.body.error) || "Could not send code. Try again."; return; }
+        UI.pendingSignup = { name:sName, email:sEmail, phone:sPhone, city:sCity, password:sPass };
+        UI.otpVerifyMode = "signup";
+        UI.otpSent = true;
+        UI.authPage = "otp-verify";
         render();
-      }
-      if(API_BASE && typeof fetch==="function"){
-        fetch(API_BASE + "/auth/signup", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass })
-        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
-        .then(function(res){
-          if(res.ok && res.body && res.body.user){
-            var u = res.body.user;
-            finishSignup({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
-          } else {
-            var msg = (res.body && res.body.error) ? res.body.error : "Signup failed. Try again.";
-            if(sErr) sErr.textContent = msg;
-          }
-        }).catch(function(e){
-          console.error("Signup backend error:", e);
-          finishSignup({ id: uid("u"), name: sName, phone: sPhone, email: sEmail, city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
-        });
-      } else {
-        finishSignup({ id: uid("u"), name: sName, phone: sPhone, email: sEmail, city: sCity, avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince: nowTs() });
-      }
+        showToast("We sent a 6-digit code to " + sEmail);
+      }).catch(function(){
+        if(sErr) sErr.textContent = "Network error. Check your connection and try again.";
+      });
       return;
     }
     if(type==="auth-forgot-password"){
       var fd = new FormData(form);
-      var emailOrPhone = (fd.get("emailOrPhone")||"").trim();
+      var resetEmail = (fd.get("emailOrPhone")||"").trim();
       var errEl = document.getElementById("authError");
-      if(!emailOrPhone){ if(errEl) errEl.textContent="Enter email or phone."; return; }
-      // Check if user exists
-      var match = DB.users.filter(function(u){ 
-        return u.email===emailOrPhone || u.phone===emailOrPhone; 
-      })[0];
-      if(!match){
-        if(errEl) errEl.textContent="No account found with that email or phone."; return;
+      if(!resetEmail || !/^[^@]+@[^@]+\.[^@]+$/.test(resetEmail)){
+        if(errEl) errEl.textContent="Enter the email address on your account."; return;
       }
-      // Generate demo OTP
-      var demoOtp = "654321";
-      UI.otpSent = true;
-      UI.otpVerifyMode = "forgot-password";
-      UI.tempForgotUserId = match.id;
-      UI.tempForgotOtp = demoOtp;
-      if(errEl) errEl.innerHTML = '<span style="color:#16a34a;">✓ Reset code sent! Demo OTP: '+demoOtp+'</span>';
-      UI.authPage = "otp-verify";
-      render();
+      if(!API_BASE || typeof fetch!=="function"){
+        if(errEl) errEl.textContent="Cannot reach the server. Try again later."; return;
+      }
+      if(errEl) errEl.textContent="";
+      fetch(API_BASE + "/auth/otp/send", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email: resetEmail, purpose: "reset" })
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+      .then(function(res){
+        if(!res.ok){ if(errEl) errEl.textContent = (res.body && res.body.error) || "Could not send code. Try again."; return; }
+        UI.resetEmail = resetEmail;
+        UI.otpSent = true;
+        UI.otpVerifyMode = "reset";
+        UI.authPage = "otp-verify";
+        render();
+        showToast("If an account exists for that email, a code has been sent.");
+      }).catch(function(){
+        if(errEl) errEl.textContent = "Network error. Check your connection and try again.";
+      });
       return;
     }
     if(type==="auth-reset-password"){
@@ -5554,35 +5544,44 @@ function syncFromServer(){
       var cp = (fdR.get("confirmPassword")||"").trim();
       var errR = document.getElementById("authError");
       if(!np){ if(errR) errR.textContent="Enter a new password."; return; }
-      if(np.length < 5){ if(errR) errR.textContent="Password must be at least 5 characters."; return; }
+      if(np.length < 8){ if(errR) errR.textContent="Password must be at least 8 characters."; return; }
       if(np !== cp){ if(errR) errR.textContent="Passwords do not match."; return; }
-      var target = userById(UI.tempForgotUserId);
-      if(!target || !target.id || target.name==="Unknown User"){
+      if(!UI.resetEmail || !UI.resetCode){
         if(errR) errR.textContent="Session expired. Start the reset again.";
         UI.authPage="forgot-password"; render(); return;
       }
-      setUserPassword(target, np);
-      UI.tempForgotUserId = null;
-      UI.tempForgotOtp = null;
-      UI.otpSent = false;
-      UI.otpVerifyMode = null;
-      UI.loginPassDraft = "";
-      UI.authPage = "login";
-      saveDB();
-      showToast("Password updated. Log in with your new password.");
-      render();
+      if(errR) errR.textContent="";
+      fetch(API_BASE + "/auth/otp/verify", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ email: UI.resetEmail, purpose: "reset", code: UI.resetCode, newPassword: np })
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+      .then(function(v){
+        if(!v.ok){
+          if(errR) errR.textContent = (v.body && v.body.error) || "Could not reset password.";
+          return;
+        }
+        UI.resetEmail = null; UI.resetCode = null;
+        UI.otpSent = false; UI.otpVerifyMode = null;
+        UI.loginPassDraft = "";
+        UI.authPage = "login";
+        saveDB();
+        render();
+        showToast("Password updated. Log in with your new password.");
+      }).catch(function(){
+        if(errR) errR.textContent = "Network error. Try again.";
+      });
       return;
     }
     if(type==="auth-otp-verify"){
       var fd = new FormData(form);
       var otp = (fd.get("otp")||"").trim();
       var errEl = document.getElementById("authError");
-      if(!otp){ if(errEl) errEl.textContent="Enter the OTP."; return; }
+      if(!otp){ if(errEl) errEl.textContent="Enter the code."; return; }
       if(UI.otpVerifyMode==="login"){
         if(otp !== UI.tempLoginOtp){
           if(errEl) errEl.textContent="Incorrect OTP. Try again."; return;
         }
-        // OTP verified - login successful
         UI.currentUserId = UI.tempLoginUserId;
         UI.authScreen = false;
         UI.otpSent = false;
@@ -5597,13 +5596,61 @@ function syncFromServer(){
         }
         render();
         return;
-      } else if(UI.otpVerifyMode==="forgot-password"){
-        if(otp !== UI.tempForgotOtp){
-          if(errEl) errEl.textContent="Incorrect code. Try again."; return;
+      } else if(UI.otpVerifyMode==="signup"){
+        var pend = UI.pendingSignup;
+        if(!pend){
+          if(errEl) errEl.textContent="Session expired. Start sign up again.";
+          UI.authPage="login"; render(); return;
         }
-        // OTP verified - allow password reset
-        UI.authPage = "reset-password";
+        if(!/^\d{6}$/.test(otp)){ if(errEl) errEl.textContent="Enter the 6-digit code."; return; }
+        fetch(API_BASE + "/auth/otp/verify", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ email: pend.email, purpose: "signup", code: otp })
+        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+        .then(function(v){
+          if(!v.ok || !v.body || !v.body.signupToken){
+            if(errEl) errEl.textContent = (v.body && v.body.error) || "Incorrect code. Try again.";
+            return null;
+          }
+          return fetch(API_BASE + "/auth/signup", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ name: pend.name, email: pend.email, phone: pend.phone, city: pend.city, password: pend.password, signupToken: v.body.signupToken })
+          }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+          .then(function(s){
+            if(!s.ok || !s.body || !s.body.user){
+              if(errEl) errEl.textContent = (s.body && s.body.error) || "Could not create account.";
+              return;
+            }
+            var u = s.body.user;
+            var newUser = { id:u.id, name:u.name, phone:u.phone, email:u.email, city:u.city, avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)], memberSince:nowTs() };
+            setUserPassword(newUser, pend.password);
+            DB.users.push(newUser);
+            migrateDB(DB);
+            saveDB();
+            UI.pendingSignup = null;
+            UI.otpSent = false;
+            UI.otpVerifyMode = null;
+            UI.currentUserId = newUser.id;
+            UI.authScreen = false;
+            storageSet(USER_KEY, newUser.id);
+            if(UI.authReturnAction==="start-sell"){
+              UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+            } else if(UI.authReturnTab){
+              UI.tab=UI.authReturnTab; UI.authReturnTab=null;
+            }
+            render();
+          });
+        }).catch(function(){
+          if(errEl) errEl.textContent = "Network error. Try again.";
+        });
+        return;
+      } else if(UI.otpVerifyMode==="reset"){
+        if(!/^\d{6}$/.test(otp)){ if(errEl) errEl.textContent="Enter the 6-digit code."; return; }
+        UI.resetCode = otp;
         UI.otpVerifyMode = null;
+        UI.authPage = "reset-password";
         if(errEl) errEl.textContent = "";
         render();
         return;
