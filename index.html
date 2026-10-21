@@ -3913,24 +3913,6 @@ function syncFromServer(){
         '</div>' +
         profileFormHtml +
         '<div class="hr"></div>' +
-        '<div style="font-weight:800;margin:8px 0 10px;">🔐 Account Verification</div>' +
-        '<div style="margin-bottom:14px;">' +
-          (u.phoneVerified ?
-            '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">☎️ Phone verified</div>' :
-            '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="tel" id="phoneInput" placeholder="Phone number" value="'+esc(u.phone==="[hidden]"?"":u.phone)+'" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-primary" data-action="send-phone-otp">Send OTP</button></div>' +
-            (UI.phoneOtpSent ? '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" id="phoneOtpInput" placeholder="Enter OTP" maxlength="6" style="width:110px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-ghost" data-action="verify-phone-otp">Verify</button></div>' : '')
-          ) +
-          (u.emailVerified ?
-            '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">✓ Email verified</div>' :
-            '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="email" id="emailInput" placeholder="Email address" value="'+esc(u.email)+'" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-primary" data-action="send-email-otp">Send OTP</button></div>' +
-            (UI.emailOtpSent ? '<div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" id="emailOtpInput" placeholder="Enter OTP" maxlength="6" style="width:100px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;"><button class="btn btn-sm btn-ghost" data-action="verify-email-otp">Verify</button></div>' : '')
-          ) +
-          (u.idVerified ?
-            '<div class="card" style="padding:10px;background:var(--success-light);color:var(--success);margin-bottom:8px;">✓ ID verified - Pro Seller Badge Unlocked</div>' :
-            '<button class="btn btn-sm btn-outline" data-action="start-id-verification" style="margin-bottom:8px;">🆔 Verify ID (Pro Seller)</button>'
-          ) +
-        '</div>' +
-        '<div class="hr"></div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">🚫 Blocked Users</div>' +
         ((u.blockedUsers && u.blockedUsers.length) ?
           '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">' +
