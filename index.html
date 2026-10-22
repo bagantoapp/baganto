@@ -2996,7 +2996,7 @@ function syncFromServer(){
     var links = LEGAL_ORDER.map(function(k){
       return '<button class="footer-link" data-action="open-legal" data-page="'+k+'">'+esc(LEGAL_DOCS[k].title)+'</button>';
     }).join(' · ');
-    return '<div class="footer-note">Baganto is a demo prototype for the Indian market - all data is stored locally in your browser.' +
+    return '<div class="footer-note">Baganto - Sell. Exchange. Save.' +
       '<div class="footer-links"><button class="footer-link" data-action="goto-support">💬 Contact Us</button> · '+links+'</div>' +
     '</div>';
   }
@@ -3903,7 +3903,7 @@ function syncFromServer(){
       (savedTabActive ? (
         '<div class="section-sub" style="margin-bottom:10px;">Your saved ads</div>' + savedHtml
       ) : (
-        '<div class="form-row" style="max-width:280px;margin-top:14px;"><label>Switch demo user</label><select data-action="switch-user">'+userOpts+'</select></div>' +
+        ''+
         '<div class="hr"></div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">Reviews Received</div>' +
         reviewsHtml +
@@ -3939,7 +3939,7 @@ function syncFromServer(){
           '<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Deleting removes your profile, ads, chats, messages and reviews. It cannot be undone.</div>' +
         '</div>' +
         '<div class="hr"></div>' +
-        '<button class="btn btn-ghost" data-action="reset-demo">↻ Reset Demo Data</button>'
+        ''
       ));
   }
 
