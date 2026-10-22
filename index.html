@@ -4674,7 +4674,14 @@ function syncFromServer(){
     if(action==="close-photo-view"){ UI.chatPhotoView = null; render(); return; }
     if(action==="remove-avatar-photo"){
       var au2 = currentUser();
-      if(au2 && au2.id){ au2.avatarPhoto = null; saveDB(); showToast("Profile picture removed."); }
+      if(au2 && au2.id){
+        fetch(API_BASE + "/users/" + au2.id, {
+          method: "PUT",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ avatarPhoto: null })
+        }).then(function(r){ if(!r.ok) throw new Error("save failed"); au2.avatarPhoto = null; saveDB(); showToast("Profile picture removed."); render(); })
+        .catch(function(){ showToast("Could not remove the picture. Try again."); });
+      }
       render(); return;
     }
     // ---- Pricing / monetisation actions (additive) ----
@@ -5739,10 +5746,17 @@ function syncFromServer(){
         var au = currentUser();
         if(!au || !au.id){ showToast("Log in to set a profile picture."); return; }
         compressImage(e.target.result, 320, 0.8, function(small){
-          au.avatarPhoto = small;
-          saveDB();
-          showToast("Profile picture updated.");
-          render();
+          if(small.length > 300000){ showToast("That picture is too large. Try a smaller one."); return; }
+          if(!API_BASE || typeof fetch!=="function"){ showToast("Cannot reach the server. Try again later."); return; }
+          fetch(API_BASE + "/users/" + au.id, {
+            method: "PUT",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({ avatarPhoto: small })
+          }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+          .then(function(res){
+            if(!res.ok){ showToast((res.body && res.body.error) || "Could not save the picture."); return; }
+            au.avatarPhoto = small; saveDB(); showToast("Profile picture saved."); render();
+          }).catch(function(){ showToast("Network error. Picture not saved."); });
         });
       };
       aReader.onerror = function(){ showToast("Could not read that image."); };

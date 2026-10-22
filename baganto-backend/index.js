@@ -201,6 +201,9 @@ app.put('/users/:id', async (req, res) => {
     for (const k of allowed) {
       if (req.body && k in req.body) updates[k] = req.body[k];
     }
+    if (typeof updates.avatarPhoto === 'string' && updates.avatarPhoto.length > 300000) {
+      return res.status(413).json({ error: 'Photo is too large' });
+    }
     if (!Object.keys(updates).length) {
       return res.status(400).json({ error: 'Nothing to update' });
     }
