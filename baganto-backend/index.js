@@ -425,7 +425,7 @@ app.post('/auth/otp/send', async (req, res) => {
     if (purpose === 'reset') {
       const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`, 'GET');
       // Same response whether or not the account exists, so emails can't be probed
-      if (!users.length) return res.json({ success: true });
+      if (!users.length) return res.status(404).json({ error: 'No account is registered with this email' });
     }
     // Invalidate older codes for this email and purpose
     await sbFetch(`otp_codes?purpose=eq.${purpose}&email=eq.${encodeURIComponent(email)}`, 'DELETE');
