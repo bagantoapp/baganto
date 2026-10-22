@@ -192,8 +192,18 @@ app.post('/users', async (req, res) => {
 
 app.put('/users/:id', async (req, res) => {
   try {
-    const data = await supabaseCall('users', 'PATCH', req.body, `?id=eq.${req.params.id}`);
-    res.json(data[0] || data);
+    const allowed = ['name', 'city', 'bio', 'avatar', 'avatarPhoto'];
+    const updates = {};
+    for (const k of allowed) {
+      if (req.body && k in req.body) updates[k] = req.body[k];
+    }
+    if (!Object.keys(updates).length) {
+      return res.status(400).json({ error: 'Nothing to update' });
+    }
+    const data = await supabaseCall('users', 'PATCH', updates, `?id=eq.${req.params.id}`);
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row) delete row.password;
+    res.json(row || {});
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
