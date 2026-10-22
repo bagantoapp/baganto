@@ -122,6 +122,7 @@ app.post('/trades', async (req, res) => {
 });
 
 app.put('/trades/:id', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('trades', 'PATCH', req.body, `?id=eq.${req.params.id}`);
     res.json(data[0] || data);
@@ -141,6 +142,7 @@ app.get('/messages/:tradeId', async (req, res) => {
 });
 
 app.post('/messages', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { trade_id, sender_id, content, photo } = req.body;
     const data = await supabaseCall('messages', 'POST', { trade_id, sender_id, content, photo });
@@ -161,6 +163,7 @@ app.get('/ratings/:userId', async (req, res) => {
 });
 
 app.post('/ratings', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { from_user_id, to_user_id, trade_id, rating, review } = req.body;
     const data = await supabaseCall('ratings', 'POST', { from_user_id, to_user_id, trade_id, rating, review });
@@ -181,6 +184,7 @@ app.get('/users/:id', async (req, res) => {
 });
 
 app.post('/users', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { id, email, phone, name, city, bio } = req.body;
     const data = await supabaseCall('users', 'POST', { id, email, phone, name, city, bio });
@@ -230,6 +234,7 @@ app.post('/support', async (req, res) => {
 });
 
 app.put('/support/:id', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('support_tickets', 'PATCH', req.body, `?id=eq.${req.params.id}`);
     res.json(data[0] || data);
