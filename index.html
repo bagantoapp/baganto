@@ -5743,11 +5743,14 @@ function syncFromServer(){
       if(aFile.size && aFile.size > 5*1024*1024){ showToast("Profile picture must be under 5 MB."); return; }
       var aReader = new FileReader();
       aReader.onload = function(e){
+        console.log('TRACE 1 file read', e.target.result.length);
         var au = currentUser();
         if(!au || !au.id){ showToast("Log in to set a profile picture."); return; }
         compressImage(e.target.result, 320, 0.8, function(small){
+          console.log('TRACE 2 compressed', small.length);
           if(small.length > 300000){ showToast("That picture is too large. Try a smaller one."); return; }
           if(!API_BASE || typeof fetch!=="function"){ showToast("Cannot reach the server. Try again later."); return; }
+          console.log("TRACE 3 sending", au.id);
           fetch(API_BASE + "/users/" + au.id, {
             method: "PUT",
             headers: {"Content-Type":"application/json"},
