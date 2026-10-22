@@ -1229,7 +1229,8 @@ function mapBackendData(data){
       avatar: u.avatar,
       city: u.city,
       bio: u.bio,
-      isVerified: !!u.is_verified
+      isVerified: !!u.is_verified,
+      avatarPhoto: u.avatarPhoto || null
     };
   }
   return {
