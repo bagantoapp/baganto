@@ -5737,6 +5737,10 @@ function syncFromServer(){
   }
 
   document.addEventListener("DOMContentLoaded", function(){
+    // Clear the file input before the picker opens, so Safari reports a change even when the same photo is chosen again
+    document.addEventListener("click", function(ev){
+      if(ev.target && ev.target.id === "avatarFileInput") ev.target.value = "";
+    }, true);
     // Profile picture upload (delegated — survives re-render)
     document.addEventListener("change", function(ev){
       if(!ev.target || ev.target.id !== "avatarFileInput") return;
