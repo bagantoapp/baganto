@@ -1260,7 +1260,8 @@ function syncFromServer(){
       apiOnline = true; apiChecked = true;
       if(data && Array.isArray(data.users) && Array.isArray(data.items)){
         if(lastAvatarChangeAt > syncStartedAt){ renderSyncPill(); return; }
-        DB = mapBackendData(data);
+        var mapped = mapBackendData(data);
+        if(!DB){ DB = mapped; } else { DB.items = mapped.items; DB.users = mapped.users; }
         persistLocal();
         render();
       } else {
