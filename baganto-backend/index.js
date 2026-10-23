@@ -194,6 +194,31 @@ app.post('/users', async (req, res) => {
   }
 });
 
+app.post('/users/:id/change-password', async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!await checkLoginLimit('pwchange:' + req.ip)) {
+      return res.status(429).json({ error: 'Too many attempts, please wait a minute' });
+    }
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new password are required' });
+    }
+    if (!validatePassword(newPassword)) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+    const rows = await supabaseCall('users', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    const row = (rows || [])[0];
+    if (!row || !await bcryptjs.compare(currentPassword, row.password || '')) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    const hashed = await bcryptjs.hash(newPassword, 10);
+    await supabaseCall('users', 'PATCH', { password: hashed }, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.put('/users/:id', async (req, res) => {
   try {
     const allowed = ['name', 'city', 'bio', 'avatar', 'avatarPhoto'];
