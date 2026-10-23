@@ -5741,6 +5741,21 @@ function syncFromServer(){
     document.addEventListener("click", function(ev){
       if(ev.target && ev.target.id === "avatarFileInput") ev.target.value = "";
     }, true);
+    // Open a brand-new file picker on every tap, so repeat picks always register
+    document.addEventListener("click", function(ev){
+      var btn = ev.target && ev.target.closest ? ev.target.closest(".avatar-upload-btn") : null;
+      if(!btn) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      var fresh = document.createElement("input");
+      fresh.type = "file";
+      fresh.accept = "image/*";
+      fresh.id = "avatarFileInput";
+      fresh.style.display = "none";
+      document.body.appendChild(fresh);
+      fresh.addEventListener("change", function(){ setTimeout(function(){ fresh.remove(); }, 0); });
+      fresh.click();
+    }, true);
     // Profile picture upload (delegated — survives re-render)
     document.addEventListener("change", function(ev){
       if(!ev.target || ev.target.id !== "avatarFileInput") return;
