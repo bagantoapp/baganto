@@ -1248,15 +1248,18 @@ function mapBackendData(data){
 }
 
 var avatarSavePending = false;
+var lastAvatarChangeAt = 0;
 function syncFromServer(){
     if(avatarSavePending) return;
     if(!API_BASE || typeof fetch !== "function") return;
+    var syncStartedAt = Date.now();
     fetch(API_BASE + "/api/db").then(function(r){
       if(!r.ok) throw new Error("bad status");
       return r.json();
     }).then(function(data){
       apiOnline = true; apiChecked = true;
       if(data && Array.isArray(data.users) && Array.isArray(data.items)){
+        if(lastAvatarChangeAt > syncStartedAt){ renderSyncPill(); return; }
         DB = mapBackendData(data);
         persistLocal();
         render();
@@ -5771,7 +5774,7 @@ function syncFromServer(){
           if(small.length > 300000){ showToast("That picture is too large. Try a smaller one."); return; }
           if(!API_BASE || typeof fetch!=="function"){ showToast("Cannot reach the server. Try again later."); return; }
           var prevPhoto = au.avatarPhoto;
-          au.avatarPhoto = small; render();
+          au.avatarPhoto = small; lastAvatarChangeAt = Date.now(); render();
           avatarSavePending = true;
           var avCtl = new AbortController();
           var avTmo = setTimeout(function(){ avCtl.abort(); }, 15000);
@@ -5782,9 +5785,9 @@ function syncFromServer(){
             body: JSON.stringify({ avatarPhoto: small })
           }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
           .then(function(res){
-            if(!res.ok){ avatarSavePending = false; au.avatarPhoto = prevPhoto; render(); showToast((res.body && res.body.error) || "Could not save the picture."); return; }
-            clearTimeout(avTmo); avatarSavePending = false; au.avatarPhoto = small; saveDB(); showToast("Profile picture saved."); render();
-          }).catch(function(err){ clearTimeout(avTmo); avatarSavePending = false; console.error("AVATAR SAVE FAILED:", err && err.name, err && err.message); au.avatarPhoto = prevPhoto; render(); showToast(err && err.name === "AbortError" ? "Upload timed out. Try again." : "Network error. Picture not saved."); });
+            if(!res.ok){ avatarSavePending = false; lastAvatarChangeAt = Date.now(); au.avatarPhoto = prevPhoto; render(); showToast((res.body && res.body.error) || "Could not save the picture."); return; }
+            clearTimeout(avTmo); avatarSavePending = false; lastAvatarChangeAt = Date.now(); au.avatarPhoto = small; saveDB(); showToast("Profile picture saved."); render();
+          }).catch(function(err){ clearTimeout(avTmo); avatarSavePending = false; lastAvatarChangeAt = Date.now(); console.error("AVATAR SAVE FAILED:", err && err.name, err && err.message); au.avatarPhoto = prevPhoto; render(); showToast(err && err.name === "AbortError" ? "Upload timed out. Try again." : "Network error. Picture not saved."); });
         });
       };
       aReader.onerror = function(){ showToast("Could not read that image."); };
