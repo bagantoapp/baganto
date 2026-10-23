@@ -3921,6 +3921,21 @@ function syncFromServer(){
         '</div>' +
         profileFormHtml +
         '<div class="hr"></div>' +
+        '<div style="font-weight:800;margin:8px 0 10px;">✏️ Account Details</div>' +
+        '<div class="card" style="padding:12px;margin-bottom:14px;">' +
+          '<div class="form-row"><label>Name</label><input id="accName" type="text" maxlength="100" value="'+esc(u.name||'')+'"></div>' +
+          '<div class="form-row"><label>City</label><select id="accCity">'+CITIES.map(function(c){ return '<option value="'+esc(c.name)+'"'+(c.name===u.city?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('')+'</select></div>' +
+          '<div class="form-row"><label>Bio</label><input id="accBio" type="text" maxlength="200" value="'+esc(u.bio||'')+'"></div>' +
+          '<button class="btn btn-sm btn-primary" data-action="save-account">Save details</button>' +
+        '</div>' +
+        '<div style="font-weight:800;margin:8px 0 10px;">🔑 Change Password</div>' +
+        '<div class="card" style="padding:12px;margin-bottom:14px;">' +
+          '<div class="form-row"><label>Current password</label><input id="accCurPass" type="password"></div>' +
+          '<div class="form-row"><label>New password</label><input id="accNewPass" type="password" placeholder="At least 8 characters"></div>' +
+          '<div class="form-row"><label>Confirm new password</label><input id="accConfPass" type="password"></div>' +
+          '<button class="btn btn-sm btn-primary" data-action="change-password">Change password</button>' +
+        '</div>' +
+        '<div class="hr"></div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">🚫 Blocked Users</div>' +
         ((u.blockedUsers && u.blockedUsers.length) ?
           '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">' +
@@ -4784,6 +4799,52 @@ function syncFromServer(){
       }).catch(function(){
         if(voStatus){ voStatus.style.color="var(--danger)"; voStatus.textContent = "Network error. Try again."; }
       });
+      return;
+    }
+    if(action==="save-account"){
+      var au3 = currentUser();
+      if(!au3 || !au3.id){ showToast("Log in to edit your details."); return; }
+      var nName = (document.getElementById("accName").value||"").trim();
+      var nCity = document.getElementById("accCity").value;
+      var nBio  = (document.getElementById("accBio").value||"").trim();
+      if(!nName || nName.length > 100){ showToast("Name must be 1 to 100 characters."); return; }
+      if(!API_BASE){ showToast("Cannot reach the server. Try again later."); return; }
+      fetch(API_BASE + "/users/" + au3.id, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ name: nName, city: nCity, bio: nBio })
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+      .then(function(res){
+        if(!res.ok){ showToast((res.body && res.body.error) || "Could not save details."); return; }
+        lastAvatarChangeAt = Date.now();
+        au3.name = nName; au3.city = nCity; au3.bio = nBio;
+        saveDB(); showToast("Details saved."); render();
+      }).catch(function(){ showToast("Network error. Details not saved."); });
+      return;
+    }
+    if(action==="change-password"){
+      var au4 = currentUser();
+      if(!au4 || !au4.id){ showToast("Log in to change your password."); return; }
+      var cur = document.getElementById("accCurPass").value || "";
+      var np1 = document.getElementById("accNewPass").value || "";
+      var np2 = document.getElementById("accConfPass").value || "";
+      if(!cur){ showToast("Enter your current password."); return; }
+      if(np1.length < 8){ showToast("New password must be at least 8 characters."); return; }
+      if(np1 !== np2){ showToast("New passwords do not match."); return; }
+      if(!API_BASE){ showToast("Cannot reach the server. Try again later."); return; }
+      fetch(API_BASE + "/users/" + au4.id + "/change-password", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ currentPassword: cur, newPassword: np1 })
+      }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+      .then(function(res){
+        if(!res.ok){ showToast((res.body && res.body.error) || "Could not change password."); return; }
+        setUserPassword(au4, np1); saveDB();
+        document.getElementById("accCurPass").value = "";
+        document.getElementById("accNewPass").value = "";
+        document.getElementById("accConfPass").value = "";
+        showToast("Password changed.");
+      }).catch(function(){ showToast("Network error. Password not changed."); });
       return;
     }
     if(action==="goto-forgot-password"){
