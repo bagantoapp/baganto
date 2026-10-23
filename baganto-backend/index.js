@@ -251,8 +251,11 @@ app.put('/support/:id', async (req, res) => {
 app.get('/api/db', async (req, res) => {
   try {
     const items = await supabaseCall('items');
-    const users = await supabaseCall('users');
-    res.json({ items: items || [], users: users || [] });
+    const users = ((await supabaseCall('users')) || []).map(u => {
+      const { password, ...safe } = u;
+      return safe;
+    });
+    res.json({ items: items || [], users });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
