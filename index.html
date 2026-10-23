@@ -5752,15 +5752,18 @@ function syncFromServer(){
           if(small.length > 300000){ showToast("That picture is too large. Try a smaller one."); return; }
           if(!API_BASE || typeof fetch!=="function"){ showToast("Cannot reach the server. Try again later."); return; }
           console.log("TRACE 3 sending", au.id);
+          var avCtl = new AbortController();
+          var avTmo = setTimeout(function(){ avCtl.abort(); }, 15000);
           fetch(API_BASE + "/users/" + au.id, {
+            signal: avCtl.signal,
             method: "PUT",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify({ avatarPhoto: small })
           }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
           .then(function(res){
             if(!res.ok){ showToast((res.body && res.body.error) || "Could not save the picture."); return; }
-            au.avatarPhoto = small; saveDB(); showToast("Profile picture saved."); render();
-          }).catch(function(){ showToast("Network error. Picture not saved."); });
+            clearTimeout(avTmo); au.avatarPhoto = small; saveDB(); showToast("Profile picture saved."); render();
+          }).catch(function(err){ clearTimeout(avTmo); console.error("AVATAR SAVE FAILED:", err && err.name, err && err.message); showToast(err && err.name === "AbortError" ? "Upload timed out. Try again." : "Network error. Picture not saved."); });
         });
       };
       aReader.onerror = function(){ showToast("Could not read that image."); };
