@@ -324,7 +324,7 @@ app.get('/api/db', async (req, res) => {
   try {
     const items = await supabaseCall('items');
     const users = ((await supabaseCall('users')) || []).map(u => {
-      const { password, ...safe } = u;
+      const { password, email, phone, ...safe } = u;
       return safe;
     });
     res.json({ items: items || [], users });
@@ -385,6 +385,14 @@ app.post('/auth/signup', async (req, res) => {
     }
     if (!checkSignupToken(req.body.signupToken, email)) {
       return res.status(403).json({ error: 'Verify your email first' });
+    }
+    if (email) {
+      const exE = await supabaseCall('users', 'GET', null, `?email=eq.${encodeURIComponent(email)}&select=id`);
+      if (exE && exE.length) return res.status(409).json({ error: 'That email is already registered' });
+    }
+    if (phone) {
+      const exP = await supabaseCall('users', 'GET', null, `?phone=eq.${encodeURIComponent(phone)}&select=id`);
+      if (exP && exP.length) return res.status(409).json({ error: 'That phone number is already registered' });
     }
     const userId = require('crypto').randomUUID();
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -514,6 +522,10 @@ app.post('/auth/otp/send', async (req, res) => {
     }
     if (!await checkLoginLimit('otp-send:' + req.ip)) {
       return res.status(429).json({ error: 'Too many requests, please wait a minute' });
+    }
+    if (purpose === 'signup') {
+      const existing = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`, 'GET');
+      if (existing.length) return res.status(409).json({ error: 'That email is already registered. Try logging in.' });
     }
     if (purpose === 'reset') {
       const users = await sbFetch(`users?email=eq.${encodeURIComponent(email)}&select=id`, 'GET');
