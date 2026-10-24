@@ -1303,6 +1303,28 @@ function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else lo
   };
 })();
 var lastSyncRaw = "";
+var socialSince = "", socialSinceUser = null;
+function uploadDataPhoto(dataUrl){
+  var m = /^data:image\/(\w+)/.exec(dataUrl);
+  var ext = m ? m[1].replace("jpeg", "jpg") : "jpg";
+  return fetch(API_BASE + "/items/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ file: dataUrl, filename: "chat-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext })
+  }).then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(j){
+      var u = j && (j.url || j.publicUrl || j.publicURL || (j.data && (j.data.url || j.data.publicUrl)));
+      return (typeof u === "string" && u.indexOf("http") === 0) ? u : null;
+    }).catch(function(){ return null; });
+}
+function ensureMessagePhotos(msg){
+  var list = Array.isArray(msg.photos) ? msg.photos : [];
+  var hasData = list.some(function(p){ return typeof p === "string" && p.indexOf("data:") === 0; });
+  if(!hasData) return Promise.resolve(true);
+  return Promise.all(list.map(function(p){
+    return (typeof p === "string" && p.indexOf("data:") === 0) ? uploadDataPhoto(p).then(function(u){ return u || p; }) : Promise.resolve(p);
+  })).then(function(urls){ msg.photos = urls; persistLocal(); return true; });
+}
 var pushedSocial = { deals: {}, messages: {}, ratings: {} };
 var socialPushing = false, socialPushAgain = false;
 var savingItemStatus = {};
@@ -1367,11 +1389,11 @@ function pushSocial(){
       return;
     }
     var jb = jobs[i++];
-    fetch(API_BASE + jb.path, {
+    (jb.path === "/social/message" ? ensureMessagePhotos(jb.body.message) : Promise.resolve(true)).then(function(){ return fetch(API_BASE + jb.path, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jb.body)
-    }).then(function(r){ if(r.ok) jb.map[jb.id] = jb.s; })
+    }); }).then(function(r){ if(r && r.ok) jb.map[jb.id] = jb.s; })
       .catch(function(){})
       .then(next);
   }
@@ -1379,8 +1401,10 @@ function pushSocial(){
 }
 function pullSocial(){
   if(!API_BASE || !getAuthToken() || !UI.currentUserId || !DB) return;
-  fetch(API_BASE + "/social/mine").then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+  if(socialSinceUser !== UI.currentUserId){ socialSince = ""; socialSinceUser = UI.currentUserId; }
+  fetch(API_BASE + "/social/mine" + (socialSince ? "?since=" + encodeURIComponent(socialSince) : "")).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     if(!j || !DB) return;
+    if(j.serverTime){ socialSince = new Date(new Date(j.serverTime).getTime() - 15000).toISOString(); }
     var changed = false;
     DB.deals = DB.deals || [];
     (j.deals || []).forEach(function(obj){

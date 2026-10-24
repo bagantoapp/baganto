@@ -595,15 +595,19 @@ app.post('/auth/otp/verify', async (req, res) => {
 // ---------- Deals, messages and ratings (only the two people in a deal) ----------
 app.get('/social/mine', requireAuth, async (req, res) => {
   try {
+    const serverTime = new Date().toISOString();
+    const sinceRaw = typeof req.query.since === 'string' ? req.query.since : '';
+    const since = sinceRaw && !isNaN(Date.parse(sinceRaw)) ? new Date(sinceRaw).toISOString() : '';
     const me = encodeURIComponent(req.userId);
     const deals = await sbFetch(`deals?or=(user_a.eq.${me},user_b.eq.${me})&select=id,data`, 'GET');
     let messages = [];
     if (deals.length) {
       const list = deals.map(d => '"' + String(d.id).replace(/"/g, '') + '"').join(',');
-      messages = await sbFetch(`deal_messages?deal_id=in.(${encodeURIComponent(list)})&select=data&order=created_at.asc`, 'GET');
+      const sinceFilter = since ? `&created_at=gt.${encodeURIComponent(since)}` : '';
+      messages = await sbFetch(`deal_messages?deal_id=in.(${encodeURIComponent(list)})${sinceFilter}&select=data&order=created_at.asc`, 'GET');
     }
     const ratings = await sbFetch('deal_ratings?select=data', 'GET');
-    res.json({ deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data) });
+    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data) });
   } catch (err) {
     console.error('GET /social/mine error:', err.message);
     res.status(500).json({ error: 'Could not load chats' });
