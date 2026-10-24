@@ -1416,7 +1416,7 @@ function pullSocial(){
     }
     mergeLog("messages", j.messages, pushedSocial.messages);
     mergeLog("ratings", j.ratings, pushedSocial.ratings);
-    if(changed){ persistLocal(); render(); }
+    if(changed){ persistLocal(); renderKeepFocus(); }
     syncDealItems();
   }).catch(function(){});
 }
@@ -1428,6 +1428,22 @@ function pullSocial(){
     return out;
   };
 })();
+function renderKeepFocus(){
+  var ae = document.activeElement, sel = null, val = null, ss = null, se = null;
+  if(ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")){
+    if(ae.id) sel = "#" + CSS.escape(ae.id);
+    else if(ae.name) sel = ae.tagName.toLowerCase() + '[name="' + ae.name + '"]';
+    else if(ae.placeholder) sel = ae.tagName.toLowerCase() + '[placeholder="' + ae.placeholder.replace(/"/g, '\\"') + '"]';
+    val = ae.value;
+    try { ss = ae.selectionStart; se = ae.selectionEnd; } catch(e){}
+  }
+  render();
+  if(sel){
+    var ne = document.querySelector(sel);
+    if(ne){ ne.value = val; ne.focus(); try { ne.setSelectionRange(ss, se); } catch(e){} }
+  }
+}
+setInterval(function(){ if(UI && UI.modal && UI.currentUserId) pullSocial(); }, 3000);
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
