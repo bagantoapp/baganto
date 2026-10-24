@@ -592,6 +592,85 @@ app.post('/auth/otp/verify', async (req, res) => {
   }
 });
 
+// ---------- Deals, messages and ratings (only the two people in a deal) ----------
+app.get('/social/mine', requireAuth, async (req, res) => {
+  try {
+    const me = encodeURIComponent(req.userId);
+    const deals = await sbFetch(`deals?or=(user_a.eq.${me},user_b.eq.${me})&select=id,data`, 'GET');
+    let messages = [];
+    if (deals.length) {
+      const list = deals.map(d => '"' + String(d.id).replace(/"/g, '') + '"').join(',');
+      messages = await sbFetch(`deal_messages?deal_id=in.(${encodeURIComponent(list)})&select=data&order=created_at.asc`, 'GET');
+    }
+    const ratings = await sbFetch('deal_ratings?select=data', 'GET');
+    res.json({ deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data) });
+  } catch (err) {
+    console.error('GET /social/mine error:', err.message);
+    res.status(500).json({ error: 'Could not load chats' });
+  }
+});
+
+app.post('/social/deal', requireAuth, async (req, res) => {
+  try {
+    const d = req.body && req.body.deal;
+    if (!d || typeof d.id !== 'string' || !d.fromUserId || !d.toUserId) return res.status(400).json({ error: 'Invalid deal' });
+    if (JSON.stringify(d).length > 200000) return res.status(413).json({ error: 'Deal too large' });
+    const existing = await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}&select=user_a,user_b`, 'GET');
+    if (existing.length) {
+      const row = existing[0];
+      if (row.user_a !== req.userId && row.user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
+      d.fromUserId = row.user_a;
+      d.toUserId = row.user_b;
+      await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}`, 'PATCH', { data: d, updated_at: new Date().toISOString() });
+    } else {
+      if (d.fromUserId !== req.userId) return res.status(403).json({ error: 'You can only start your own deals' });
+      await sbFetch('deals', 'POST', { id: d.id, user_a: d.fromUserId, user_b: d.toUserId, data: d });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/deal error:', err.message);
+    res.status(500).json({ error: 'Could not save deal' });
+  }
+});
+
+app.post('/social/message', requireAuth, async (req, res) => {
+  try {
+    const m = req.body && req.body.message;
+    if (!m || typeof m.id !== 'string' || typeof m.dealId !== 'string') return res.status(400).json({ error: 'Invalid message' });
+    if (m.senderId !== req.userId) return res.status(403).json({ error: 'Not your message' });
+    if (JSON.stringify(m).length > 3000000) return res.status(413).json({ error: 'Message too large' });
+    const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(m.dealId)}&select=user_a,user_b`, 'GET');
+    if (!dl.length) return res.status(404).json({ error: 'Deal not found' });
+    if (dl[0].user_a !== req.userId && dl[0].user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
+    const ex = await sbFetch(`deal_messages?id=eq.${encodeURIComponent(m.id)}&select=id`, 'GET');
+    if (ex.length) return res.json({ success: true });
+    await sbFetch('deal_messages', 'POST', { id: m.id, deal_id: m.dealId, sender_id: req.userId, data: m });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/message error:', err.message);
+    res.status(500).json({ error: 'Could not save message' });
+  }
+});
+
+app.post('/social/rating', requireAuth, async (req, res) => {
+  try {
+    const r = req.body && req.body.rating;
+    if (!r || typeof r.id !== 'string' || typeof r.dealId !== 'string') return res.status(400).json({ error: 'Invalid rating' });
+    if (r.fromUserId !== req.userId) return res.status(403).json({ error: 'Not your rating' });
+    const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(r.dealId)}&select=user_a,user_b`, 'GET');
+    if (!dl.length) return res.status(404).json({ error: 'Deal not found' });
+    const other = dl[0].user_a === req.userId ? dl[0].user_b : (dl[0].user_b === req.userId ? dl[0].user_a : null);
+    if (!other || r.toUserId !== other) return res.status(403).json({ error: 'Not your deal' });
+    const ex = await sbFetch(`deal_ratings?deal_id=eq.${encodeURIComponent(r.dealId)}&from_user=eq.${encodeURIComponent(req.userId)}&select=id`, 'GET');
+    if (ex.length) return res.json({ success: true });
+    await sbFetch('deal_ratings', 'POST', { id: r.id, deal_id: r.dealId, from_user: req.userId, to_user: other, data: r });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/rating error:', err.message);
+    res.status(500).json({ error: 'Could not save rating' });
+  }
+});
+
 // POST /auth/login - check email/phone + password
 app.post('/auth/login', async (req, res) => {
   try {

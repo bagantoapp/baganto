@@ -1203,7 +1203,7 @@ function mapBackendData(data){
       id: it.id,
       ownerId: it.owner_id,
       title: it.title,
-      icon: it.icon || "[]",
+      icon: (it.icon && it.icon !== "[]") ? it.icon : "📦",
       photos: Array.isArray(it.photos) ? it.photos : (it.photos ? JSON.parse(it.photos) : []),
       category: it.category,
       description: it.description,
@@ -1303,9 +1303,89 @@ function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else lo
   };
 })();
 var lastSyncRaw = "";
+var pushedSocial = { deals: {}, messages: {}, ratings: {} };
+var socialPushing = false, socialPushAgain = false;
+function pushSocial(){
+  if(!API_BASE || !getAuthToken() || !UI.currentUserId || !DB) return;
+  if(socialPushing){ socialPushAgain = true; return; }
+  socialPushing = true;
+  var me = UI.currentUserId;
+  var jobs = [];
+  (DB.deals || []).forEach(function(d){
+    if(d && d.id && (d.fromUserId === me || d.toUserId === me)){
+      var s = JSON.stringify(d);
+      if(pushedSocial.deals[d.id] !== s) jobs.push({ path: "/social/deal", body: { deal: d }, map: pushedSocial.deals, id: d.id, s: s });
+    }
+  });
+  (DB.messages || []).forEach(function(m){
+    if(m && m.id && m.senderId === me && pushedSocial.messages[m.id] === undefined)
+      jobs.push({ path: "/social/message", body: { message: m }, map: pushedSocial.messages, id: m.id, s: "1" });
+  });
+  (DB.ratings || []).forEach(function(rt){
+    if(rt && rt.id && rt.fromUserId === me && pushedSocial.ratings[rt.id] === undefined)
+      jobs.push({ path: "/social/rating", body: { rating: rt }, map: pushedSocial.ratings, id: rt.id, s: "1" });
+  });
+  var i = 0;
+  function next(){
+    if(i >= jobs.length){
+      socialPushing = false;
+      if(socialPushAgain){ socialPushAgain = false; pushSocial(); }
+      return;
+    }
+    var jb = jobs[i++];
+    fetch(API_BASE + jb.path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(jb.body)
+    }).then(function(r){ if(r.ok) jb.map[jb.id] = jb.s; })
+      .catch(function(){})
+      .then(next);
+  }
+  next();
+}
+function pullSocial(){
+  if(!API_BASE || !getAuthToken() || !UI.currentUserId || !DB) return;
+  fetch(API_BASE + "/social/mine").then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+    if(!j || !DB) return;
+    var changed = false;
+    function merge(listName, rows, pushedMap, isLog){
+      var arr = DB[listName] = DB[listName] || [];
+      (rows || []).forEach(function(obj){
+        if(!obj || !obj.id) return;
+        var idx = -1;
+        for(var k = 0; k < arr.length; k++){ if(arr[k].id === obj.id){ idx = k; break; } }
+        var s = JSON.stringify(obj);
+        if(idx === -1){
+          arr.push(obj);
+          pushedMap[obj.id] = isLog ? "1" : s;
+          changed = true;
+        } else if(!isLog){
+          var local = JSON.stringify(arr[idx]);
+          var unpushed = pushedMap[obj.id] !== undefined && pushedMap[obj.id] !== local;
+          if(local !== s && !unpushed){ arr[idx] = obj; pushedMap[obj.id] = s; changed = true; }
+        } else {
+          pushedMap[obj.id] = "1";
+        }
+      });
+    }
+    merge("deals", j.deals, pushedSocial.deals, false);
+    merge("messages", j.messages, pushedSocial.messages, true);
+    merge("ratings", j.ratings, pushedSocial.ratings, true);
+    if(changed){ persistLocal(); render(); }
+  }).catch(function(){});
+}
+(function(){
+  var _saveDB = saveDB;
+  saveDB = function(){
+    var out = _saveDB.apply(this, arguments);
+    setTimeout(pushSocial, 0);
+    return out;
+  };
+})();
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
+    pullSocial();
     if(avatarSavePending) return;
     if(!API_BASE || typeof fetch !== "function") return;
     var syncStartedAt = Date.now();
