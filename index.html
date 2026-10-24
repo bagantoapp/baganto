@@ -1302,6 +1302,7 @@ function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else lo
     return out;
   };
 })();
+var lastSyncRaw = "";
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
@@ -1313,13 +1314,15 @@ function syncFromServer(){
       return r.json();
     }).then(function(data){
       apiOnline = true; apiChecked = true;
-      var __before = DB ? JSON.stringify([DB.items, DB.users]) : '';
+      var __raw = JSON.stringify(data);
+      if(__raw === lastSyncRaw){ renderSyncPill(); return; }
       if(data && Array.isArray(data.users) && Array.isArray(data.items)){
         if(lastAvatarChangeAt > syncStartedAt){ renderSyncPill(); return; }
+        lastSyncRaw = __raw;
         var mapped = mapBackendData(data);
         if(!DB){ DB = mapped; } else { DB.items = mapped.items; DB.users = mapped.users; }
         persistLocal();
-        if(JSON.stringify([DB.items, DB.users]) !== __before){ render(); } else { renderSyncPill(); }
+        render();
       } else {
         renderSyncPill();
       }
