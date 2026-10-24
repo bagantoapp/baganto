@@ -72,9 +72,48 @@ app.get('/items/:id', async (req, res) => {
   }
 });
 
-app.post('/items', async (req, res) => {
+function makeAuthToken(userId) {
+  const exp = Date.now() + 30 * 24 * 60 * 60 * 1000;
+  const payload = `${userId}|${exp}`;
+  const sig = require('crypto').createHmac('sha256', process.env.AUTH_SECRET).update('auth:' + payload).digest('hex');
+  return Buffer.from(payload).toString('base64url') + '.' + sig;
+}
+
+function verifyAuthToken(token) {
   try {
-    const { owner_id, title, description, category, price, condition, listing_type, photos } = req.body;
+    if (!process.env.AUTH_SECRET) return null;
+    const [part, sig] = String(token || '').split('.');
+    if (!part || !sig) return null;
+    const payload = Buffer.from(part, 'base64url').toString();
+    const [userId, exp] = payload.split('|');
+    const expect = require('crypto').createHmac('sha256', process.env.AUTH_SECRET).update('auth:' + payload).digest('hex');
+    if (sig.length !== expect.length) return null;
+    if (!require('crypto').timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
+    if (!userId || Date.now() > Number(exp)) return null;
+    return userId;
+  } catch (e) {
+    return null;
+  }
+}
+
+function requireAuth(req, res, next) {
+  if (!process.env.AUTH_SECRET) return res.status(500).json({ error: 'Server auth is not configured' });
+  const h = req.headers.authorization || '';
+  const userId = verifyAuthToken(h.startsWith('Bearer ') ? h.slice(7) : '');
+  if (!userId) return res.status(401).json({ error: 'Please log in again' });
+  req.userId = userId;
+  next();
+}
+
+async function itemOwnerId(id) {
+  const rows = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(id)}&select=owner_id`);
+  return rows && rows[0] ? rows[0].owner_id : null;
+}
+
+app.post('/items', requireAuth, async (req, res) => {
+  try {
+    const { title, description, category, price, condition, listing_type, photos } = req.body;
+    const owner_id = req.userId;
     const photosArray = Array.isArray(photos) ? photos : [];
     const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: photosArray });
     res.json(data[0] || data);
@@ -83,8 +122,9 @@ app.post('/items', async (req, res) => {
   }
 });
 
-app.put('/items/:id', async (req, res) => {
+app.put('/items/:id', requireAuth, async (req, res) => {
   try {
+    if (await itemOwnerId(req.params.id) !== req.userId) return res.status(403).json({ error: 'Not your listing' });
     const data = await supabaseCall('items', 'PATCH', req.body, `?id=eq.${req.params.id}`);
     res.json(data[0] || data);
   } catch (err) {
@@ -92,8 +132,9 @@ app.put('/items/:id', async (req, res) => {
   }
 });
 
-app.delete('/items/:id', async (req, res) => {
+app.delete('/items/:id', requireAuth, async (req, res) => {
   try {
+    if (await itemOwnerId(req.params.id) !== req.userId) return res.status(403).json({ error: 'Not your listing' });
     await supabaseCall('items', 'DELETE', null, `?id=eq.${req.params.id}`);
     res.json({ message: 'Item deleted' });
   } catch (err) {
@@ -194,8 +235,9 @@ app.post('/users', async (req, res) => {
   }
 });
 
-app.post('/users/:id/change-password', async (req, res) => {
+app.post('/users/:id/change-password', requireAuth, async (req, res) => {
   try {
+    if (req.userId !== req.params.id) return res.status(403).json({ error: 'Not allowed' });
     const { currentPassword, newPassword } = req.body || {};
     if (!await checkLoginLimit('pwchange:' + req.ip)) {
       return res.status(429).json({ error: 'Too many attempts, please wait a minute' });
@@ -209,7 +251,7 @@ app.post('/users/:id/change-password', async (req, res) => {
     const rows = await supabaseCall('users', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}`);
     const row = (rows || [])[0];
     if (!row || !await bcryptjs.compare(currentPassword, row.password || '')) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
+      return res.status(403).json({ error: 'Current password is incorrect' });
     }
     const hashed = await bcryptjs.hash(newPassword, 10);
     await supabaseCall('users', 'PATCH', { password: hashed }, `?id=eq.${encodeURIComponent(req.params.id)}`);
@@ -219,8 +261,9 @@ app.post('/users/:id/change-password', async (req, res) => {
   }
 });
 
-app.put('/users/:id', async (req, res) => {
+app.put('/users/:id', requireAuth, async (req, res) => {
   try {
+    if (req.userId !== req.params.id) return res.status(403).json({ error: 'Not allowed' });
     const allowed = ['name', 'city', 'bio', 'avatar', 'avatarPhoto'];
     const updates = {};
     for (const k of allowed) {
@@ -353,7 +396,7 @@ app.post('/auth/signup', async (req, res) => {
     const created = await supabaseCall('users', 'POST', newUser);
     const user = Array.isArray(created) ? created[0] : created;
     delete user.password;
-    res.json({ success: true, user: user });
+    res.json({ success: true, user: user, token: process.env.AUTH_SECRET ? makeAuthToken(user.id) : null });
   } catch (err) {
     console.error('POST /auth/signup error:', err.message);
     res.status(400).json({ error: err.message });
@@ -553,7 +596,7 @@ app.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Incorrect email/phone or password' });
     }
     delete match.password;
-    res.json({ success: true, user: match });
+    res.json({ success: true, user: match, token: process.env.AUTH_SECRET ? makeAuthToken(match.id) : null });
   } catch (err) {
     console.error('POST /auth/login error:', err.message);
     res.status(400).json({ error: err.message });
@@ -576,7 +619,7 @@ app.listen(PORT, () => {
 });
 
 // Image upload endpoint
-app.post('/items/upload', async (req, res) => {
+app.post('/items/upload', requireAuth, async (req, res) => {
   try {
     const { file, filename } = req.body;
     if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });

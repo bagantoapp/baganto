@@ -1247,6 +1247,39 @@ function mapBackendData(data){
   };
 }
 
+var AUTH_KEY = "baganto_auth_token";
+function getAuthToken(){ try { return localStorage.getItem(AUTH_KEY) || ""; } catch(e){ return ""; } }
+function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else localStorage.removeItem(AUTH_KEY); } catch(e){} }
+(function(){
+  if(typeof window.fetch !== "function" || window.__bagantoFetchWrapped) return;
+  window.__bagantoFetchWrapped = true;
+  var origFetch = window.fetch.bind(window);
+  window.fetch = function(input, init){
+    var url = typeof input === "string" ? input : ((input && input.url) || "");
+    var isApi = url.indexOf("api.baganto.com") !== -1 || (typeof API_BASE === "string" && API_BASE && url.indexOf(API_BASE) === 0);
+    if(isApi){
+      init = init || {};
+      var h = new Headers(init.headers || {});
+      var tok = getAuthToken();
+      if(tok && !h.has("Authorization")) h.set("Authorization", "Bearer " + tok);
+      init.headers = h;
+    }
+    return origFetch(input, init).then(function(res){
+      if(isApi){
+        var path = url.split("?")[0];
+        if(/\/auth\/(login|signup)$/.test(path) && res.ok){
+          res.clone().json().then(function(j){ if(j && j.token) setAuthToken(j.token); }).catch(function(){});
+        } else if(res.status === 401 && path.indexOf("/auth/") === -1){
+          setAuthToken("");
+          try { storageSet(USER_KEY, ""); } catch(e){}
+          UI.currentUserId = null; UI.authScreen = true; UI.authPage = "login";
+          showToast("Please log in again.");
+        }
+      }
+      return res;
+    });
+  };
+})();
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
@@ -2413,7 +2446,7 @@ function syncFromServer(){
     DB.users = DB.users.filter(function(uu){ return uu.id!==uid_; });
 
     UI.currentUserId = "";
-    storageSet(USER_KEY, "");
+    storageSet(USER_KEY, ""); setAuthToken("");
     UI.authScreen = true;
     UI.authPage   = "login";
     UI.modal = null;
