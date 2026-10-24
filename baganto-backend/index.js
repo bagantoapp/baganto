@@ -615,12 +615,23 @@ app.post('/social/deal', requireAuth, async (req, res) => {
     const d = req.body && req.body.deal;
     if (!d || typeof d.id !== 'string' || !d.fromUserId || !d.toUserId) return res.status(400).json({ error: 'Invalid deal' });
     if (JSON.stringify(d).length > 200000) return res.status(413).json({ error: 'Deal too large' });
-    const existing = await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}&select=user_a,user_b`, 'GET');
+    delete d.typingUsers;
+    const existing = await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}&select=user_a,user_b,data`, 'GET');
     if (existing.length) {
       const row = existing[0];
       if (row.user_a !== req.userId && row.user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
       d.fromUserId = row.user_a;
       d.toUserId = row.user_b;
+      const oldSt = (row.data && row.data.status) || 'pending';
+      const newSt = d.status || 'pending';
+      const rank = { pending: 0, accepted: 1, rejected: 2, withdrawn: 2, completed: 3 };
+      if (newSt !== oldSt && rank[newSt] !== undefined && rank[oldSt] !== undefined) {
+        let ok = rank[newSt] > rank[oldSt];
+        if (ok && (newSt === 'accepted' || newSt === 'rejected') && req.userId !== row.user_b) ok = false;
+        if (ok && newSt === 'withdrawn' && req.userId !== row.user_a) ok = false;
+        if (ok && newSt === 'completed' && oldSt !== 'accepted') ok = false;
+        if (!ok) d.status = oldSt;
+      }
       await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}`, 'PATCH', { data: d, updated_at: new Date().toISOString() });
     } else {
       if (d.fromUserId !== req.userId) return res.status(403).json({ error: 'You can only start your own deals' });

@@ -1305,6 +1305,39 @@ function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else lo
 var lastSyncRaw = "";
 var pushedSocial = { deals: {}, messages: {}, ratings: {} };
 var socialPushing = false, socialPushAgain = false;
+var savingItemStatus = {};
+function cleanDeal(d){
+  var c = {};
+  for(var k in d){ if(Object.prototype.hasOwnProperty.call(d, k) && k !== "typingUsers") c[k] = d[k]; }
+  return c;
+}
+function syncDealItems(){
+  if(!DB || !UI.currentUserId || !API_BASE || !getAuthToken()) return;
+  var me = UI.currentUserId;
+  (DB.deals || []).forEach(function(d){
+    if(!d || d.status !== "completed") return;
+    var targets = [];
+    if(d.kind === "sale" && d.itemId) targets.push({ id: d.itemId, st: "sold" });
+    if(d.offeredItemId) targets.push({ id: d.offeredItemId, st: "traded" });
+    if(d.requestedItemId) targets.push({ id: d.requestedItemId, st: "traded" });
+    targets.forEach(function(x){
+      var it = itemById(x.id);
+      if(!it || !it.id || it.ownerId !== me) return;
+      if(it.status === x.st || savingItemStatus[x.id] === x.st) return;
+      savingItemStatus[x.id] = x.st;
+      it.status = x.st;
+      lastAvatarChangeAt = Date.now();
+      fetch(API_BASE + "/items/" + x.id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: x.st })
+      }).then(function(r){
+        lastAvatarChangeAt = Date.now();
+        if(!r.ok) delete savingItemStatus[x.id];
+      }).catch(function(){ delete savingItemStatus[x.id]; });
+    });
+  });
+}
 function pushSocial(){
   if(!API_BASE || !getAuthToken() || !UI.currentUserId || !DB) return;
   if(socialPushing){ socialPushAgain = true; return; }
@@ -1313,8 +1346,9 @@ function pushSocial(){
   var jobs = [];
   (DB.deals || []).forEach(function(d){
     if(d && d.id && (d.fromUserId === me || d.toUserId === me)){
-      var s = JSON.stringify(d);
-      if(pushedSocial.deals[d.id] !== s) jobs.push({ path: "/social/deal", body: { deal: d }, map: pushedSocial.deals, id: d.id, s: s });
+      var c = cleanDeal(d);
+      var s = JSON.stringify(c);
+      if(pushedSocial.deals[d.id] !== s) jobs.push({ path: "/social/deal", body: { deal: c }, map: pushedSocial.deals, id: d.id, s: s });
     }
   });
   (DB.messages || []).forEach(function(m){
@@ -1348,37 +1382,49 @@ function pullSocial(){
   fetch(API_BASE + "/social/mine").then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
     if(!j || !DB) return;
     var changed = false;
-    function merge(listName, rows, pushedMap, isLog){
+    DB.deals = DB.deals || [];
+    (j.deals || []).forEach(function(obj){
+      if(!obj || !obj.id) return;
+      var idx = -1;
+      for(var k = 0; k < DB.deals.length; k++){ if(DB.deals[k].id === obj.id){ idx = k; break; } }
+      var s = JSON.stringify(obj);
+      if(idx === -1){
+        obj.typingUsers = [];
+        DB.deals.push(obj);
+        pushedSocial.deals[obj.id] = s;
+        changed = true;
+      } else {
+        var local = JSON.stringify(cleanDeal(DB.deals[idx]));
+        var unpushed = pushedSocial.deals[obj.id] !== undefined && pushedSocial.deals[obj.id] !== local;
+        if(local !== s && !unpushed){
+          obj.typingUsers = [];
+          DB.deals[idx] = obj;
+          pushedSocial.deals[obj.id] = s;
+          changed = true;
+        }
+      }
+    });
+    function mergeLog(listName, rows, pushedMap){
       var arr = DB[listName] = DB[listName] || [];
       (rows || []).forEach(function(obj){
         if(!obj || !obj.id) return;
-        var idx = -1;
-        for(var k = 0; k < arr.length; k++){ if(arr[k].id === obj.id){ idx = k; break; } }
-        var s = JSON.stringify(obj);
-        if(idx === -1){
-          arr.push(obj);
-          pushedMap[obj.id] = isLog ? "1" : s;
-          changed = true;
-        } else if(!isLog){
-          var local = JSON.stringify(arr[idx]);
-          var unpushed = pushedMap[obj.id] !== undefined && pushedMap[obj.id] !== local;
-          if(local !== s && !unpushed){ arr[idx] = obj; pushedMap[obj.id] = s; changed = true; }
-        } else {
-          pushedMap[obj.id] = "1";
-        }
+        var found = false;
+        for(var k = 0; k < arr.length; k++){ if(arr[k].id === obj.id){ found = true; break; } }
+        if(!found){ arr.push(obj); changed = true; }
+        pushedMap[obj.id] = "1";
       });
     }
-    merge("deals", j.deals, pushedSocial.deals, false);
-    merge("messages", j.messages, pushedSocial.messages, true);
-    merge("ratings", j.ratings, pushedSocial.ratings, true);
+    mergeLog("messages", j.messages, pushedSocial.messages);
+    mergeLog("ratings", j.ratings, pushedSocial.ratings);
     if(changed){ persistLocal(); render(); }
+    syncDealItems();
   }).catch(function(){});
 }
 (function(){
   var _saveDB = saveDB;
   saveDB = function(){
     var out = _saveDB.apply(this, arguments);
-    setTimeout(pushSocial, 0);
+    setTimeout(function(){ pushSocial(); syncDealItems(); }, 0);
     return out;
   };
 })();
