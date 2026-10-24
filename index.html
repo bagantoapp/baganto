@@ -5592,6 +5592,32 @@ function syncFromServer(){
         icon: getCategoryIcon(editCat),
         photos: allPhotos.slice(0, 5)
       });
+      var eId = form.dataset.id;
+      var eListingType = (forSaleE && forBarterE) ? "both" : (forBarterE ? "barter" : "sale");
+      var ePhotos = allPhotos.slice(0, 5).filter(function(ph){ return typeof ph === "string" && ph.indexOf("http") === 0; });
+      avatarSavePending = true; lastAvatarChangeAt = Date.now();
+      fetch(API_BASE + "/items/" + eId, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+          title: fdE.get("title")||"",
+          category: editCat,
+          city: fdE.get("city")||currentUser().city,
+          description: fdE.get("description")||"",
+          price: forSaleE ? priceE : null,
+          condition: fdE.get("condition")||"good",
+          listing_type: eListingType,
+          want_in_exchange: forBarterE ? (fdE.get("wantInExchange")||"") : "",
+          photos: ePhotos
+        })
+      }).then(function(r){
+        avatarSavePending = false; lastAvatarChangeAt = Date.now();
+        if(!r.ok) throw new Error("save failed");
+        showToast("Changes saved.");
+      }).catch(function(){
+        avatarSavePending = false; lastAvatarChangeAt = Date.now();
+        showToast("Could not save changes to the server. Try again.");
+      });
       UI.listingFormOpen = false;
       UI.editingItemId = null;
       render();
