@@ -3147,7 +3147,7 @@ function syncFromServer(){
 
     // Keep the chat thread scrolled to the newest message
     var cbox = document.querySelector(".chat-box");
-    if(cbox){ try{ cbox.scrollTop = cbox.scrollHeight; }catch(e){} }
+    if(cbox){ try{ cbox.scrollTop = cbox.scrollHeight; }catch(e){} Array.prototype.forEach.call(cbox.querySelectorAll("img"), function(im){ if(!im.complete){ im.addEventListener("load", function(){ try{ cbox.scrollTop = cbox.scrollHeight; }catch(e){} }, {once:true}); } }); }
 
     // Auto-detect location on render if user is logged in
     if(UI.currentUserId){
