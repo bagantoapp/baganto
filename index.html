@@ -1280,6 +1280,22 @@ function setAuthToken(t){ try { if(t) localStorage.setItem(AUTH_KEY, t); else lo
     });
   };
 })();
+(function(){
+  var _render = render;
+  var KEEP_IDS = ["accName","accCity","accBio","accCurPass","accNewPass","accConfPass"];
+  render = function(){
+    var saved = {};
+    KEEP_IDS.forEach(function(id){ var el = document.getElementById(id); if(el) saved[id] = el.value; });
+    var out = _render.apply(this, arguments);
+    KEEP_IDS.forEach(function(id){
+      if(Object.prototype.hasOwnProperty.call(saved, id)){
+        var el = document.getElementById(id);
+        if(el) el.value = saved[id];
+      }
+    });
+    return out;
+  };
+})();
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
