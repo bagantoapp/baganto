@@ -607,7 +607,8 @@ app.get('/social/mine', requireAuth, async (req, res) => {
       messages = await sbFetch(`deal_messages?deal_id=in.(${encodeURIComponent(list)})${sinceFilter}&select=data&order=created_at.asc`, 'GET');
     }
     const ratings = await sbFetch('deal_ratings?select=data', 'GET');
-    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data) });
+    const notifs = await sbFetch(`notifications?user_id=eq.${me}&order=created_at.desc&limit=50&select=data,is_read`, 'GET');
+    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data), notifications: notifs.map(x => Object.assign({}, x.data, { read: !!x.is_read })) });
   } catch (err) {
     console.error('GET /social/mine error:', err.message);
     res.status(500).json({ error: 'Could not load chats' });
@@ -683,6 +684,57 @@ app.post('/social/rating', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('POST /social/rating error:', err.message);
     res.status(500).json({ error: 'Could not save rating' });
+  }
+});
+
+app.post('/social/notify', requireAuth, async (req, res) => {
+  try {
+    const n = req.body && req.body.notification;
+    if (!n || typeof n.id !== 'string' || typeof n.userId !== 'string' || typeof n.dealId !== 'string') return res.status(400).json({ error: 'Invalid notification' });
+    if (n.fromUserId !== req.userId) return res.status(403).json({ error: 'Not your notification' });
+    const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(n.dealId)}&select=user_a,user_b`, 'GET');
+    if (!dl.length) return res.status(404).json({ error: 'Deal not found' });
+    const pair = [dl[0].user_a, dl[0].user_b];
+    if (pair.indexOf(req.userId) === -1 || pair.indexOf(n.userId) === -1) return res.status(403).json({ error: 'Not your deal' });
+    const ex = await sbFetch(`notifications?id=eq.${encodeURIComponent(n.id)}&select=id`, 'GET');
+    if (ex.length) return res.json({ success: true });
+    const clean = { id: n.id, userId: n.userId, fromUserId: req.userId, type: String(n.type || 'deal').slice(0, 40), text: String(n.text || '').slice(0, 300), itemId: n.itemId || null, dealId: n.dealId, read: false, createdAt: Number(n.createdAt) || Date.now() };
+    await sbFetch('notifications', 'POST', { id: n.id, user_id: n.userId, data: clean });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/notify error:', err.message);
+    res.status(500).json({ error: 'Could not save notification' });
+  }
+});
+
+app.post('/social/notify-read', requireAuth, async (req, res) => {
+  try {
+    const me = encodeURIComponent(req.userId);
+    const ids = Array.isArray(req.body && req.body.ids) ? req.body.ids.filter(x => typeof x === 'string').slice(0, 200) : null;
+    let path = `notifications?user_id=eq.${me}`;
+    if (ids && ids.length) path += `&id=in.(${encodeURIComponent(ids.map(x => '"' + x.replace(/"/g, '') + '"').join(','))})`;
+    await sbFetch(path, 'PATCH', { is_read: true });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/notify-read error:', err.message);
+    res.status(500).json({ error: 'Could not mark read' });
+  }
+});
+
+app.delete('/users/me', requireAuth, async (req, res) => {
+  try {
+    const me = encodeURIComponent(req.userId);
+    const rows = await sbFetch(`users?id=eq.${me}&select=email`, 'GET');
+    await sbFetch(`deals?or=(user_a.eq.${me},user_b.eq.${me})`, 'DELETE');
+    await sbFetch(`deal_ratings?or=(from_user.eq.${me},to_user.eq.${me})`, 'DELETE');
+    await sbFetch(`notifications?user_id=eq.${me}`, 'DELETE');
+    await sbFetch(`items?owner_id=eq.${me}`, 'DELETE');
+    if (rows[0] && rows[0].email) await sbFetch(`otp_codes?email=eq.${encodeURIComponent(rows[0].email)}`, 'DELETE');
+    await sbFetch(`users?id=eq.${me}`, 'DELETE');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /users/me error:', err.message);
+    res.status(500).json({ error: 'Could not delete account' });
   }
 });
 

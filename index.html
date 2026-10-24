@@ -1325,7 +1325,11 @@ function ensureMessagePhotos(msg){
     return (typeof p === "string" && p.indexOf("data:") === 0) ? uploadDataPhoto(p).then(function(u){ return u || p; }) : Promise.resolve(p);
   })).then(function(urls){ msg.photos = urls; persistLocal(); return true; });
 }
-var pushedSocial = { deals: {}, messages: {}, ratings: {} };
+function markNotifsReadServer(ids){
+  if(!API_BASE || !getAuthToken()) return;
+  fetch(API_BASE + "/social/notify-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ids ? { ids: ids } : {}) }).catch(function(){});
+}
+var pushedSocial = { deals: {}, messages: {}, ratings: {}, notifications: {} };
 var socialPushing = false, socialPushAgain = false;
 var savingItemStatus = {};
 function cleanDeal(d){
@@ -1376,6 +1380,10 @@ function pushSocial(){
   (DB.messages || []).forEach(function(m){
     if(m && m.id && m.senderId === me && pushedSocial.messages[m.id] === undefined)
       jobs.push({ path: "/social/message", body: { message: m }, map: pushedSocial.messages, id: m.id, s: "1" });
+  });
+  (DB.notifications || []).forEach(function(nt){
+    if(nt && nt.id && nt.dealId && nt.fromUserId === me && pushedSocial.notifications[nt.id] === undefined)
+      jobs.push({ path: "/social/notify", body: { notification: nt }, map: pushedSocial.notifications, id: nt.id, s: "1" });
   });
   (DB.ratings || []).forEach(function(rt){
     if(rt && rt.id && rt.fromUserId === me && pushedSocial.ratings[rt.id] === undefined)
@@ -1440,6 +1448,15 @@ function pullSocial(){
     }
     mergeLog("messages", j.messages, pushedSocial.messages);
     mergeLog("ratings", j.ratings, pushedSocial.ratings);
+    DB.notifications = DB.notifications || [];
+    (j.notifications || []).forEach(function(n){
+      if(!n || !n.id) return;
+      var exN = null;
+      for(var k = 0; k < DB.notifications.length; k++){ if(DB.notifications[k].id === n.id){ exN = DB.notifications[k]; break; } }
+      if(!exN){ DB.notifications.push(n); changed = true; }
+      else if(n.read && !exN.read){ exN.read = true; changed = true; }
+      pushedSocial.notifications[n.id] = "1";
+    });
     if(changed){ persistLocal(); renderKeepFocus(); }
     syncDealItems();
   }).catch(function(){});
@@ -2631,11 +2648,18 @@ function syncFromServer(){
   function deleteMyAccount(){
     var u = currentUser();
     if(!u || !u.id){ showToast("Log in first."); return; }
-    if(DB.users.length <= 1){ showToast("This is the only account — reset the demo data instead."); return; }
     if(!window.confirm("Permanently delete your account?\n\nThis removes your profile, ads, chats, messages, reviews and saved ads. It cannot be undone.")) return;
     var typed = window.prompt('This cannot be undone. Type DELETE to confirm:');
     if(!typed || typed.trim().toUpperCase() !== "DELETE"){ showToast("Account deletion cancelled."); return; }
 
+    if(!API_BASE){ showToast("Cannot reach the server. Try again later."); return; }
+    showToast("Deleting your account...");
+    fetch(API_BASE + "/users/me", { method: "DELETE" }).then(function(r){
+      if(!r.ok) throw new Error("delete failed");
+      finishLocalDelete(u);
+    }).catch(function(){ showToast("Could not delete your account. Try again."); });
+  }
+  function finishLocalDelete(u){
     var uid_ = u.id, name = u.name;
     var myDealIds = DB.deals.filter(function(d){ return d.fromUserId===uid_ || d.toUserId===uid_; }).map(function(d){ return d.id; });
 
@@ -2725,6 +2749,7 @@ function syncFromServer(){
     DB.notifications.push({
       id: uid("n"),
       userId: userId,
+      fromUserId: UI.currentUserId,
       type: type,
       text: text,
       itemId: opts.itemId || null,
@@ -2750,7 +2775,7 @@ function syncFromServer(){
   }
   function markAllNotificationsRead(){
     if(!DB.notifications) return;
-    DB.notifications.forEach(function(n){ if(n.userId===UI.currentUserId) n.read = true; });
+    DB.notifications.forEach(function(n){ if(n.userId===UI.currentUserId) n.read = true; }); markNotifsReadServer(null);
     saveDB();
   }
   function notificationIcon(type){
@@ -5183,7 +5208,7 @@ function syncFromServer(){
     if(action==="open-notif"){
       var nt = (DB.notifications||[]).filter(function(x){ return x.id===t.dataset.id; })[0];
       if(nt){
-        nt.read = true;
+        nt.read = true; markNotifsReadServer([nt.id]);
         saveDB();
         UI.notifOpen = false;
         if(nt.dealId){ UI.tab="trades"; UI.modal={type:"trade", dealId:nt.dealId}; }
