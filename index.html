@@ -5085,7 +5085,29 @@ function syncFromServer(){
     }
 
     // OLX: mark as sold
-    if(action==="mark-sold"){ markItemSold(t.dataset.id); render(); return; }
+    if(action==="mark-sold"){
+      var msId = t.dataset.id;
+      var msItem = DB.items.filter(function(x){ return x.id===msId; })[0];
+      var msPrev = msItem ? msItem.status : null;
+      markItemSold(msId);
+      avatarSavePending = true; lastAvatarChangeAt = Date.now();
+      render();
+      fetch(API_BASE + "/items/" + msId, {
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ status: "sold" })
+      }).then(function(r){
+        avatarSavePending = false; lastAvatarChangeAt = Date.now();
+        if(!r.ok) throw new Error("save failed");
+        showToast("Marked as sold.");
+      }).catch(function(){
+        avatarSavePending = false; lastAvatarChangeAt = Date.now();
+        if(msItem){ msItem.status = msPrev; saveDB(); }
+        render();
+        showToast("Could not mark as sold. Try again.");
+      });
+      return;
+    }
 
     // OLX: share item
     if(action==="share-item"){ shareItem(t.dataset.id); return; }

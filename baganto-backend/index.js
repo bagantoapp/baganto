@@ -125,7 +125,11 @@ app.post('/items', requireAuth, async (req, res) => {
 app.put('/items/:id', requireAuth, async (req, res) => {
   try {
     if (await itemOwnerId(req.params.id) !== req.userId) return res.status(403).json({ error: 'Not your listing' });
-    const data = await supabaseCall('items', 'PATCH', req.body, `?id=eq.${req.params.id}`);
+    const allowed = ['title', 'description', 'category', 'price', 'condition', 'listing_type', 'photos', 'status', 'want_in_exchange', 'city'];
+    const updates = {};
+    for (const k of allowed) { if (req.body && k in req.body) updates[k] = req.body[k]; }
+    if (!Object.keys(updates).length) return res.status(400).json({ error: 'Nothing to update' });
+    const data = await supabaseCall('items', 'PATCH', updates, `?id=eq.${encodeURIComponent(req.params.id)}`);
     res.json(data[0] || data);
   } catch (err) {
     res.status(400).json({ error: err.message });
