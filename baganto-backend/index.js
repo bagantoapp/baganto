@@ -125,7 +125,7 @@ app.post('/items', requireAuth, async (req, res) => {
 app.put('/items/:id', requireAuth, async (req, res) => {
   try {
     if (await itemOwnerId(req.params.id) !== req.userId) return res.status(403).json({ error: 'Not your listing' });
-    const allowed = ['title', 'description', 'category', 'price', 'condition', 'listing_type', 'photos', 'status', 'want_in_exchange', 'city'];
+    const allowed = ['title', 'description', 'category', 'price', 'condition', 'listing_type', 'photos', 'status', 'want_in_exchange', 'city', 'expires_at'];
     const updates = {};
     for (const k of allowed) { if (req.body && k in req.body) updates[k] = req.body[k]; }
     if (!Object.keys(updates).length) return res.status(400).json({ error: 'Nothing to update' });

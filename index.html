@@ -1213,7 +1213,13 @@ function mapBackendData(data){
       wantInExchange: it.want_in_exchange || '',
       city: it.city || 'Mysore, Karnataka',
       condition: it.condition || 'good',
-      status: it.status || 'available',
+      expiresAt: it.expires_at ? new Date(it.expires_at).getTime() : null,
+      status: (function(){
+        var st = it.status || 'available';
+        var ex = it.expires_at ? new Date(it.expires_at).getTime()
+          : ((it.created_at ? new Date(it.created_at).getTime() : Date.now()) + 30*24*60*60*1000);
+        return (st === 'available' && ex <= Date.now()) ? 'expired' : st;
+      })(),
       negotiable: false,
       views: it.views || 0,
       isFeatured: false,
@@ -1577,6 +1583,19 @@ function syncFromServer(){
     it.expiresAt = nowTs() + AD_LIFETIME_DAYS*DAY;
     if(qu && qu.id) qu.adsUsedThisPeriod = (qu.adsUsedThisPeriod||0) + 1;
     saveDB();
+    avatarSavePending = true; lastAvatarChangeAt = Date.now();
+    fetch(API_BASE + "/items/" + it.id, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ status: "available", expires_at: new Date(it.expiresAt).toISOString() })
+    }).then(function(r){
+      avatarSavePending = false; lastAvatarChangeAt = Date.now();
+      if(!r.ok) throw new Error("save failed");
+    }).catch(function(){
+      avatarSavePending = false; lastAvatarChangeAt = Date.now();
+      it.status = "expired"; saveDB(); render();
+      showToast("Could not repost. Try again.");
+    });
     showToast("Reposted — live for another "+AD_LIFETIME_DAYS+" days.");
     return true;
   }
