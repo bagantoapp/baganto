@@ -642,6 +642,11 @@ app.post('/social/deal', requireAuth, async (req, res) => {
       const mergedRead = Object.assign({}, oldRead);
       if (newRead[req.userId] !== undefined) mergedRead[req.userId] = Math.max(Number(oldRead[req.userId]) || 0, Number(newRead[req.userId]) || 0);
       d.readAt = mergedRead;
+      const oldHidden = (row.data && row.data.hiddenFor) || {};
+      const newHidden = d.hiddenFor || {};
+      const mergedHidden = Object.assign({}, oldHidden);
+      if (newHidden[req.userId] !== undefined) mergedHidden[req.userId] = Math.max(Number(oldHidden[req.userId]) || 0, Number(newHidden[req.userId]) || 0);
+      d.hiddenFor = mergedHidden;
       await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}`, 'PATCH', { data: d, updated_at: new Date().toISOString() });
     } else {
       if (d.fromUserId !== req.userId) return res.status(403).json({ error: 'You can only start your own deals' });

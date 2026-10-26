@@ -1366,6 +1366,16 @@ function mergeDuplicateDeals(){
   });
   if(merged){ persistLocal(); render(); showToast("Added to your existing chat for this ad."); }
 }
+function isChatHidden(d){
+  if(!d || !UI.currentUserId) return false;
+  var h = d.hiddenFor && d.hiddenFor[UI.currentUserId];
+  if(!h) return false;
+  var msgs = DB.messages || [];
+  for(var i = 0; i < msgs.length; i++){
+    if(msgs[i] && msgs[i].dealId === d.id && msgs[i].createdAt > h) return false;
+  }
+  return true;
+}
 function markNotifsReadServer(ids){
   if(!API_BASE || !getAuthToken()) return;
   fetch(API_BASE + "/social/notify-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ids ? { ids: ids } : {}) }).catch(function(){});
@@ -1542,6 +1552,9 @@ document.addEventListener("input", function(ev){
   var _renderChatThread = renderChatThread;
   renderChatThread = function(d, cp){
     var html = _renderChatThread.apply(this, arguments);
+    if(d && (d.status === "rejected" || d.status === "withdrawn" || d.status === "completed")){
+      html += '<div style="text-align:center;margin-top:10px;"><button class="btn btn-ghost btn-sm" data-action="delete-chat" data-id="' + d.id + '" style="color:#ef4444;">🗑 Delete chat</button></div>';
+    }
     if(d && (d.status === "rejected" || d.status === "withdrawn")){
       html = html.replace(/placeholder="Type a message[^"]*"/g, 'disabled placeholder="This chat is closed"');
       html += '<div class="muted" style="font-size:13px;margin-top:8px;text-align:center;">This chat is closed because the request was ' +
@@ -4074,6 +4087,7 @@ function syncFromServer(){
     // Build a unified inbox: one row per deal, sorted by last activity
     var myDeals = DB.deals.filter(function(d){
       return d.fromUserId===UI.currentUserId || d.toUserId===UI.currentUserId;
+    myDeals = myDeals.filter(function(d){ return !isChatHidden(d); });
     });
 
     // Apply filter
@@ -5541,6 +5555,17 @@ function syncFromServer(){
 
     // Your data: export / delete account
     if(action==="export-my-data"){ exportMyData(); return; }
+    if(action==="delete-chat"){
+      var dc = findDeal(t.dataset.id);
+      if(!dc) return;
+      if(!window.confirm("Delete this chat from your list? The other person keeps their copy.")) return;
+      dc.hiddenFor = dc.hiddenFor || {};
+      dc.hiddenFor[UI.currentUserId] = Date.now();
+      UI.modal = null;
+      saveDB(); render();
+      showToast("Chat deleted.");
+      return;
+    }
     if(action==="view-seller"){ UI.modal = {type:"seller", userId: t.dataset.userid}; render(); return; }
     if(action==="view-seller-item"){ UI.modal = {type:"item", itemId: t.dataset.id}; render(); return; }
     if(action==="delete-my-account"){ UI.delReasonSel = ""; UI.delOtherText = ""; UI.modal = {type:"delete-account"}; render(); return; }
