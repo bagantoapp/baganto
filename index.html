@@ -5682,6 +5682,8 @@ function syncFromServer(){
       var forSale = !noTradeA && (propA || !!fd.get("forSale"));
       var forBarter = !noTradeA && !propA && !!fd.get("forBarter") && !isNoBarter(catA);
       if(!noTradeA && !propA && !forSale && !forBarter){ showToast("Choose at least one: list for sale, or open to barter."); return; }
+      var __priceRaw = String(new FormData(form).get("price") || "").trim();
+      if(forSale && !noTradeA && __priceRaw === ""){ showToast("Enter a price, or 0 to give it away for free."); return; }
       var price = null;
       if(forSale){
         var rawPrice = fd.get("price");
