@@ -2451,15 +2451,13 @@ function syncFromServer(){
   function buyItem(itemId){
     var it = itemById(itemId);
     if(!it || it.status!=="available" || !it.forSale) return null;
-    var d = {id:uid("d"), kind:"sale", fromUserId:UI.currentUserId, toUserId:it.ownerId, itemId:itemId, price:it.price, status:"completed", createdAt:nowTs(), completedAt:nowTs()};
+    var dup = DB.deals.filter(function(p){ return p.kind==="sale" && p.itemId===itemId && p.fromUserId===UI.currentUserId && (p.status==="pending" || p.status==="accepted"); })[0];
+    if(dup){ showToast("You already sent a buy request for this item."); return null; }
+    var d = {id:uid("d"), kind:"sale", fromUserId:UI.currentUserId, toUserId:it.ownerId, itemId:itemId, price:it.price, status:"pending", createdAt:nowTs()};
     DB.deals.push(d);
-    it.status = "sold";
-    DB.deals.forEach(function(p){
-      if(p.kind==="barter" && p.status==="pending" && (p.offeredItemId===itemId || p.requestedItemId===itemId)) p.status="rejected";
-    });
-    addNotification(it.ownerId, "deal", currentUser().name+" bought your "+it.title+" for "+formatINR(it.price), {itemId:itemId, dealId:d.id});
+    addNotification(it.ownerId, "deal", currentUser().name+" wants to buy your "+it.title+" for "+formatINR(it.price), {itemId:itemId, dealId:d.id});
     saveDB();
-    showToast("Purchased " + it.title + " for " + formatINR(it.price) + "!");
+    showToast("Buy request sent. The seller will confirm.");
     return d;
   }
 
@@ -4691,7 +4689,7 @@ function syncFromServer(){
       '<div style="font-size:46px;">'+it.icon+'</div>' +
       '<div style="font-size:19px;font-weight:800;margin:6px 0 4px;">'+esc(it.title)+'</div>' +
       '<div class="item-price" style="margin-bottom:10px;">'+formatINR(it.price)+'</div>' +
-      '<div class="muted" style="margin-bottom:16px;">Buying from '+avatarOf(owner, 20)+' '+esc(owner.name)+'. This purchase completes immediately - no negotiation needed.</div>' +
+      '<div class="muted" style="margin-bottom:16px;">Buying from '+avatarOf(owner, 20)+' '+esc(owner.name)+'. The seller will confirm your request before the item is marked sold.</div>' +
       '<button class="btn btn-primary btn-block" data-action="confirm-buy" data-id="'+it.id+'">Confirm Purchase - '+formatINR(it.price)+'</button>';
   }
 

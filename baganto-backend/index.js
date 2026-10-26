@@ -640,6 +640,7 @@ app.post('/social/deal', requireAuth, async (req, res) => {
       await sbFetch(`deals?id=eq.${encodeURIComponent(d.id)}`, 'PATCH', { data: d, updated_at: new Date().toISOString() });
     } else {
       if (d.fromUserId !== req.userId) return res.status(403).json({ error: 'You can only start your own deals' });
+      if (d.status === 'completed' || d.status === 'accepted') d.status = 'pending';
       await sbFetch('deals', 'POST', { id: d.id, user_a: d.fromUserId, user_b: d.toUserId, data: d });
     }
     res.json({ success: true });
