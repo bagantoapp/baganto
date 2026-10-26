@@ -1232,7 +1232,7 @@ function mapBackendData(data){
       email: u.email,
       phone: u.phone,
       name: u.name,
-      avatar: u.avatar,
+      avatar: u.avatar || "🙂",
       city: u.city,
       bio: u.bio,
       isVerified: !!u.is_verified,
@@ -1324,6 +1324,21 @@ function ensureMessagePhotos(msg){
   return Promise.all(list.map(function(p){
     return (typeof p === "string" && p.indexOf("data:") === 0) ? uploadDataPhoto(p).then(function(u){ return u || p; }) : Promise.resolve(p);
   })).then(function(urls){ msg.photos = urls; persistLocal(); return true; });
+}
+function dealHasUnread(d){
+  if(!d || !UI.currentUserId) return false;
+  var me = UI.currentUserId;
+  if(d.fromUserId !== me && d.toUserId !== me) return false;
+  var readTs = (d.readAt && d.readAt[me]) || 0;
+  var msgs = DB.messages || [];
+  for(var i = 0; i < msgs.length; i++){
+    var m = msgs[i];
+    if(m && m.dealId === d.id && m.senderId !== me && m.createdAt > readTs) return true;
+  }
+  return d.status === "pending" && d.toUserId === me && !readTs;
+}
+function unreadChatCount(){
+  return (DB.deals || []).filter(dealHasUnread).length;
 }
 function markNotifsReadServer(ids){
   if(!API_BASE || !getAuthToken()) return;
@@ -3390,7 +3405,7 @@ function syncFromServer(){
     var tabsHtml = tabs.map(function(t){
       var cls = "nav-tab" + (UI.tab===t.id ? " active" : "");
       var b = "";
-      if(t.id==="trades" && badge>0) b = '<span class="nav-badge">'+badge+'</span>';
+      if(t.id==="trades"){ var ucN = UI.currentUserId ? unreadChatCount() : 0; if(ucN>0) b = '<span class="nav-badge" title="Unread chats">'+(ucN>9?'9+':ucN)+'</span>'; }
       if(t.id==="profile"){
         // Unread notifications live in the bell on the Profile page, so surface
         // the count on the tab itself — otherwise nobody knows to look.
@@ -4022,7 +4037,7 @@ function syncFromServer(){
       return tB - tA;
     });
 
-    var unreadCount = myDeals.filter(function(d){ return d.status==="pending" && d.toUserId===UI.currentUserId; }).length;
+    var unreadCount = myDeals.filter(function(d){ return dealHasUnread(d); }).length;
 
     var rows = myDeals.map(function(d){
       var cpId = d.fromUserId===UI.currentUserId ? d.toUserId : d.fromUserId;
@@ -4030,7 +4045,7 @@ function syncFromServer(){
       var msgs = messagesFor(d.id);
       var last = msgs.length ? msgs[msgs.length-1] : null;
       var isIncoming = d.toUserId===UI.currentUserId;
-      var isUnread = d.status==="pending" && isIncoming;
+      var isUnread = dealHasUnread(d);
 
       var itemLabel = "";
       if(d.kind==="barter"){
@@ -4763,6 +4778,8 @@ function syncFromServer(){
     msgs.forEach(function(m){ if(m.createdAt > lastAnyTs) lastAnyTs = m.createdAt; });
     if(!d.readAt) d.readAt = {};
     if(lastAnyTs && (d.readAt[UI.currentUserId] || 0) < lastAnyTs){ d.readAt[UI.currentUserId] = lastAnyTs; setTimeout(saveDB, 0); }
+    var dealNotifIds = (DB.notifications || []).filter(function(n){ return n.dealId === d.id && n.userId === UI.currentUserId && !n.read; }).map(function(n){ n.read = true; return n.id; });
+    if(dealNotifIds.length){ markNotifsReadServer(dealNotifIds); setTimeout(saveDB, 0); }
     var otherReadTs = (counterparty && counterparty.id && d.readAt[counterparty.id]) || 0;
 
     var msgsHtml = msgs.map(function(m, i){
@@ -5189,7 +5206,7 @@ function syncFromServer(){
             var u = res.body.user;
             var existing = DB.users.filter(function(x){ return x.id===u.id; })[0];
             if(!existing){
-              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar, memberSince: nowTs() });
+              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar || "🙂", memberSince: nowTs() });
               saveDB();
             }
             finishLogin({id: u.id});
@@ -5912,7 +5929,7 @@ function syncFromServer(){
             var u = res.body.user;
             var existing = DB.users.filter(function(x){ return x.id===u.id; })[0];
             if(!existing){
-              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar, memberSince: nowTs() });
+              DB.users.push({ id: u.id, name: u.name, phone: u.phone, email: u.email, city: u.city, avatar: u.avatar || "🙂", memberSince: nowTs() });
               saveDB();
             }
             finishRealLogin({id: u.id});
