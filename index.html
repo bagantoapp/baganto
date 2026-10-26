@@ -4517,6 +4517,7 @@ function syncFromServer(){
     }
     if(m.type==="rate") return modalWrap("Rate This Trade", renderRateModalBody(m.dealId, m.toUserId));
     if(m.type==="delete-account") return modalWrap("Why are you leaving?", renderDeleteAccountBody());
+    if(m.type==="seller") return modalWrap("Seller profile", renderSellerModalBody(m.userId));
     if(m.type==="id-verification") return modalWrap("🆔 ID Verification (Pro Seller)", renderIdVerificationModalBody());
     return "";
   }
@@ -4539,6 +4540,39 @@ function syncFromServer(){
         '<button class="btn btn-danger btn-sm" data-action="confirm-delete-account">Continue</button>' +
         '<button class="btn btn-sm" data-action="close-modal">Cancel</button>' +
       '</div>';
+  }
+
+  function renderSellerModalBody(sellerId){
+    var u = userById(sellerId);
+    if(!u || !u.id) return '<div class="muted">This seller is no longer on Baganto.</div>';
+    var rating = userRating(u.id);
+    var ads = (DB.items || []).filter(function(it){ return it.ownerId === u.id && it.status === "available"; });
+    var doneCount = (DB.items || []).filter(function(it){ return it.ownerId === u.id && (it.status === "sold" || it.status === "traded"); }).length;
+    var reviews = (DB.ratings || []).filter(function(r){ return r.toUserId === u.id; }).slice(-5).reverse();
+    var since = u.memberSince ? new Date(u.memberSince).getFullYear() : "";
+    var head = '<div style="display:flex;gap:14px;align-items:center;margin-bottom:12px;">' + avatarOf(u, 64) +
+      '<div><div style="font-size:20px;font-weight:800;">' + esc(u.name) + '</div>' +
+      '<div class="muted">' + esc(u.city || "") + (since ? ' · Member since ' + since : '') + '</div>' +
+      '<div style="margin-top:4px;font-size:14px;">' +
+        (rating.count ? '<span class="stars">★</span> ' + rating.avg.toFixed(1) + ' (' + rating.count + ' review' + (rating.count !== 1 ? 's' : '') + ')' : 'No reviews yet') +
+        ' · ' + ads.length + ' active ad' + (ads.length !== 1 ? 's' : '') + ' · ' + doneCount + ' sold/traded</div></div></div>';
+    var bio = u.bio ? '<div style="margin-bottom:12px;">' + esc(u.bio) + '</div>' : '';
+    var hint = (u.id !== UI.currentUserId && ads.length) ? '<div class="muted" style="font-size:13px;margin-bottom:10px;">To contact ' + esc(u.name) + ', open any ad below and tap “Is this still available?”</div>' : '';
+    var grid = ads.length ? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px;">' + ads.map(function(it){
+      var img = (it.photos && it.photos[0]) ? '<img src="' + it.photos[0] + '" alt="" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">' : '<div style="height:100px;display:flex;align-items:center;justify-content:center;font-size:36px;">' + it.icon + '</div>';
+      var pr = it.forSale ? ((it.price || 0) > 0 ? formatINR(it.price) : 'FREE') : 'Barter';
+      return '<div class="card" data-action="view-seller-item" data-id="' + it.id + '" style="padding:8px;cursor:pointer;">' + img +
+        '<div style="font-weight:700;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(it.title) + '</div>' +
+        '<div class="muted" style="font-size:13px;">' + pr + '</div></div>';
+    }).join('') + '</div>' : '<div class="muted" style="margin-bottom:16px;">No active ads right now.</div>';
+    var revHtml = reviews.length ? reviews.map(function(r){
+      var by = userById(r.fromUserId);
+      return '<div class="card" style="padding:10px;margin-bottom:8px;"><div style="display:flex;justify-content:space-between;"><b>' + esc((by && by.name) || 'A user') + '</b><span class="stars">' + starsStr(r.stars) + '</span></div>' +
+        (r.review ? '<div class="muted" style="font-size:13.5px;margin-top:4px;">' + esc(r.review) + '</div>' : '') + '</div>';
+    }).join('') : '<div class="muted">No reviews yet.</div>';
+    return head + bio + hint +
+      '<div style="font-weight:800;margin:6px 0 10px;">Active ads</div>' + grid +
+      '<div style="font-weight:800;margin:6px 0 10px;">Reviews</div>' + revHtml;
   }
 
   function modalWrap(title, bodyHtml){
@@ -4640,7 +4674,7 @@ function syncFromServer(){
       priceLine +
       wantLine +
       '<div class="hr"></div>' +
-      '<div class="item-meta" style="margin:10px 0 4px;">'+avatarOf(owner, 22)+' <b>'+esc(owner.name)+'</b> · '+esc(it.city)+(dist>0?' · '+dist+' km away':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1)+' ('+rating.count+')':' · No reviews yet')+'</div>' +
+      '<div class="item-meta" style="margin:10px 0 4px;">'+avatarOf(owner, 22)+' <button type="button" class="footer-link" data-action="view-seller" data-userid="'+owner.id+'" style="font-weight:700;font-size:inherit;">'+esc(owner.name)+'</button> · '+esc(it.city)+(dist>0?' · '+dist+' km away':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1)+' ('+rating.count+')':' · No reviews yet')+'</div>' +
       memberLine +
       '<div style="display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;font-size:12px;">' +
         (owner.phoneVerified ? '<span class="trust-badge">☎️ Verified</span>' : '') +
@@ -5468,6 +5502,8 @@ function syncFromServer(){
 
     // Your data: export / delete account
     if(action==="export-my-data"){ exportMyData(); return; }
+    if(action==="view-seller"){ UI.modal = {type:"seller", userId: t.dataset.userid}; render(); return; }
+    if(action==="view-seller-item"){ UI.modal = {type:"item", itemId: t.dataset.id}; render(); return; }
     if(action==="delete-my-account"){ UI.delReasonSel = ""; UI.delOtherText = ""; UI.modal = {type:"delete-account"}; render(); return; }
     if(action==="confirm-delete-account"){
       var dSel = UI.delReasonSel || "";
