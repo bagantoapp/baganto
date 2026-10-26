@@ -1500,6 +1500,18 @@ function renderKeepFocus(){
   }
 }
 setInterval(function(){ if(UI && UI.modal && UI.currentUserId) pullSocial(); }, 3000);
+document.addEventListener("change", function(ev){
+  var t = ev.target;
+  if(t && t.name === "delReason"){
+    UI.delReasonSel = t.value;
+    var w = document.getElementById("delOtherWrap");
+    if(w) w.style.display = (t.value === "Other") ? "block" : "none";
+  }
+});
+document.addEventListener("input", function(ev){
+  var t = ev.target;
+  if(t && t.id === "delOtherText") UI.delOtherText = t.value;
+});
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
@@ -4515,13 +4527,13 @@ function syncFromServer(){
     var opts = reasons.map(function(rs){
       return '<label style="display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;">' +
         '<input type="radio" name="delReason" value="'+esc(rs)+'"'+(sel===rs?' checked':'')+
-        ' onchange="UI.delReasonSel=this.value;document.getElementById(\'delOtherWrap\').style.display=(this.value===\'Other\')?\'block\':\'none\';">' +
+        '>' +
         '<span>'+esc(rs)+'</span></label>';
     }).join("");
     return '<div class="muted" style="margin-bottom:10px;">Your feedback helps us improve Baganto. It is saved without your name or email.</div>' +
       opts +
       '<div id="delOtherWrap" style="display:'+(sel==="Other"?'block':'none')+';margin-top:8px;">' +
-        '<textarea id="delOtherText" rows="3" maxlength="1000" placeholder="Tell us why you are leaving" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;" oninput="UI.delOtherText=this.value;">'+esc(UI.delOtherText||"")+'</textarea>' +
+        '<textarea id="delOtherText" rows="3" maxlength="1000" placeholder="Tell us why you are leaving" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;">'+esc(UI.delOtherText||"")+'</textarea>' +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:16px;">' +
         '<button class="btn btn-danger btn-sm" data-action="confirm-delete-account">Continue</button>' +
