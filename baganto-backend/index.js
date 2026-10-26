@@ -661,9 +661,11 @@ app.post('/social/message', requireAuth, async (req, res) => {
     if (!m || typeof m.id !== 'string' || typeof m.dealId !== 'string') return res.status(400).json({ error: 'Invalid message' });
     if (m.senderId !== req.userId) return res.status(403).json({ error: 'Not your message' });
     if (JSON.stringify(m).length > 3000000) return res.status(413).json({ error: 'Message too large' });
-    const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(m.dealId)}&select=user_a,user_b`, 'GET');
+    const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(m.dealId)}&select=user_a,user_b,data`, 'GET');
     if (!dl.length) return res.status(404).json({ error: 'Deal not found' });
     if (dl[0].user_a !== req.userId && dl[0].user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
+    const dst = dl[0].data && dl[0].data.status;
+    if (dst === 'rejected' || dst === 'withdrawn') return res.status(403).json({ error: 'This chat is closed' });
     const ex = await sbFetch(`deal_messages?id=eq.${encodeURIComponent(m.id)}&select=id`, 'GET');
     if (ex.length) return res.json({ success: true });
     await sbFetch('deal_messages', 'POST', { id: m.id, deal_id: m.dealId, sender_id: req.userId, data: m });

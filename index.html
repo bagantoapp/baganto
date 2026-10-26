@@ -1512,6 +1512,18 @@ document.addEventListener("input", function(ev){
   var t = ev.target;
   if(t && t.id === "delOtherText") UI.delOtherText = t.value;
 });
+(function(){
+  var _renderChatThread = renderChatThread;
+  renderChatThread = function(d, cp){
+    var html = _renderChatThread.apply(this, arguments);
+    if(d && (d.status === "rejected" || d.status === "withdrawn")){
+      html = html.replace(/placeholder="Type a message[^"]*"/g, 'disabled placeholder="This chat is closed"');
+      html += '<div class="muted" style="font-size:13px;margin-top:8px;text-align:center;">This chat is closed because the request was ' +
+        (d.status === "rejected" ? "declined" : "withdrawn") + '. To talk again, open the ad and send a new request.</div>';
+    }
+    return html;
+  };
+})();
 var avatarSavePending = false;
 var lastAvatarChangeAt = 0;
 function syncFromServer(){
@@ -2495,6 +2507,7 @@ function syncFromServer(){
     if(!text && !photos.length) return;
     // Blocking works both ways — neither side can message the other
     var dlk = DB.deals.filter(function(d){ return d.id===dealId; })[0];
+    if(dlk && (dlk.status==="rejected" || dlk.status==="withdrawn")){ showToast("This chat is closed."); return; }
     if(dlk){
       var otherId = dlk.fromUserId===UI.currentUserId ? dlk.toUserId : dlk.fromUserId;
       if(isUserBlocked(otherId, UI.currentUserId)){
