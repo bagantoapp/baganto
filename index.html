@@ -2667,7 +2667,7 @@ function syncFromServer(){
 
     if(!API_BASE){ showToast("Cannot reach the server. Try again later."); return; }
     showToast("Deleting your account...");
-    fetch(API_BASE + "/users/me", { method: "DELETE" }).then(function(r){
+    fetch(API_BASE + "/users/me", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify(UI.deleteReason || {}) }).then(function(r){
       if(!r.ok) throw new Error("delete failed");
       finishLocalDelete(u);
     }).catch(function(){ showToast("Could not delete your account. Try again."); });
@@ -3357,6 +3357,7 @@ function syncFromServer(){
     var pct = Math.min(100, Math.round(used/limit*100));
     var mb = (used/1048576).toFixed(1);
     var colour = pct >= 85 ? "#ef4444" : (pct >= 60 ? "#f59e0b" : "var(--primary)");
+    return '';
     return '<div style="margin-bottom:10px;">' +
       '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Storage used: <b>'+mb+' MB</b> of about 5 MB ('+pct+'%)' +
         (pct >= 85 ? ' — delete some photos or old ads soon' : '') + '</div>' +
@@ -4503,8 +4504,29 @@ function syncFromServer(){
       return modalWrap(title, renderTradeModalBody(m.dealId));
     }
     if(m.type==="rate") return modalWrap("Rate This Trade", renderRateModalBody(m.dealId, m.toUserId));
+    if(m.type==="delete-account") return modalWrap("Why are you leaving?", renderDeleteAccountBody());
     if(m.type==="id-verification") return modalWrap("🆔 ID Verification (Pro Seller)", renderIdVerificationModalBody());
     return "";
+  }
+
+  function renderDeleteAccountBody(){
+    var reasons = ["It is too expensive", "I did not find what I was looking for", "Bad experience with a buyer or seller", "Too many notifications or emails", "Privacy concerns", "I made another account", "Other"];
+    var sel = UI.delReasonSel || "";
+    var opts = reasons.map(function(rs){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer;">' +
+        '<input type="radio" name="delReason" value="'+esc(rs)+'"'+(sel===rs?' checked':'')+
+        ' onchange="UI.delReasonSel=this.value;document.getElementById(\'delOtherWrap\').style.display=(this.value===\'Other\')?\'block\':\'none\';">' +
+        '<span>'+esc(rs)+'</span></label>';
+    }).join("");
+    return '<div class="muted" style="margin-bottom:10px;">Your feedback helps us improve Baganto. It is saved without your name or email.</div>' +
+      opts +
+      '<div id="delOtherWrap" style="display:'+(sel==="Other"?'block':'none')+';margin-top:8px;">' +
+        '<textarea id="delOtherText" rows="3" maxlength="1000" placeholder="Tell us why you are leaving" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;" oninput="UI.delOtherText=this.value;">'+esc(UI.delOtherText||"")+'</textarea>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:16px;">' +
+        '<button class="btn btn-danger btn-sm" data-action="confirm-delete-account">Continue</button>' +
+        '<button class="btn btn-sm" data-action="close-modal">Cancel</button>' +
+      '</div>';
   }
 
   function modalWrap(title, bodyHtml){
@@ -5434,7 +5456,17 @@ function syncFromServer(){
 
     // Your data: export / delete account
     if(action==="export-my-data"){ exportMyData(); return; }
-    if(action==="delete-my-account"){ deleteMyAccount(); render(); return; }
+    if(action==="delete-my-account"){ UI.delReasonSel = ""; UI.delOtherText = ""; UI.modal = {type:"delete-account"}; render(); return; }
+    if(action==="confirm-delete-account"){
+      var dSel = UI.delReasonSel || "";
+      var dTxt = String(UI.delOtherText || "").trim();
+      if(!dSel){ showToast("Please choose a reason."); return; }
+      if(dSel === "Other" && !dTxt){ showToast("Please tell us why you are leaving."); return; }
+      UI.deleteReason = { reason: dSel, details: dSel === "Other" ? dTxt : "" };
+      UI.modal = null; render();
+      deleteMyAccount();
+      return;
+    }
     // Trust & Safety: Blocking
     if(action==="block-user"){
       var blkId = t.dataset.userid;

@@ -731,6 +731,12 @@ app.delete('/users/me', requireAuth, async (req, res) => {
   try {
     const me = encodeURIComponent(req.userId);
     const rows = await sbFetch(`users?id=eq.${me}&select=email`, 'GET');
+    const fbReason = (req.body && typeof req.body.reason === 'string') ? req.body.reason.slice(0, 100) : '';
+    const fbDetails = (req.body && typeof req.body.details === 'string') ? req.body.details.slice(0, 1000) : '';
+    if (fbReason) {
+      try { await sbFetch('account_deletion_feedback', 'POST', { reason: fbReason, details: fbDetails || null }); }
+      catch (e) { console.error('deletion feedback save failed:', e.message); }
+    }
     await sbFetch(`deals?or=(user_a.eq.${me},user_b.eq.${me})`, 'DELETE');
     await sbFetch(`deal_ratings?or=(from_user.eq.${me},to_user.eq.${me})`, 'DELETE');
     await sbFetch(`notifications?user_id=eq.${me}`, 'DELETE');
