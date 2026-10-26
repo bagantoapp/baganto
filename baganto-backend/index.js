@@ -631,7 +631,7 @@ app.post('/social/deal', requireAuth, async (req, res) => {
       const newSt = d.status || 'pending';
       const rank = { pending: 0, accepted: 1, rejected: 2, withdrawn: 2, completed: 3 };
       if (newSt !== oldSt && rank[newSt] !== undefined && rank[oldSt] !== undefined) {
-        let ok = rank[newSt] > rank[oldSt];
+        let ok = rank[newSt] > rank[oldSt] || (newSt === 'pending' && (oldSt === 'rejected' || oldSt === 'withdrawn') && req.userId === row.user_a);
         if (ok && (newSt === 'accepted' || newSt === 'rejected') && req.userId !== row.user_b) ok = false;
         if (ok && newSt === 'withdrawn' && req.userId !== row.user_a) ok = false;
         if (ok && newSt === 'completed' && oldSt !== 'accepted') ok = false;

@@ -1340,6 +1340,32 @@ function dealHasUnread(d){
 function unreadChatCount(){
   return (DB.deals || []).filter(dealHasUnread).length;
 }
+function dealAdKey(d){ return d ? (d.itemId || d.requestedItemId || "") : ""; }
+function mergeDuplicateDeals(){
+  if(!DB || !DB.deals) return;
+  var skip = { id: 1, createdAt: 1, readAt: 1, fromUserId: 1, toUserId: 1, typingUsers: 1 };
+  var merged = false;
+  var fresh = DB.deals.filter(function(d){ return d && d.id && pushedSocial.deals[d.id] === undefined && dealAdKey(d); });
+  fresh.forEach(function(n){
+    if(DB.deals.indexOf(n) === -1) return;
+    var older = DB.deals.filter(function(o){
+      if(o === n || o.fromUserId !== n.fromUserId || o.toUserId !== n.toUserId || dealAdKey(o) !== dealAdKey(n)) return false;
+      var oc = o.createdAt || 0, nc = n.createdAt || 0;
+      return oc < nc || (oc === nc && String(o.id) < String(n.id));
+    }).sort(function(a, b){ return (a.createdAt || 0) - (b.createdAt || 0); })[0];
+    if(!older) return;
+    if(older.status === "pending" || older.status === "rejected" || older.status === "withdrawn"){
+      Object.keys(n).forEach(function(k){ if(!skip[k]) older[k] = n[k]; });
+      older.status = "pending";
+    }
+    (DB.messages || []).forEach(function(m){ if(m.dealId === n.id) m.dealId = older.id; });
+    (DB.notifications || []).forEach(function(x){ if(x.dealId === n.id) x.dealId = older.id; });
+    if(UI.modal && UI.modal.dealId === n.id) UI.modal.dealId = older.id;
+    DB.deals = DB.deals.filter(function(d){ return d !== n; });
+    merged = true;
+  });
+  if(merged){ persistLocal(); render(); showToast("Added to your existing chat for this ad."); }
+}
 function markNotifsReadServer(ids){
   if(!API_BASE || !getAuthToken()) return;
   fetch(API_BASE + "/social/notify-read", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(ids ? { ids: ids } : {}) }).catch(function(){});
@@ -1480,7 +1506,7 @@ function pullSocial(){
   var _saveDB = saveDB;
   saveDB = function(){
     var out = _saveDB.apply(this, arguments);
-    setTimeout(function(){ pushSocial(); syncDealItems(); }, 0);
+    setTimeout(function(){ mergeDuplicateDeals(); pushSocial(); syncDealItems(); }, 0);
     return out;
   };
 })();
