@@ -4759,6 +4759,11 @@ function syncFromServer(){
     // before it has certainly been seen, which drives the ✓✓ ticks.
     var theirLastTs = 0;
     msgs.forEach(function(m){ if(m.senderId!==UI.currentUserId && m.createdAt>theirLastTs) theirLastTs = m.createdAt; });
+    var lastAnyTs = 0;
+    msgs.forEach(function(m){ if(m.createdAt > lastAnyTs) lastAnyTs = m.createdAt; });
+    if(!d.readAt) d.readAt = {};
+    if(lastAnyTs && (d.readAt[UI.currentUserId] || 0) < lastAnyTs){ d.readAt[UI.currentUserId] = lastAnyTs; setTimeout(saveDB, 0); }
+    var otherReadTs = (counterparty && counterparty.id && d.readAt[counterparty.id]) || 0;
 
     var msgsHtml = msgs.map(function(m, i){
       var mine = m.senderId===UI.currentUserId;
@@ -4773,15 +4778,16 @@ function syncFromServer(){
         return '<img class="msg-img" src="'+src+'" alt="Shared photo" data-action="view-chat-photo" data-src="'+src+'">';
       }).join("") : "";
       var body = imgs + (m.text ? esc(m.text) : "");
-      var seen = mine && theirLastTs > m.createdAt;
-      var tick = mine ? '<span class="msg-tick'+(seen?' seen':'')+'">'+(seen?'✓✓':'✓')+'</span>' : '';
+      var seen = mine && (otherReadTs >= m.createdAt || theirLastTs > m.createdAt);
+      var delivered = mine && pushedSocial.messages[m.id] !== undefined;
+      var tick = mine ? '<span class="msg-tick'+(seen?' seen':'')+'">'+((seen || delivered)?'✓✓':'✓')+'</span>' : '';
       out += '<div class="msg '+(mine?'msg-me':'msg-them')+(grouped?' grouped':'')+'">' + body +
         '<span class="msg-time">'+esc(formatClock(m.createdAt))+tick+'</span></div>';
       return out;
     }).join("");
 
     var typingUsers = getTypingUsers(d.id);
-    var typingHtml = typingUsers.length ? '<div class="chat-typing">'+esc(typingUsers.join(", "))+' is typing…</div>' : '';
+    var typingHtml = '';
 
     var emptyThread = '<div class="chat-day">Today</div>' +
       '<div class="muted" style="align-self:center;font-size:12.5px;text-align:center;padding:14px 0;">No messages yet — say hello!</div>';
