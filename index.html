@@ -4825,6 +4825,24 @@ function syncFromServer(){
       } else {
         actionsS = '<button class="btn btn-primary btn-sm" data-action="open-rate" data-id="'+d.id+'" data-to="'+counterpartyId+'">Rate '+esc(counterparty.name)+'</button>';
       }
+      if(d.status !== "completed"){
+        var cpName = esc(counterparty.name);
+        if(d.status === "pending"){
+          roleLine = isBuyer ? "You asked to buy this from "+cpName+". Waiting for the seller to confirm." : cpName+" wants to buy this. Accept to go ahead, or decline.";
+          actionsS = isBuyer
+            ? '<button class="btn btn-danger btn-sm" data-action="withdraw-deal" data-id="'+d.id+'">Cancel request</button>'
+            : '<button class="btn btn-primary btn-sm" data-action="accept-deal" data-id="'+d.id+'">Accept</button> <button class="btn btn-danger btn-sm" data-action="reject-deal" data-id="'+d.id+'">Decline</button>';
+        } else if(d.status === "accepted"){
+          roleLine = isBuyer ? "The seller accepted. Arrange payment and pickup in chat." : "You accepted. Tap Mark Completed after payment and handover.";
+          actionsS = isBuyer ? '' : '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Completed</button>';
+        } else if(d.status === "rejected"){
+          roleLine = isBuyer ? "The seller declined this request." : "You declined this request.";
+          actionsS = '';
+        } else if(d.status === "withdrawn"){
+          roleLine = isBuyer ? "You cancelled this request." : "The buyer cancelled this request.";
+          actionsS = '';
+        }
+      }
       return '' +
         '<div class="muted" style="margin-bottom:12px;font-size:13px;">'+roleLine+'</div>' +
         renderChatThread(d, counterparty) +
