@@ -3410,7 +3410,7 @@ function syncFromServer(){
         // Unread notifications live in the bell on the Profile page, so surface
         // the count on the tab itself — otherwise nobody knows to look.
         var unreadN = UI.currentUserId ? unreadNotificationCount() : 0;
-        if(unreadN>0) b += '<span class="nav-badge" title="Unread notifications">'+(unreadN>9?'9+':unreadN)+'</span>';
+
         if(saved>0) b += '<span class="saved-badge">'+saved+'</span>';
       }
       return '<button class="'+cls+'" data-action="goto-tab" data-tab="'+t.id+'">'+t.label+b+'</button>';
