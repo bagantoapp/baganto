@@ -371,6 +371,7 @@
   .chat-row:first-child{border-radius:var(--radius) var(--radius) 0 0;}
   .chat-row:last-child{border-radius:0 0 var(--radius) var(--radius);border-bottom:none;}
   .chat-row.unread{background:#fff8f3;}
+  .chat-row.chat-selected{background:#ffedd5;}
   .chat-avatar{font-size:21px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg);border-radius:50%;border:1px solid var(--border);}
   .chat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
   .chat-top{display:flex;align-items:baseline;gap:8px;}
@@ -1375,6 +1376,17 @@ function isChatHidden(d){
     if(msgs[i] && msgs[i].dealId === d.id && msgs[i].createdAt > h) return false;
   }
   return true;
+}
+function chatSelectedCount(){
+  var s = UI.chatSelected || {};
+  return Object.keys(s).filter(function(k){ return s[k]; }).length;
+}
+function markDealRead(d){
+  var me = UI.currentUserId, last = 0;
+  (DB.messages || []).forEach(function(m){ if(m.dealId === d.id && m.createdAt > last) last = m.createdAt; });
+  if(!last) last = d.createdAt || Date.now();
+  d.readAt = d.readAt || {};
+  if((d.readAt[me] || 0) < last) d.readAt[me] = last;
 }
 function markNotifsReadServer(ids){
   if(!API_BASE || !getAuthToken()) return;
@@ -4087,8 +4099,9 @@ function syncFromServer(){
     // Build a unified inbox: one row per deal, sorted by last activity
     var myDeals = DB.deals.filter(function(d){
       return d.fromUserId===UI.currentUserId || d.toUserId===UI.currentUserId;
-    myDeals = myDeals.filter(function(d){ return !isChatHidden(d); });
     });
+    myDeals = myDeals.filter(function(d){ return !isChatHidden(d); });
+    UI.chatVisibleIds = myDeals.map(function(d){ return d.id; });
 
     // Apply filter
     var cf = UI.chatsFilter;
@@ -4134,7 +4147,7 @@ function syncFromServer(){
 
       var showTag = (d.status==="pending" || d.status==="accepted" || d.status==="completed");
       var tagText = d.status==="completed" ? "Done" : (d.status==="accepted" ? "Accepted" : "Awaiting reply");
-      return '<div class="chat-row'+(isUnread?' unread':'')+'" data-action="open-deal" data-id="'+d.id+'">' +
+      return '<div class="chat-row'+(isUnread?' unread':'')+(UI.chatSelectMode && UI.chatSelected && UI.chatSelected[d.id]?' chat-selected':'')+'" data-action="'+(UI.chatSelectMode?'toggle-chat-select':'open-deal')+'" data-id="'+d.id+'">'+(UI.chatSelectMode?'<input type="checkbox" '+(UI.chatSelected&&UI.chatSelected[d.id]?'checked ':'')+'style="margin-right:10px;pointer-events:none;">':'') +
         '<div class="chat-avatar">'+avatarOf(cp, 40)+'</div>' +
         '<div class="chat-info">' +
           '<div class="chat-top"><span class="chat-name">'+esc(cp.name)+'</span>' +
@@ -4163,6 +4176,14 @@ function syncFromServer(){
     return '' +
       '<div class="section-title">Chats</div>' +
       '<div class="section-sub">'+(unreadCount>0?unreadCount+' unread · ':'')+myDeals.length+' conversation'+(myDeals.length!==1?'s':'')+'</div>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px;">' +
+        (UI.chatSelectMode
+          ? '<button class="btn btn-danger btn-sm" data-action="chats-delete-selected">🗑 Delete selected ('+chatSelectedCount()+')</button>' +
+            '<button class="btn btn-sm" data-action="chats-select-all">Select all</button>' +
+            '<button class="btn btn-sm" data-action="chats-select-off">Cancel</button>'
+          : '<button class="btn btn-sm" data-action="chats-select-on">☑ Select</button>' +
+            '<button class="btn btn-sm" data-action="chats-mark-all-read">✓ Mark all as read</button>') +
+      '</div>' +
       filterBar +
       (myDeals.length ? '<div class="card" style="padding:0;overflow:hidden;"><div class="chat-list">'+rows+'</div></div>' : emptyHtml);
   }
@@ -5555,6 +5576,36 @@ function syncFromServer(){
 
     // Your data: export / delete account
     if(action==="export-my-data"){ exportMyData(); return; }
+    if(action==="chats-select-on"){ UI.chatSelectMode = true; UI.chatSelected = {}; render(); return; }
+    if(action==="chats-select-off"){ UI.chatSelectMode = false; UI.chatSelected = {}; render(); return; }
+    if(action==="chats-select-all"){ UI.chatSelected = {}; (UI.chatVisibleIds || []).forEach(function(id){ UI.chatSelected[id] = true; }); render(); return; }
+    if(action==="toggle-chat-select"){ UI.chatSelected = UI.chatSelected || {}; var cid = t.dataset.id; UI.chatSelected[cid] = !UI.chatSelected[cid]; render(); return; }
+    if(action==="chats-mark-all-read"){
+      (DB.deals || []).forEach(function(d){ if(d.fromUserId===UI.currentUserId || d.toUserId===UI.currentUserId) markDealRead(d); });
+      var nids = (DB.notifications || []).filter(function(n){ return n.userId===UI.currentUserId && !n.read && n.dealId; }).map(function(n){ n.read = true; return n.id; });
+      if(nids.length) markNotifsReadServer(nids);
+      saveDB(); render();
+      showToast("All chats marked as read.");
+      return;
+    }
+    if(action==="chats-delete-selected"){
+      var selMap = UI.chatSelected || {};
+      var selIds = Object.keys(selMap).filter(function(k){ return selMap[k]; });
+      if(!selIds.length){ showToast("Select chats to delete."); return; }
+      var deletable = [], kept = 0;
+      selIds.forEach(function(id){
+        var dd = findDeal(id);
+        if(!dd) return;
+        if(dd.status==="rejected" || dd.status==="withdrawn" || dd.status==="completed") deletable.push(dd); else kept++;
+      });
+      if(!deletable.length){ showToast("Open chats can't be deleted. Withdraw or decline them first."); return; }
+      if(!window.confirm("Delete " + deletable.length + " chat" + (deletable.length!==1?"s":"") + " from your list? The other person keeps their copy.")) return;
+      deletable.forEach(function(dd){ dd.hiddenFor = dd.hiddenFor || {}; dd.hiddenFor[UI.currentUserId] = Date.now(); });
+      UI.chatSelectMode = false; UI.chatSelected = {};
+      saveDB(); render();
+      showToast("Deleted " + deletable.length + " chat" + (deletable.length!==1?"s":"") + "." + (kept ? " " + kept + " open chat" + (kept!==1?"s were":" was") + " kept. Withdraw or decline first." : ""));
+      return;
+    }
     if(action==="delete-chat"){
       var dc = findDeal(t.dataset.id);
       if(!dc) return;
