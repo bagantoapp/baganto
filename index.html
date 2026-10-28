@@ -372,6 +372,7 @@
   .chat-row:first-child{border-radius:var(--radius) var(--radius) 0 0;}
   .chat-row:last-child{border-radius:0 0 var(--radius) var(--radius);border-bottom:none;}
   .chat-row.unread{background:#fff8f3;}
+  .sync-pill.sync-hidden{display:none !important;}
   .chat-row.chat-selected{background:#ffedd5;}
   .chat-avatar{font-size:21px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg);border-radius:50%;border:1px solid var(--border);}
   .chat-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
@@ -1613,9 +1614,9 @@ function syncFromServer(){
   // so a background sync update never gets clobbered by stale static markup.
   function syncPillState(){
     if(!API_BASE) return {text:"Local demo mode", cls:"sync-pill sync-off"};
-    if(!apiChecked) return {text:"Connecting…", cls:"sync-pill sync-wait"};
-    if(apiOnline) return {text:"● Synced", cls:"sync-pill sync-on"};
-    return {text:"○ Offline (local only)", cls:"sync-pill sync-off"};
+    if(!apiChecked) return {text:"", cls:"sync-pill sync-hidden"};
+    if(apiOnline) return {text:"", cls:"sync-pill sync-hidden"};
+    return {text:"⚠ Can't connect. Retrying…", cls:"sync-pill sync-off"};
   }
   function renderSyncPill(){
     var el = document.getElementById("syncPill");
