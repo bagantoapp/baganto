@@ -465,6 +465,22 @@
   .auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
   .auth-divider::before{left:0;} .auth-divider::after{right:0;}
 
+
+  /* ---- Phone layout ---- */
+  html,body{max-width:100%;overflow-x:hidden;}
+  img,video{max-width:100%;}
+  @media (max-width:640px){
+    .wrap{padding:12px;}
+    .cat-grid{grid-template-columns:repeat(2,1fr) !important;gap:8px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr)) !important;gap:10px;}
+    .hero-logo{width:64px;height:64px;}
+    .hero-tagline{height:auto !important;max-width:46%;}
+    .toolbar input[type=text]{min-width:0;}
+    .msg-img{max-width:70vw;}
+    .auth-card{padding:24px 18px;}
+    .modal-box{max-width:100%;width:calc(100% - 16px);}
+    header{flex-wrap:wrap;gap:8px;}
+  }
 </style>
 </head>
 <body>
