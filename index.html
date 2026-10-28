@@ -3314,7 +3314,7 @@ function syncFromServer(){
             '<div class="auth-field"><label>Password</label>'+
               '<div class="pw-wrap"><input type="password" name="password" id="signupPassField" placeholder="Create a password" required><button type="button" class="pw-toggle" data-action="toggle-pw" data-target="signupPassField">show</button></div></div>'+
             '<button type="submit" class="auth-btn" id="signupSubmit" disabled style="opacity:0.5;">Create Account</button>'+
-            '<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">By signing up you agree to our <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal" data-page="terms">Terms</button> and <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal" data-page="privacy">Privacy Policy</button>.</div>'+
+            '<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">By signing up you agree to our <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal-modal" data-page="terms">Terms</button> and <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal-modal" data-page="privacy">Privacy Policy</button>.</div>'+
           '</form>'+
           '<div class="auth-switch" style="margin-top:16px;">Already have an account? <a data-action="goto-login">Login</a></div>'+
         '</div>'+
@@ -5178,6 +5178,20 @@ function syncFromServer(){
       var errSw = document.getElementById("authError");
       if(errSw) errSw.textContent = "";
       render();
+      return;
+    }
+    if(action==="open-legal-modal"){
+      var lp = (typeof LEGAL_DOCS !== "undefined") ? LEGAL_DOCS[t.dataset.page] : null;
+      if(!lp) return;
+      var lhtml = Array.isArray(lp.html) ? lp.html.join("") : lp.html;
+      var oldL = document.getElementById("legalOverlay"); if(oldL) oldL.remove();
+      var holder = document.createElement("div");
+      holder.id = "legalOverlay";
+      holder.innerHTML = '<div class="modal-overlay" onclick="if(event.target===this) document.getElementById(\'legalOverlay\').remove()">' +
+        '<div class="modal-box"><div class="modal-head"><h3>' + esc(lp.title) + '</h3>' +
+        '<button class="modal-close" type="button" onclick="document.getElementById(\'legalOverlay\').remove()">✕</button></div>' +
+        '<div class="modal-body">' + lhtml + '</div></div></div>';
+      document.body.appendChild(holder);
       return;
     }
     if(action==="send-signup-otp"){
