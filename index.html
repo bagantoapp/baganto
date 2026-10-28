@@ -1161,11 +1161,23 @@
   }
 
   // ---------------- Persistence ----------------
+  function emptyDB(){
+    return { users: [], items: [], deals: [], messages: [], ratings: [], notifications: [],
+             savedItems: [], reports: [], purchases: [], supportTickets: [] };
+  }
   function loadDB(){
     var raw = storageGet(STORAGE_KEY);
     if(raw){
       try{
         var loaded = migrateDB(JSON.parse(raw));
+        var demoIds = { u1:1, u2:1, u3:1, u4:1, u5:1, u6:1 };
+        loaded.deals = (loaded.deals || []).filter(function(d){ return !demoIds[d.fromUserId] && !demoIds[d.toUserId]; });
+        var keptDeals = {}; loaded.deals.forEach(function(d){ keptDeals[d.id] = 1; });
+        loaded.messages = (loaded.messages || []).filter(function(m){ return keptDeals[m.dealId]; });
+        loaded.ratings = (loaded.ratings || []).filter(function(r){ return !demoIds[r.fromUserId] && !demoIds[r.toUserId]; });
+        loaded.notifications = (loaded.notifications || []).filter(function(n){ return !demoIds[n.userId]; });
+        loaded.users = (loaded.users || []).filter(function(u){ return !demoIds[u.id]; });
+        loaded.items = (loaded.items || []).filter(function(it){ return !demoIds[it.ownerId]; });
         var expiredCount = loaded.__expiredNow || 0;
         delete loaded.__expiredNow;
         // Write expiries back immediately, otherwise they are recalculated on
@@ -1174,7 +1186,7 @@
         return loaded;
       }catch(e){ /* fall through to reseed */ }
     }
-    var fresh = migrateDB(seedDB());
+    var fresh = migrateDB(emptyDB());
     delete fresh.__expiredNow;
     storageSet(STORAGE_KEY, JSON.stringify(fresh));
     return fresh;
@@ -1629,12 +1641,12 @@ function syncFromServer(){
   function seedDB(){
     var now = nowTs();
     var users = [
-      {id:"u1", name:"You", phone:"9876541001", email:"you@baganto.com", password:"demo123", avatar:"🙂", city:"Mumbai, Maharashtra", memberSince:now-420*DAY, isAdmin:true, phoneVerified:true, emailVerified:true, isVerified:true, idVerified:true, blockedUsers:[], reputationScore:98, dealCompletionRate:100, responseTimeHours:2, fraudFlags:0},
-      {id:"u2", name:"Aarav Mehta", phone:"9876541002", email:"aarav@baganto.com", password:"demo123", avatar:"🧑‍💻", city:"Bengaluru, Karnataka", memberSince:now-310*DAY, phoneVerified:true, emailVerified:true, isVerified:true, blockedUsers:[], reputationScore:92, dealCompletionRate:95, responseTimeHours:4, fraudFlags:0},
-      {id:"u3", name:"Priya Sharma", phone:"9876541003", email:"priya@baganto.com", password:"demo123", avatar:"👩‍🎨", city:"Delhi", memberSince:now-180*DAY, phoneVerified:true, blockedUsers:[], reputationScore:85, dealCompletionRate:87, responseTimeHours:6, fraudFlags:0},
-      {id:"u4", name:"Rohan Verma", phone:"9876541004", email:"rohan@baganto.com", password:"demo123", avatar:"🧑‍🔧", city:"Chennai, Tamil Nadu", memberSince:now-90*DAY, blockedUsers:[], reputationScore:78, dealCompletionRate:80, responseTimeHours:8, fraudFlags:0},
-      {id:"u5", name:"Ananya Iyer", phone:"9876541005", email:"ananya@baganto.com", password:"demo123", avatar:"👩‍🔬", city:"Pune, Maharashtra", memberSince:now-200*DAY, phoneVerified:true, emailVerified:true, isVerified:true, blockedUsers:[], reputationScore:88, dealCompletionRate:92, responseTimeHours:3, fraudFlags:0},
-      {id:"u6", name:"Karan Singh", phone:"9876541006", email:"karan@baganto.com", password:"demo123", avatar:"🧑‍🍳", city:"Jaipur, Rajasthan", memberSince:now-55*DAY, blockedUsers:[], reputationScore:72, dealCompletionRate:75, responseTimeHours:12, fraudFlags:0}
+      {id:"u1", name:"You", phone:"9876541001", email:"you@baganto.com", avatar:"🙂", city:"Mumbai, Maharashtra", memberSince:now-420*DAY, isAdmin:true, phoneVerified:true, emailVerified:true, isVerified:true, idVerified:true, blockedUsers:[], reputationScore:98, dealCompletionRate:100, responseTimeHours:2, fraudFlags:0},
+      {id:"u2", name:"Aarav Mehta", phone:"9876541002", email:"aarav@baganto.com", avatar:"🧑‍💻", city:"Bengaluru, Karnataka", memberSince:now-310*DAY, phoneVerified:true, emailVerified:true, isVerified:true, blockedUsers:[], reputationScore:92, dealCompletionRate:95, responseTimeHours:4, fraudFlags:0},
+      {id:"u3", name:"Priya Sharma", phone:"9876541003", email:"priya@baganto.com", avatar:"👩‍🎨", city:"Delhi", memberSince:now-180*DAY, phoneVerified:true, blockedUsers:[], reputationScore:85, dealCompletionRate:87, responseTimeHours:6, fraudFlags:0},
+      {id:"u4", name:"Rohan Verma", phone:"9876541004", email:"rohan@baganto.com", avatar:"🧑‍🔧", city:"Chennai, Tamil Nadu", memberSince:now-90*DAY, blockedUsers:[], reputationScore:78, dealCompletionRate:80, responseTimeHours:8, fraudFlags:0},
+      {id:"u5", name:"Ananya Iyer", phone:"9876541005", email:"ananya@baganto.com", avatar:"👩‍🔬", city:"Pune, Maharashtra", memberSince:now-200*DAY, phoneVerified:true, emailVerified:true, isVerified:true, blockedUsers:[], reputationScore:88, dealCompletionRate:92, responseTimeHours:3, fraudFlags:0},
+      {id:"u6", name:"Karan Singh", phone:"9876541006", email:"karan@baganto.com", avatar:"🧑‍🍳", city:"Jaipur, Rajasthan", memberSince:now-55*DAY, blockedUsers:[], reputationScore:72, dealCompletionRate:75, responseTimeHours:12, fraudFlags:0}
     ];
 
     var items = [
@@ -1930,7 +1942,7 @@ function syncFromServer(){
       if(!u.hasOwnProperty("avatarPhoto")) u.avatarPhoto = null;
       // Replace any plain-text password with a salted hash, once
       if(!u.pwHash){
-        setUserPassword(u, u.password != null ? u.password : "demo123");
+        if(u.password != null) setUserPassword(u, u.password);
       } else if(u.password){
         delete u.password;
       }
@@ -1980,7 +1992,7 @@ function syncFromServer(){
   function resetDemo(){
     if(!window.confirm("Reset all demo data back to the original seed? This clears your listings, trades and messages.")) return;
     storageRemove(STORAGE_KEY);
-    DB = seedDB();
+    DB = emptyDB();
     saveDB();
     UI.currentUserId = "u1";
     storageSet(USER_KEY, "u1");
@@ -5318,17 +5330,24 @@ function syncFromServer(){
     }
     if(action==="resend-otp"){
       var errRe = document.getElementById("authError");
-      if(UI.otpVerifyMode==="forgot-password"){
-        UI.tempForgotOtp = generateOTP();
-        if(errRe) errRe.innerHTML = '<span style="color:#16a34a;">✓ New code sent. Demo OTP: '+UI.tempForgotOtp+'</span>';
+      if(UI.otpVerifyMode==="reset" && UI.resetEmail){
+        if(errRe) errRe.textContent = "";
+        fetch(API_BASE + "/auth/otp/send", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ email: UI.resetEmail, purpose: "reset" })
+        }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
+        .then(function(res){
+          if(!res.ok){ if(errRe) errRe.textContent = (res.body && res.body.error) || "Could not send a new code."; return; }
+          showToast("A new code was sent to " + UI.resetEmail);
+        }).catch(function(){ if(errRe) errRe.textContent = "Network error. Try again."; });
       } else {
-        UI.tempLoginOtp = generateOTP();
-        if(errRe) errRe.innerHTML = '<span style="color:#16a34a;">✓ New OTP sent. Demo OTP: '+UI.tempLoginOtp+'</span>';
+        if(errRe) errRe.textContent = "Please go back and start again.";
       }
       return;
     }
     if(action==="back-from-otp"){
-      UI.authPage = (UI.otpVerifyMode==="forgot-password") ? "forgot-password" : "login";
+      UI.authPage = (UI.otpVerifyMode==="forgot-password" || UI.otpVerifyMode==="reset") ? "forgot-password" : "login";
       UI.otpSent=false; UI.otpVerifyMode=null;
       render(); return;
     }
@@ -6288,7 +6307,7 @@ function syncFromServer(){
       var errEl = document.getElementById("authError");
       if(!otp){ if(errEl) errEl.textContent="Enter the code."; return; }
       if(UI.otpVerifyMode==="login"){
-        if(otp !== UI.tempLoginOtp){
+        if(true){
           if(errEl) errEl.textContent="Incorrect OTP. Try again."; return;
         }
         UI.currentUserId = UI.tempLoginUserId;
