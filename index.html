@@ -5012,7 +5012,8 @@ function syncFromServer(){
             : '<button class="btn btn-primary btn-sm" data-action="accept-deal" data-id="'+d.id+'">Accept</button> <button class="btn btn-danger btn-sm" data-action="reject-deal" data-id="'+d.id+'">Decline</button>';
         } else if(d.status === "accepted"){
           roleLine = isBuyer ? "The seller accepted. Arrange payment and pickup in chat." : "You accepted. Tap Mark Completed after payment and handover.";
-          actionsS = isBuyer ? '' : '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Completed</button>';
+          actionsS = (isBuyer ? '' : '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Completed</button> ') +
+            '<button class="btn btn-danger btn-sm" data-action="cancel-deal" data-id="'+d.id+'">Cancel deal</button>';
         } else if(d.status === "rejected"){
           roleLine = isBuyer ? "The seller declined this request." : "You declined this request.";
           actionsS = '';
@@ -5036,7 +5037,8 @@ function syncFromServer(){
     } else if(d.status==="pending" && !isIncoming){
       actions = '<button class="btn btn-danger btn-sm" data-action="withdraw-deal" data-id="'+d.id+'">Withdraw Proposal</button>';
     } else if(d.status==="accepted"){
-      actions = '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Trade Complete</button>';
+      actions = '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Trade Complete</button> ' +
+                '<button class="btn btn-danger btn-sm" data-action="cancel-deal" data-id="'+d.id+'">Cancel deal</button>';
     } else if(d.status==="completed"){
       var existing = ratingByFrom(d.id, UI.currentUserId);
       if(existing){
@@ -5638,6 +5640,14 @@ function syncFromServer(){
       UI.chatSelectMode = false; UI.chatSelected = {};
       saveDB(); render();
       showToast("Deleted " + deletable.length + " chat" + (deletable.length!==1?"s":"") + "." + (kept ? " " + kept + " open chat" + (kept!==1?"s were":" was") + " kept. Withdraw or decline first." : ""));
+      return;
+    }
+    if(action==="cancel-deal"){
+      var cdl = findDeal(t.dataset.id);
+      if(!cdl) return;
+      if(!window.confirm("Cancel this deal? The chat will close for both of you.")) return;
+      if(cdl.fromUserId === UI.currentUserId) withdrawDeal(cdl.id); else rejectDeal(cdl.id);
+      UI.modal = null; render();
       return;
     }
     if(action==="delete-chat"){
