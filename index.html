@@ -1478,7 +1478,16 @@ function pushSocial(){
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(jb.body)
-    }); }).then(function(r){ if(r && r.ok) jb.map[jb.id] = jb.s; })
+    }); }).then(function(r){
+      if(r && r.ok){ jb.map[jb.id] = jb.s; return; }
+      if(r && r.status === 403 && jb.path === "/social/message"){
+        DB.messages = (DB.messages || []).filter(function(m){ return m.id !== jb.id; });
+        jb.map[jb.id] = "refused";
+        persistLocal();
+        showToast("This chat is closed. Your message was not sent.");
+        setTimeout(pullSocial, 0);
+      }
+    })
       .catch(function(){})
       .then(next);
   }
@@ -1503,6 +1512,8 @@ function pullSocial(){
         pushedSocial.deals[obj.id] = s;
         changed = true;
       } else {
+        var srvClosed = obj.status === "rejected" || obj.status === "withdrawn" || obj.status === "completed";
+        if(srvClosed && DB.deals[idx].status !== obj.status){ DB.deals[idx].status = obj.status; changed = true; }
         var local = JSON.stringify(cleanDeal(DB.deals[idx]));
         var unpushed = pushedSocial.deals[obj.id] !== undefined && pushedSocial.deals[obj.id] !== local;
         if(local !== s && !unpushed){
