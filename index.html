@@ -5345,7 +5345,7 @@ function syncFromServer(){
                 '<button class="btn btn-danger btn-sm" data-action="reject-deal" data-id="'+d.id+'">Decline</button>';
     } else if(d.status==="pending" && !isIncoming){
       actions = '<button class="btn btn-danger btn-sm" data-action="withdraw-deal" data-id="'+d.id+'">Withdraw Proposal</button>';
-    } else if(d.status==="accepted" && d.kind!=="query"){
+    } else if(d.status==="accepted"){
       actions = '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Trade Complete</button> ' +
                 '<button class="btn btn-danger btn-sm" data-action="cancel-deal" data-id="'+d.id+'">Cancel deal</button>';
     } else if(d.status==="completed"){
