@@ -5340,10 +5340,10 @@ function syncFromServer(){
     var isIncoming = d.toUserId === UI.currentUserId;
 
     var actions = "";
-    if(d.status==="pending" && isIncoming){
+    if(d.kind!=="query" && d.status==="pending" && isIncoming){
       actions = '<button class="btn btn-primary btn-sm" data-action="accept-deal" data-id="'+d.id+'">Accept</button> ' +
                 '<button class="btn btn-danger btn-sm" data-action="reject-deal" data-id="'+d.id+'">Decline</button>';
-    } else if(d.status==="pending" && !isIncoming){
+    } else if(d.kind!=="query" && d.status==="pending" && !isIncoming){
       actions = '<button class="btn btn-danger btn-sm" data-action="withdraw-deal" data-id="'+d.id+'">Withdraw Proposal</button>';
     } else if(d.status==="accepted"){
       actions = '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Trade Complete</button> ' +
