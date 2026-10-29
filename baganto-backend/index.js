@@ -30,7 +30,8 @@ const SUPABASE_KEY = process.env.anon_public;
 async function supabaseCall(table, method = 'GET', data = null, filters = '') {
   const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
   // user_plans is private (plan limits); only the server's service_role key may touch it
-  const key = (table === 'user_plans' && process.env.service_role) ? process.env.service_role : SUPABASE_KEY;
+  // All database calls use the server-only service_role key, so Row Level Security can block the public anon key.
+  const key = process.env.service_role || SUPABASE_KEY;
   const options = {
     method,
     headers: {
