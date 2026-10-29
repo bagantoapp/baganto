@@ -6252,9 +6252,11 @@ function syncFromServer(){
           }
         } else {
           console.error('Upload failed with status:', uploadRes.status);
+          alert('Photo ' + (i+1) + ' did not upload. Error code: ' + uploadRes.status);
         }
       } catch (e) {
         console.error('Image upload error:', e);
+        alert('Photo ' + (i+1) + ' failed to upload: ' + e.message);
       }
     }
     return urls;
