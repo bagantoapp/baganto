@@ -2776,6 +2776,10 @@ function syncFromServer(){
     out.sort(function(a,b){return a.createdAt-b.createdAt;});
     return out;
   }
+  function ownRatingButtons(ratingId, dealId, toUserId){
+    return ' <button class="btn btn-ghost btn-sm" data-action="edit-rating" data-id="'+ratingId+'" data-deal="'+dealId+'" data-to="'+toUserId+'">Edit</button> ' +
+      '<button class="btn btn-ghost btn-sm" data-action="delete-rating" data-id="'+ratingId+'" style="color:#ef4444;">Delete</button>';
+  }
   function ratingByFrom(dealId, fromUserId){
     for(var i=0;i<DB.ratings.length;i++){ var r=DB.ratings[i]; if(r.dealId===dealId && r.fromUserId===fromUserId) return r; }
     return null;
@@ -5308,7 +5312,7 @@ function syncFromServer(){
       var actionsS = "";
       var existingS = ratingByFrom(d.id, UI.currentUserId);
       if(existingS){
-        actionsS = '<div class="muted">You rated this '+(isBuyer?'seller':'buyer')+': <span class="stars">'+starsStr(existingS.stars)+'</span></div>';
+        actionsS = '<div class="muted">You rated this '+(isBuyer?'seller':'buyer')+': <span class="stars">'+starsStr(existingS.stars)+'</span>'+ownRatingButtons(existingS.id, d.id, counterpartyId)+'</div>';
       } else {
         actionsS = '<button class="btn btn-primary btn-sm" data-action="open-rate" data-id="'+d.id+'" data-to="'+counterpartyId+'">Rate '+esc(counterparty.name)+'</button>';
       }
@@ -5351,7 +5355,7 @@ function syncFromServer(){
     } else if(d.status==="completed"){
       var existing = ratingByFrom(d.id, UI.currentUserId);
       if(existing){
-        actions = '<div class="muted">You rated this trade: <span class="stars">'+starsStr(existing.stars)+'</span></div>';
+        actions = '<div class="muted">You rated this trade: <span class="stars">'+starsStr(existing.stars)+'</span>'+ownRatingButtons(existing.id, d.id, counterpartyId)+'</div>';
       } else {
         actions = '<button class="btn btn-primary btn-sm" data-action="open-rate" data-id="'+d.id+'" data-to="'+counterpartyId+'">Rate '+esc(counterparty.name)+'</button>';
       }
@@ -5383,15 +5387,19 @@ function syncFromServer(){
 
   function renderRateModalBody(dealId, toUserId){
     var u = userById(toUserId);
+    var editing = (UI.modal && UI.modal.editRatingId) ? DB.ratings.filter(function(r){ return r.id===UI.modal.editRatingId; })[0] : null;
+    var curStars = editing ? editing.stars : 5;
+    var curReview = editing ? (editing.review||"") : "";
     return '' +
       '<div class="muted" style="margin-bottom:8px;">How was your trade with '+esc(u.name)+'?</div>' +
       '<form data-form="rate-trade" data-id="'+dealId+'" data-to="'+toUserId+'">' +
-        '<input type="hidden" name="stars" id="starsHidden" value="5">' +
+        (editing ? '<input type="hidden" name="editRatingId" value="'+editing.id+'">' : '') +
+        '<input type="hidden" name="stars" id="starsHidden" value="'+curStars+'">' +
         '<div class="star-picker" id="starPicker">' +
-          [1,2,3,4,5].map(function(n){ return '<span data-action="pick-star" data-n="'+n+'" class="'+(n<=5?'on':'')+'">★</span>'; }).join("") +
+          [1,2,3,4,5].map(function(n){ return '<span data-action="pick-star" data-n="'+n+'" class="'+(n<=curStars?'on':'')+'">★</span>'; }).join("") +
         '</div>' +
-        '<div class="form-row"><label>Review (optional)</label><textarea name="review" placeholder="How did it go?"></textarea></div>' +
-        '<button type="submit" class="btn btn-primary btn-block">Submit Rating</button>' +
+        '<div class="form-row"><label>Review (optional)</label><textarea name="review" placeholder="How did it go?">'+esc(curReview)+'</textarea></div>' +
+        '<button type="submit" class="btn btn-primary btn-block">'+(editing ? 'Save Changes' : 'Submit Rating')+'</button>' +
       '</form>';
   }
 
@@ -5763,6 +5771,18 @@ function syncFromServer(){
     if(action==="confirm-buy"){ buyItem(t.dataset.id); UI.modal=null; UI.tab="trades"; render(); return; }
     if(action==="open-deal"){   UI.modal = {type:"trade", dealId:t.dataset.id}; render(); return; }
     if(action==="open-rate"){   UI.modal = {type:"rate", dealId:t.dataset.id, toUserId:t.dataset.to}; render(); return; }
+    if(action==="edit-rating"){
+      var erEdit = DB.ratings.filter(function(r){ return r.id===t.dataset.id && r.fromUserId===UI.currentUserId; })[0];
+      if(!erEdit) return;
+      UI.modal = {type:"rate", dealId:t.dataset.deal, toUserId:t.dataset.to, editRatingId:erEdit.id}; render(); return;
+    }
+    if(action==="delete-rating"){
+      var erDel = DB.ratings.filter(function(r){ return r.id===t.dataset.id && r.fromUserId===UI.currentUserId; })[0];
+      if(!erDel) return;
+      if(!window.confirm("Delete your review?")) return;
+      DB.ratings = DB.ratings.filter(function(r){ return r.id!==erDel.id; });
+      saveDB(); showToast("Review deleted."); render(); return;
+    }
 
     // OLX: toggle save (heart)
     if(action==="toggle-save"){
@@ -6335,7 +6355,13 @@ function syncFromServer(){
     if(type==="rate-trade"){
       var fd4 = new FormData(form);
       var stars = parseInt(fd4.get("stars")||"5", 10);
-      submitRating(form.dataset.id, form.dataset.to, stars, fd4.get("review"));
+      var editId = fd4.get("editRatingId");
+      if(editId){
+        var erSave = DB.ratings.filter(function(r){ return r.id===editId && r.fromUserId===UI.currentUserId; })[0];
+        if(erSave){ erSave.stars = stars; erSave.review = (fd4.get("review")||"").trim(); saveDB(); showToast("Review updated."); }
+      } else {
+        submitRating(form.dataset.id, form.dataset.to, stars, fd4.get("review"));
+      }
       UI.modal = null;
       render();
       return;
