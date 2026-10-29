@@ -2816,7 +2816,7 @@ function syncFromServer(){
   function acceptDeal(id){
     var d = findDeal(id); if(!d) return;
     d.status = "accepted";
-    lockItemsAndRejectOthers(d);
+    if(d.kind!=="query") lockItemsAndRejectOthers(d);
     addNotification(d.fromUserId, "deal", currentUser().name+" accepted your trade proposal", {dealId:d.id});
     saveDB();
     showToast("Trade accepted! Items reserved for this swap.");
@@ -2867,6 +2867,7 @@ function syncFromServer(){
     // Blocking works both ways — neither side can message the other
     var dlk = DB.deals.filter(function(d){ return d.id===dealId; })[0];
     if(dlk && (dlk.status==="rejected" || dlk.status==="withdrawn")){ showToast("This chat is closed."); return; }
+    if(dlk && dlk.status==="pending"){ showToast("Chat opens once the other person accepts."); return; }
     if(dlk){
       var otherId = dlk.fromUserId===UI.currentUserId ? dlk.toUserId : dlk.fromUserId;
       if(isUserBlocked(otherId, UI.currentUserId)){
@@ -5285,13 +5286,13 @@ function syncFromServer(){
       '<div class="chat-thread">' +
         '<div class="chat-box">'+(msgsHtml || emptyThread)+typingHtml+'</div>' +
         renderChatImageStrip() +
-        '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
+        (d.status==="pending" ? '<div class="muted" style="padding:12px;text-align:center;font-size:14px;">'+(d.toUserId===UI.currentUserId ? 'Accept this request to start chatting.' : 'Chat opens once '+esc(counterparty && counterparty.name ? counterparty.name : 'they')+' accepts.')+'</div>' : '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
           '<label class="chat-attach" title="Send a photo">📎' +
             '<input type="file" id="chatImgInput" accept="image/*" multiple>' +
           '</label>' +
           '<input type="text" id="msgInput_'+d.id+'" name="text" placeholder="Type a message…" autocomplete="off" data-dealid="'+d.id+'">' +
           '<button class="chat-send" type="submit" title="Send" aria-label="Send">&#10148;</button>' +
-        '</form>' +
+        '</form>') +
       '</div>';
   }
 
@@ -5340,12 +5341,12 @@ function syncFromServer(){
     var isIncoming = d.toUserId === UI.currentUserId;
 
     var actions = "";
-    if(d.kind!=="query" && d.status==="pending" && isIncoming){
+    if(d.status==="pending" && isIncoming){
       actions = '<button class="btn btn-primary btn-sm" data-action="accept-deal" data-id="'+d.id+'">Accept</button> ' +
                 '<button class="btn btn-danger btn-sm" data-action="reject-deal" data-id="'+d.id+'">Decline</button>';
-    } else if(d.kind!=="query" && d.status==="pending" && !isIncoming){
+    } else if(d.status==="pending" && !isIncoming){
       actions = '<button class="btn btn-danger btn-sm" data-action="withdraw-deal" data-id="'+d.id+'">Withdraw Proposal</button>';
-    } else if(d.status==="accepted"){
+    } else if(d.status==="accepted" && d.kind!=="query"){
       actions = '<button class="btn btn-primary btn-sm" data-action="complete-deal" data-id="'+d.id+'">Mark Trade Complete</button> ' +
                 '<button class="btn btn-danger btn-sm" data-action="cancel-deal" data-id="'+d.id+'">Cancel deal</button>';
     } else if(d.status==="completed"){
