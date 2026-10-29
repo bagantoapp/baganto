@@ -1867,8 +1867,7 @@ document.addEventListener("input", function(ev){
     }
     if(d && (d.status === "rejected" || d.status === "withdrawn")){
       html = html.replace(/placeholder="Type a message[^"]*"/g, 'disabled placeholder="This chat is closed"');
-      html += '<div class="muted" style="font-size:13px;margin-top:8px;text-align:center;">This chat is closed because the request was ' +
-        (d.status === "rejected" ? "declined" : "withdrawn") + '. To talk again, open the ad and send a new request.</div>';
+      html += '<div class="muted" style="font-size:13px;margin-top:8px;text-align:center;">This chat is closed. To talk again, open the ad and send a new request.</div>';
     }
     return html;
   };
@@ -5357,7 +5356,7 @@ function syncFromServer(){
         actions = '<button class="btn btn-primary btn-sm" data-action="open-rate" data-id="'+d.id+'" data-to="'+counterpartyId+'">Rate '+esc(counterparty.name)+'</button>';
       }
     } else {
-      actions = '<div class="muted">This proposal is '+d.status+'.</div>';
+      actions = (d.kind==="query" && d.status==="accepted") ? '<div class="muted">Chat is open.</div>' : '<div class="muted">This proposal is '+d.status+'.</div>';
     }
 
     return renderChatThread(d, counterparty) +
