@@ -29,12 +29,14 @@ const SUPABASE_KEY = process.env.anon_public;
 // Helper function for Supabase REST API calls
 async function supabaseCall(table, method = 'GET', data = null, filters = '') {
   const url = `${SUPABASE_URL}/rest/v1/${table}${filters}`;
+  // user_plans is private (plan limits); only the server's service_role key may touch it
+  const key = (table === 'user_plans' && process.env.service_role) ? process.env.service_role : SUPABASE_KEY;
   const options = {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${key}`,
+      'apikey': key,
       'Prefer': 'return=representation'
     }
   };
