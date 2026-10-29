@@ -6232,8 +6232,9 @@ function syncFromServer(){
     for (var i = 0; i < files.length; i++) {
       try {
         var file = files[i];
-        var reader = new FileReader();
-        var result = await new Promise(function(resolve, reject) {
+        var isDataUrl = (typeof file === 'string');
+        var result = isDataUrl ? file : await new Promise(function(resolve, reject) {
+          var reader = new FileReader();
           reader.onload = function() { resolve(reader.result); };
           reader.onerror = function() { reject(reader.error); };
           reader.readAsDataURL(file);
@@ -6241,7 +6242,7 @@ function syncFromServer(){
         var uploadRes = await fetch('https://api.baganto.com/items/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file: result, filename: file.name })
+          body: JSON.stringify({ file: result, filename: isDataUrl ? ('photo-' + Date.now() + '-' + i + '.jpg') : file.name })
         });
         if (uploadRes.ok) {
           var data = await uploadRes.json();
@@ -6263,8 +6264,7 @@ function syncFromServer(){
     if(type==="add-listing"){
       var fd = new FormData(form);
       // Get uploaded image files
-      var imgInput = document.getElementById('imgFileInput');
-      var photoUrls = await uploadImages(imgInput.files || []);
+      var photoUrls = await uploadImages((UI.newListingImages || []).slice(0, 5));
       var catA = fd.get("category")||"";
       var noTradeA = isNoTrade(catA);
       var propA    = isProperty(catA);
