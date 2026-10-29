@@ -120,12 +120,73 @@ async function itemOwnerId(id) {
   return rows && rows[0] ? rows[0].owner_id : null;
 }
 
+
+// ============ PLAN LIMITS ============
+async function getUserPlan(userId) {
+  try {
+    let plan = await supabaseCall('user_plans', 'GET', null, `?user_id=eq.${userId}`);
+    if (!plan || plan.length === 0) {
+      // First time user - create Free plan
+      const newPlan = { user_id: userId, plan_type: 'free', ads_used_this_month: 0, boosts_available: 0, premium_credits: 0, reset_date: new Date().toISOString().split('T')[0] };
+      plan = await supabaseCall('user_plans', 'POST', newPlan);
+      return plan[0] || newPlan;
+    }
+    return plan[0];
+  } catch (e) {
+    console.error('Error getting user plan:', e.message);
+    throw new Error('Could not fetch plan info');
+  }
+}
+
+async function canPostAd(userId) {
+  const plan = await getUserPlan(userId);
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Reset monthly count if past reset_date
+  if (plan.reset_date < today) {
+    await supabaseCall('user_plans', 'PATCH', { ads_used_this_month: 0, reset_date: today }, `?user_id=eq.${userId}`);
+    plan.ads_used_this_month = 0;
+  }
+  
+  const limits = {
+    free: 3,
+    growth: 25,
+    professional: 50,
+    business: 100
+  };
+  
+  const limit = limits[plan.plan_type] || 3;
+  return plan.ads_used_this_month < limit;
+}
+
+async function deductAd(userId) {
+  try {
+    const plan = await getUserPlan(userId);
+    await supabaseCall('user_plans', 'PATCH', { ads_used_this_month: (plan.ads_used_this_month || 0) + 1 }, `?user_id=eq.${userId}`);
+  } catch (e) {
+    console.error('Error deducting ad:', e.message);
+  }
+}
+
 app.post('/items', requireAuth, async (req, res) => {
   try {
+    // Check if user can post (plan limit)
+    const canPost = await canPostAd(req.userId);
+    if (!canPost) {
+      const plan = await getUserPlan(req.userId);
+      const limits = { free: 3, growth: 25, professional: 50, business: 100 };
+      const limit = limits[plan.plan_type] || 3;
+      return res.status(429).json({ error: `Monthly ad limit (${limit}) reached. Upgrade your plan or wait for reset.` });
+    }
+    
     const { title, description, category, price, condition, listing_type, photos } = req.body;
     const owner_id = req.userId;
     const photosArray = Array.isArray(photos) ? photos : [];
     const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: photosArray });
+    
+    // Deduct one ad from monthly count
+    await deductAd(req.userId);
+    
     res.json(data[0] || data);
   } catch (err) {
     res.status(400).json({ error: err.message });
