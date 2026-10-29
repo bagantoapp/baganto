@@ -1903,6 +1903,7 @@ function syncFromServer(){
         });
         DB.users = mapped.users;
       }
+        if(data.my_plan){ var __mu = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0]; if(__mu) __mu.adsUsedThisPeriod = data.my_plan.ads_used_this_month; }
         var __meNew = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0];
         if(__meNew && __meContact){ if(!__meNew.email) __meNew.email = __meContact.email; if(!__meNew.phone) __meNew.phone = __meContact.phone; }
         persistLocal();
@@ -2958,7 +2959,7 @@ function syncFromServer(){
           photos: item.photos || []
         })
       }).then(function(r){
-        if(r.ok) return;
+        if(r.ok){ showToast(__okMsg); return; }
         console.error("Item sync to backend failed:", r.status);
         // Server refused the ad (e.g. monthly limit). Undo the local copy so it doesn't look saved.
         DB.items = DB.items.filter(function(x){ return x.id !== item.id; });
@@ -2974,7 +2975,8 @@ function syncFromServer(){
       }).catch(function(e){ console.error("Item sync to backend error:", e); });
     }
     var left = quotaUser && quotaUser.id ? adsRemaining(quotaUser.id) : null;
-    showToast("Ad posted! Check My Listings." + (left!==null ? " ("+left+" ad"+(left===1?"":"s")+" left this month)" : ""));
+    var __okMsg = "Ad posted! Check My Listings." + (left!==null ? " ("+left+" ad"+(left===1?"":"s")+" left this month)" : "");
+    if(!(API_BASE && typeof fetch==="function")) showToast(__okMsg);
     return true;
   }
 

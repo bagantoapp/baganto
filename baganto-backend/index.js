@@ -400,7 +400,19 @@ app.get('/api/db', async (req, res) => {
       const { password, email, phone, ...safe } = u;
       return safe;
     });
-    res.json({ items: items || [], users });
+    const out = { items: items || [], users };
+    // If the caller is logged in, include their real monthly ad count so every device shows the true limit
+    const h = req.headers.authorization || '';
+    const uid = h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
+    if (uid) {
+      try {
+        const plan = await getUserPlan(uid);
+        const today = new Date().toISOString().split('T')[0];
+        const used = (plan.reset_date && plan.reset_date < today) ? 0 : (plan.ads_used_this_month || 0);
+        out.my_plan = { user_id: uid, plan_type: plan.plan_type, ads_used_this_month: used };
+      } catch (e) { /* plan lookup failed; still return items */ }
+    }
+    res.json(out);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
