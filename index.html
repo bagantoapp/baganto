@@ -1893,7 +1893,16 @@ function syncFromServer(){
         if(lastAvatarChangeAt > syncStartedAt){ renderSyncPill(); return; }
         lastSyncRaw = __raw;
         var mapped = mapBackendData(data);
-        if(!DB){ DB = mapped; } else { DB.items = mapped.items; DB.users = mapped.users; }
+        if(!DB){ DB = mapped; } else {
+        DB.items = mapped.items;
+        // Server doesn't send billing fields, so carry them over from this device's copy.
+        var __oldUsers = DB.users || [];
+        mapped.users.forEach(function(nu){
+          var ou = __oldUsers.filter(function(x){ return x.id===nu.id; })[0];
+          if(ou){ ["plan","planExpiry","planPeriodStart","adsUsedThisPeriod","boostCredits"].forEach(function(k){ if(ou[k]!==undefined) nu[k]=ou[k]; }); }
+        });
+        DB.users = mapped.users;
+      }
         var __meNew = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0];
         if(__meNew && __meContact){ if(!__meNew.email) __meNew.email = __meContact.email; if(!__meNew.phone) __meNew.phone = __meContact.phone; }
         persistLocal();
@@ -2948,7 +2957,21 @@ function syncFromServer(){
           listing_type: listingType,
           photos: item.photos || []
         })
-      }).then(function(r){ if(!r.ok) console.error("Item sync to backend failed:", r.status); }).catch(function(e){ console.error("Item sync to backend error:", e); });
+      }).then(function(r){
+        if(r.ok) return;
+        console.error("Item sync to backend failed:", r.status);
+        // Server refused the ad (e.g. monthly limit). Undo the local copy so it doesn't look saved.
+        DB.items = DB.items.filter(function(x){ return x.id !== item.id; });
+        if(quotaUser && quotaUser.id) quotaUser.adsUsedThisPeriod = Math.max(0, (quotaUser.adsUsedThisPeriod||0) - 1);
+        saveDB();
+        if(r.status === 429){
+          showToast("You've used all your ads this month. Upgrade in the Plans tab.");
+          UI.tab = "pricing";
+        } else {
+          showToast("Ad couldn't be saved. Please try again.");
+        }
+        render();
+      }).catch(function(e){ console.error("Item sync to backend error:", e); });
     }
     var left = quotaUser && quotaUser.id ? adsRemaining(quotaUser.id) : null;
     showToast("Ad posted! Check My Listings." + (left!==null ? " ("+left+" ad"+(left===1?"":"s")+" left this month)" : ""));
