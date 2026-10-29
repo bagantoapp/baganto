@@ -760,7 +760,7 @@
   // How long an ad stays live, as promised on the Plans page. Declared here so
   // it already has a value when the database is loaded and migrated below.
   var AD_LIFETIME_DAYS = 30;
-  var API_BASE = (window.BAGANTO_API_BASE || "").replace(/\/+$/, "");
+  var API_BASE = (window.BAGANTO_API_BASE || "https://api.baganto.com").replace(/\/+$/, "");
   var apiOnline = false;
   var apiChecked = false;
 
