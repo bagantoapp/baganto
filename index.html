@@ -5675,7 +5675,7 @@ function syncFromServer(){
         UI.loginPassDraft = "";
         storageSet(USER_KEY, match.id);
         if(UI.authReturnAction==="start-sell"){
-          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory="";
         } else if(UI.authReturnTab){
           UI.tab=UI.authReturnTab; UI.authReturnTab=null;
         }
@@ -5777,7 +5777,7 @@ function syncFromServer(){
     // OLX: start-sell shortcut → My Ads + open form
     if(action==="start-sell"){
       if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; UI.authReturnAction="start-sell"; render(); return; }
-      UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory=""; UI.modal=null; render(); window.scrollTo(0,0); return; }
+      UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory=""; UI.modal=null; render(); window.scrollTo(0,0); return; }
 
     // OLX: two-level category browse
     if(action==="browse-category"){
@@ -6463,7 +6463,7 @@ function syncFromServer(){
         UI.authScreen    = false;
         storageSet(USER_KEY, match.id);
         if(UI.authReturnAction==="start-sell"){
-          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory="";
         } else if(UI.authReturnTab){
           UI.tab=UI.authReturnTab; UI.authReturnTab=null;
         }
@@ -6550,7 +6550,7 @@ function syncFromServer(){
         UI.authScreen = false;
         storageSet(USER_KEY, newUser.id);
         if(UI.authReturnAction==="start-sell"){
-          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory="";
         } else if(UI.authReturnTab){
           UI.tab=UI.authReturnTab; UI.authReturnTab=null;
         }
@@ -6641,7 +6641,7 @@ function syncFromServer(){
         UI.tempLoginOtp = null;
         storageSet(USER_KEY, UI.currentUserId);
         if(UI.authReturnAction==="start-sell"){
-          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+          UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory="";
         } else if(UI.authReturnTab){
           UI.tab=UI.authReturnTab; UI.authReturnTab=null;
         }
@@ -6687,7 +6687,7 @@ function syncFromServer(){
             UI.authScreen = false;
             storageSet(USER_KEY, newUser.id);
             if(UI.authReturnAction==="start-sell"){
-              UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.newListingCategory="";
+              UI.authReturnAction=null; UI.tab="listings"; UI.listingFormOpen=true; UI.editingItemId=null; UI.newListingCategory="";
             } else if(UI.authReturnTab){
               UI.tab=UI.authReturnTab; UI.authReturnTab=null;
             }
