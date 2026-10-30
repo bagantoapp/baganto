@@ -747,7 +747,8 @@ app.get('/social/mine', requireAuth, async (req, res) => {
     const ratings = await sbFetch('deal_ratings?select=data', 'GET');
     const notifs = await sbFetch(`notifications?user_id=eq.${me}&order=created_at.desc&limit=50&select=data,is_read`, 'GET');
     const blockRows = await sbFetch(`user_blocks?blocker_id=eq.${me}&select=blocked_id`, 'GET');
-    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data), blocked: blockRows.map(x => x.blocked_id), notifications: notifs.map(x => Object.assign({}, x.data, { read: !!x.is_read })) });
+    const savedRows = await sbFetch(`saved_items?user_id=eq.${me}&select=item_id`, 'GET');
+    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data), blocked: blockRows.map(x => x.blocked_id), saved: savedRows.map(x => x.item_id), notifications: notifs.map(x => Object.assign({}, x.data, { read: !!x.is_read })) });
   } catch (err) {
     console.error('GET /social/mine error:', err.message);
     res.status(500).json({ error: 'Could not load chats' });
@@ -896,6 +897,29 @@ async function userContactLines(uid) {
     return ['Account ID: ' + uid];
   }
 }
+
+app.post('/saved', requireAuth, async (req, res) => {
+  try {
+    const itemId = req.body && req.body.itemId;
+    if (typeof itemId !== 'string' || !itemId) return res.status(400).json({ error: 'Invalid item' });
+    const ex = await sbFetch(`saved_items?user_id=eq.${encodeURIComponent(req.userId)}&item_id=eq.${encodeURIComponent(itemId)}&select=item_id`, 'GET');
+    if (!ex.length) await sbFetch('saved_items', 'POST', { user_id: req.userId, item_id: itemId });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /saved error:', err.message);
+    res.status(500).json({ error: 'Could not save ad' });
+  }
+});
+
+app.delete('/saved/:itemId', requireAuth, async (req, res) => {
+  try {
+    await sbFetch(`saved_items?user_id=eq.${encodeURIComponent(req.userId)}&item_id=eq.${encodeURIComponent(req.params.itemId)}`, 'DELETE');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /saved error:', err.message);
+    res.status(500).json({ error: 'Could not remove saved ad' });
+  }
+});
 
 app.post('/social/block', requireAuth, async (req, res) => {
   try {

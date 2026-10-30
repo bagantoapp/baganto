@@ -1841,6 +1841,12 @@ function pullSocial(){
         if(rt && pushedSocial.ratings[rt.id] && !serverIds[rt.id]){ arr.splice(m, 1); delete pushedSocial.ratings[rt.id]; changed = true; }
       }
     })(j.ratings);
+    // Saved ads come from the server, so they follow the account across devices.
+    if(Array.isArray(j.saved) && UI.currentUserId){
+      DB.savedItems = (DB.savedItems || []).filter(function(x){ return x.userId !== UI.currentUserId; })
+        .concat(j.saved.map(function(id){ return {userId: UI.currentUserId, itemId: id}; }));
+      changed = true;
+    }
     // The server's block list is the source of truth, so it follows the account across devices.
     if(Array.isArray(j.blocked)){
       var meBlock = userById(UI.currentUserId);
@@ -3196,11 +3202,13 @@ function syncFromServer(){
   function toggleSave(itemId){
     if(isSaved(itemId)){
       DB.savedItems = DB.savedItems.filter(function(s){ return !(s.userId===UI.currentUserId && s.itemId===itemId); });
+      fetch(API_BASE + "/saved/" + encodeURIComponent(itemId), { method: "DELETE" }).catch(function(){});
       showToast("Removed from saved ads.");
     } else {
       DB.savedItems.push({userId:UI.currentUserId, itemId:itemId});
+      fetch(API_BASE + "/saved", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ itemId: itemId }) }).catch(function(){});
       var svIt = itemById(itemId);
-      if(svIt && svIt.id!=="__missing__") addNotification(svIt.ownerId, "save", currentUser().name+" saved your "+svIt.title, {itemId:itemId});
+      // Saved ads are private: the owner is not notified.
       showToast("❤️ Added to saved ads.");
     }
     saveDB();
