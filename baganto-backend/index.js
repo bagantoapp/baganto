@@ -67,10 +67,25 @@ app.get('/health', (req, res) => {
 });
 
 // ============ ITEMS (Listings) ============
+function optionalUid(req) {
+  const h = req.headers.authorization || '';
+  return h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
+}
+
+// IDs of people who have blocked this user, or whom this user has blocked.
+async function blockedOtherIds(uid) {
+  const ids = new Set();
+  if (!uid) return ids;
+  const rows = await sbFetch(`user_blocks?or=(blocker_id.eq.${encodeURIComponent(uid)},blocked_id.eq.${encodeURIComponent(uid)})&select=blocker_id,blocked_id`, 'GET');
+  rows.forEach(r => ids.add(r.blocker_id === uid ? r.blocked_id : r.blocker_id));
+  return ids;
+}
+
 app.get('/items', async (req, res) => {
   try {
     const data = await supabaseCall('items');
-    res.json(data);
+    const hidden = await blockedOtherIds(optionalUid(req));
+    res.json((data || []).filter(it => !hidden.has(it.owner_id)));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -79,7 +94,9 @@ app.get('/items', async (req, res) => {
 app.get('/items/:id', async (req, res) => {
   try {
     const data = await supabaseCall('items', 'GET', null, `?id=eq.${req.params.id}`);
-    res.json(data[0] || null);
+    const row = data[0] || null;
+    if (row && (await blockedOtherIds(optionalUid(req))).has(row.owner_id)) return res.json(null);
+    res.json(row);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -305,7 +322,14 @@ app.post('/ratings', async (req, res) => {
 app.get('/users/:id', async (req, res) => {
   try {
     const data = await supabaseCall('users', 'GET', null, `?id=eq.${req.params.id}`);
-    res.json(data[0] || null);
+    const u = data[0];
+    if (!u) return res.json(null);
+    const { password, ...rest } = u;
+    const uid = optionalUid(req);
+    if (uid && uid === u.id) return res.json(rest);
+    if ((await blockedOtherIds(uid)).has(u.id)) return res.json(null);
+    const { email, phone, ...pub } = rest;
+    res.json(pub);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -428,7 +452,8 @@ app.get('/api/db', async (req, res) => {
       const { password, email, phone, ...safe } = u;
       return safe;
     });
-    const out = { items: items || [], users };
+    const hiddenOwners = await blockedOtherIds(optionalUid(req));
+    const out = { items: (items || []).filter(it => !hiddenOwners.has(it.owner_id)), users };
     // If the caller is logged in, include their real monthly ad count so every device shows the true limit
     const h = req.headers.authorization || '';
     const uid = h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
