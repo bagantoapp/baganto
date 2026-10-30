@@ -1638,7 +1638,9 @@ function dealHasUnread(d){
   return d.status === "pending" && d.toUserId === me && !readTs;
 }
 function unreadChatCount(){
-  return (DB.deals || []).filter(dealHasUnread).length;
+  return (DB.deals || []).filter(function(d){
+    return !(d.hiddenFor && d.hiddenFor[UI.currentUserId]) && dealHasUnread(d);
+  }).length;
 }
 function dealAdKey(d){ return d ? (d.itemId || d.requestedItemId || "") : ""; }
 function mergeDuplicateDeals(){
