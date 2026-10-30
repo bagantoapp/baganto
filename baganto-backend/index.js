@@ -204,6 +204,14 @@ app.put('/items/:id', requireAuth, async (req, res) => {
     const updates = {};
     for (const k of allowed) { if (req.body && k in req.body) updates[k] = req.body[k]; }
     if (!Object.keys(updates).length) return res.status(400).json({ error: 'Nothing to update' });
+    // Reposting an expired ad counts as a new post: check the limit and move it into this month.
+    if (req.body && req.body.status === 'available') {
+      const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}&select=status`);
+      if (cur[0] && cur[0].status !== 'available') {
+        if (!(await canPostAd(req.userId))) return res.status(429).json({ error: 'Monthly ad limit reached. Upgrade your plan to repost.' });
+        updates.created_at = new Date().toISOString();
+      }
+    }
     const data = await supabaseCall('items', 'PATCH', updates, `?id=eq.${encodeURIComponent(req.params.id)}`);
     res.json(data[0] || data);
   } catch (err) {
