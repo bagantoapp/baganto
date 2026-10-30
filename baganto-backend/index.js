@@ -373,6 +373,7 @@ app.put('/users/:id', requireAuth, async (req, res) => {
 
 // ============ SUPPORT TICKETS ============
 app.get('/support', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('support_tickets', 'GET', null, '?order=created_at.desc');
     res.json(data);
@@ -383,11 +384,20 @@ app.get('/support', async (req, res) => {
 
 app.post('/support', async (req, res) => {
   try {
-    const { user_id, contact_email, category, subject, message } = req.body;
-    const data = await supabaseCall('support_tickets', 'POST', { user_id, contact_email, category, subject, message, status: 'open' });
-    res.json(data[0] || data);
+    const h = req.headers.authorization || '';
+    const uid = h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
+    const t = req.body && req.body.ticket;
+    if (!t || typeof t !== 'object') return res.status(400).json({ error: 'Invalid ticket' });
+    const message = String(t.message || '').slice(0, 5000);
+    if (!message.trim()) return res.status(400).json({ error: 'Message is required' });
+    const subject = String(t.subject || '').slice(0, 200);
+    const category = String(t.category || '').slice(0, 100);
+    const contact_email = String(t.contactEmail || '').slice(0, 200);
+    await sbFetch('support_tickets', 'POST', { user_id: uid || null, contact_email, category, subject, message, status: 'open' });
+    res.json({ success: true });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('POST /support error:', err.message);
+    res.status(500).json({ error: 'Could not send message' });
   }
 });
 

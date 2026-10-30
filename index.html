@@ -6557,6 +6557,8 @@ function syncFromServer(){
         adminReply: "",
         createdAt: nowTs()
       });
+      var lastTicket = DB.supportTickets[DB.supportTickets.length - 1];
+      fetch(API_BASE + "/support", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ ticket: lastTicket }) }).catch(function(){});
       saveDB();
       form.reset();
       showToast("✅ Message sent - we'll get back to you soon.");
