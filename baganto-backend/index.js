@@ -838,6 +838,21 @@ async function isBlockedEither(a, b) {
   return rows.length > 0;
 }
 
+async function notifyTelegram(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chat = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chat) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chat, text: String(text).slice(0, 3500) })
+    });
+  } catch (e) {
+    console.error('Telegram alert failed:', e.message);
+  }
+}
+
 app.post('/social/block', requireAuth, async (req, res) => {
   try {
     const userId = req.body && req.body.userId;
@@ -867,7 +882,18 @@ app.post('/social/report', requireAuth, async (req, res) => {
     if (!r || typeof r.id !== 'string' || !r.id) return res.status(400).json({ error: 'Invalid report' });
     if (JSON.stringify(r).length > 20000) return res.status(413).json({ error: 'Report too large' });
     const ex = await sbFetch(`reports?id=eq.${encodeURIComponent(r.id)}&select=id`, 'GET');
-    if (!ex.length) await sbFetch('reports', 'POST', { id: r.id, reporter_id: req.userId, data: Object.assign({}, r, { reportedBy: req.userId }) });
+    if (!ex.length) {
+      await sbFetch('reports', 'POST', { id: r.id, reporter_id: req.userId, data: Object.assign({}, r, { reportedBy: req.userId }) });
+      notifyTelegram([
+        '🚩 New report on Baganto',
+        'Type: ' + (r.type || 'ad'),
+        'Reason: ' + (r.reason || '-'),
+        'Details: ' + String(r.details || '-').slice(0, 500),
+        'Reporter ID: ' + req.userId,
+        'Target: ' + (r.targetUserId || r.itemId || '-'),
+        'Report ID: ' + r.id
+      ].join('\n'));
+    }
     res.json({ success: true });
   } catch (err) {
     console.error('POST /social/report error:', err.message);
