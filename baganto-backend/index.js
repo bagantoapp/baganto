@@ -141,25 +141,26 @@ async function getUserPlan(userId) {
   }
 }
 
+// Count the ads this user has posted since the start of the current calendar month (UTC).
+async function countPostsThisMonth(userId) {
+  const start = new Date();
+  start.setUTCDate(1);
+  start.setUTCHours(0, 0, 0, 0);
+  const rows = await sbFetch(`items?owner_id=eq.${encodeURIComponent(userId)}&created_at=gte.${encodeURIComponent(start.toISOString())}&select=id`, 'GET');
+  return rows.length;
+}
+
 async function canPostAd(userId) {
   const plan = await getUserPlan(userId);
-  const today = new Date().toISOString().split('T')[0];
-  
-  // Reset monthly count if past reset_date
-  if (plan.reset_date < today) {
-    await supabaseCall('user_plans', 'PATCH', { ads_used_this_month: 0, reset_date: today }, `?user_id=eq.${userId}`);
-    plan.ads_used_this_month = 0;
-  }
-  
   const limits = {
     free: 3,
     growth: 25,
     professional: 50,
     business: 100
   };
-  
   const limit = limits[plan.plan_type] || 3;
-  return plan.ads_used_this_month < limit;
+  const used = await countPostsThisMonth(userId);
+  return used < limit;
 }
 
 async function deductAd(userId) {
@@ -409,7 +410,7 @@ app.get('/api/db', async (req, res) => {
       try {
         const plan = await getUserPlan(uid);
         const today = new Date().toISOString().split('T')[0];
-        const used = (plan.reset_date && plan.reset_date < today) ? 0 : (plan.ads_used_this_month || 0);
+        const used = await countPostsThisMonth(uid);
         out.my_plan = { user_id: uid, plan_type: plan.plan_type, ads_used_this_month: used };
       } catch (e) { /* plan lookup failed; still return items */ }
     }
