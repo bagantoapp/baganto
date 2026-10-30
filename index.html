@@ -1839,6 +1839,11 @@ function pullSocial(){
         if(rt && pushedSocial.ratings[rt.id] && !serverIds[rt.id]){ arr.splice(m, 1); delete pushedSocial.ratings[rt.id]; changed = true; }
       }
     })(j.ratings);
+    // The server's block list is the source of truth, so it follows the account across devices.
+    if(Array.isArray(j.blocked)){
+      var meBlock = userById(UI.currentUserId);
+      if(meBlock){ meBlock.blockedUsers = j.blocked.slice(); changed = true; }
+    }
     DB.notifications = DB.notifications || [];
     (j.notifications || []).forEach(function(n){
       if(!n || !n.id) return;
@@ -2494,6 +2499,7 @@ function syncFromServer(){
       status: "open"
     };
     DB.reports.push(report);
+    fetch(API_BASE + "/social/report", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ report: report }) }).catch(function(){});
     saveDB();
     showToast("✅ Report submitted. Thank you for keeping Baganto safe!");
   }
@@ -2690,6 +2696,7 @@ function syncFromServer(){
       if(!blocker.blockedUsers) blocker.blockedUsers = [];
       blocker.blockedUsers.push(userId);
       saveDB();
+      fetch(API_BASE + "/social/block", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ userId: userId }) }).catch(function(){});
       showToast("User blocked");
     }
   }
@@ -2698,6 +2705,7 @@ function syncFromServer(){
     var blocker = userById(blockerUserId);
     if(blocker && isUserBlocked(userId, blockerUserId)){
       blocker.blockedUsers = blocker.blockedUsers.filter(function(id){ return id !== userId; });
+      fetch(API_BASE + "/social/block/" + encodeURIComponent(userId), { method: "DELETE" }).catch(function(){});
       saveDB();
       showToast("User unblocked");
     }

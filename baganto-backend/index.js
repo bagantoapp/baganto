@@ -703,7 +703,8 @@ app.get('/social/mine', requireAuth, async (req, res) => {
     }
     const ratings = await sbFetch('deal_ratings?select=data', 'GET');
     const notifs = await sbFetch(`notifications?user_id=eq.${me}&order=created_at.desc&limit=50&select=data,is_read`, 'GET');
-    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data), notifications: notifs.map(x => Object.assign({}, x.data, { read: !!x.is_read })) });
+    const blockRows = await sbFetch(`user_blocks?blocker_id=eq.${me}&select=blocked_id`, 'GET');
+    res.json({ serverTime, deals: deals.map(d => d.data), messages: messages.map(m => m.data), ratings: ratings.map(r => r.data), blocked: blockRows.map(x => x.blocked_id), notifications: notifs.map(x => Object.assign({}, x.data, { read: !!x.is_read })) });
   } catch (err) {
     console.error('GET /social/mine error:', err.message);
     res.status(500).json({ error: 'Could not load chats' });
@@ -766,6 +767,8 @@ app.post('/social/message', requireAuth, async (req, res) => {
     if (dl[0].user_a !== req.userId && dl[0].user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
     const dst = dl[0].data && dl[0].data.status;
     if (dst === 'rejected' || dst === 'withdrawn') return res.status(403).json({ error: 'This chat is closed' });
+    const otherId = dl[0].user_a === req.userId ? dl[0].user_b : dl[0].user_a;
+    if (await isBlockedEither(req.userId, otherId)) return res.status(403).json({ error: 'You cannot message this user' });
     const ex = await sbFetch(`deal_messages?id=eq.${encodeURIComponent(m.id)}&select=id`, 'GET');
     if (ex.length) return res.json({ success: true });
     await sbFetch('deal_messages', 'POST', { id: m.id, deal_id: m.dealId, sender_id: req.userId, data: m });
@@ -817,6 +820,48 @@ app.delete('/social/rating/:id', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('DELETE /social/rating error:', err.message);
     res.status(500).json({ error: 'Could not delete rating' });
+  }
+});
+
+async function isBlockedEither(a, b) {
+  const rows = await sbFetch(`user_blocks?or=(and(blocker_id.eq.${encodeURIComponent(a)},blocked_id.eq.${encodeURIComponent(b)}),and(blocker_id.eq.${encodeURIComponent(b)},blocked_id.eq.${encodeURIComponent(a)}))&select=blocker_id`, 'GET');
+  return rows.length > 0;
+}
+
+app.post('/social/block', requireAuth, async (req, res) => {
+  try {
+    const userId = req.body && req.body.userId;
+    if (typeof userId !== 'string' || !userId || userId === req.userId) return res.status(400).json({ error: 'Invalid user' });
+    const ex = await sbFetch(`user_blocks?blocker_id=eq.${encodeURIComponent(req.userId)}&blocked_id=eq.${encodeURIComponent(userId)}&select=blocker_id`, 'GET');
+    if (!ex.length) await sbFetch('user_blocks', 'POST', { blocker_id: req.userId, blocked_id: userId });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/block error:', err.message);
+    res.status(500).json({ error: 'Could not block user' });
+  }
+});
+
+app.delete('/social/block/:id', requireAuth, async (req, res) => {
+  try {
+    await sbFetch(`user_blocks?blocker_id=eq.${encodeURIComponent(req.userId)}&blocked_id=eq.${encodeURIComponent(req.params.id)}`, 'DELETE');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /social/block error:', err.message);
+    res.status(500).json({ error: 'Could not unblock user' });
+  }
+});
+
+app.post('/social/report', requireAuth, async (req, res) => {
+  try {
+    const r = req.body && req.body.report;
+    if (!r || typeof r.id !== 'string' || !r.id) return res.status(400).json({ error: 'Invalid report' });
+    if (JSON.stringify(r).length > 20000) return res.status(413).json({ error: 'Report too large' });
+    const ex = await sbFetch(`reports?id=eq.${encodeURIComponent(r.id)}&select=id`, 'GET');
+    if (!ex.length) await sbFetch('reports', 'POST', { id: r.id, reporter_id: req.userId, data: Object.assign({}, r, { reportedBy: req.userId }) });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('POST /social/report error:', err.message);
+    res.status(500).json({ error: 'Could not submit report' });
   }
 });
 
