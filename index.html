@@ -4529,7 +4529,7 @@ function syncFromServer(){
       var preview = last
         ? (last.text ? (lastHasPhoto ? "📷 " : "") + esc(last.text) : (lastHasPhoto ? "📷 Photo" : ""))
         : (isIncoming ? "New enquiry" : "Awaiting reply");
-      var kindIcon = d.kind==="barter"?"🔄":d.kind==="sale"?"🛒":d.kind==="offer"?"💬":"❓";
+      var kindIcon = d.kind==="barter"?"🔄":d.kind==="sale"?"🛒":"💬";
       var statusPill = statusPillFor(d.status);
 
       var showTag = (d.status==="pending" || d.status==="accepted" || d.status==="completed");
