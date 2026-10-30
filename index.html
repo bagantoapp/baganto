@@ -5781,6 +5781,7 @@ function syncFromServer(){
       if(!erDel) return;
       if(!window.confirm("Delete your review?")) return;
       DB.ratings = DB.ratings.filter(function(r){ return r.id!==erDel.id; });
+      fetch(API_BASE + "/social/rating/" + encodeURIComponent(erDel.id), { method: "DELETE" }).catch(function(){});
       saveDB(); showToast("Review deleted."); render(); return;
     }
 
@@ -6358,7 +6359,7 @@ function syncFromServer(){
       var editId = fd4.get("editRatingId");
       if(editId){
         var erSave = DB.ratings.filter(function(r){ return r.id===editId && r.fromUserId===UI.currentUserId; })[0];
-        if(erSave){ erSave.stars = stars; erSave.review = (fd4.get("review")||"").trim(); saveDB(); showToast("Review updated."); }
+        if(erSave){ erSave.stars = stars; erSave.review = (fd4.get("review")||"").trim(); saveDB(); showToast("Review updated."); fetch(API_BASE + "/social/rating/" + encodeURIComponent(erSave.id), { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ rating: erSave }) }).catch(function(){}); }
       } else {
         submitRating(form.dataset.id, form.dataset.to, stars, fd4.get("review"));
       }

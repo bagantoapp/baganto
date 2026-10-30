@@ -786,6 +786,31 @@ app.post('/social/rating', requireAuth, async (req, res) => {
   }
 });
 
+app.put('/social/rating/:id', requireAuth, async (req, res) => {
+  try {
+    const r = req.body && req.body.rating;
+    if (!r || r.id !== req.params.id) return res.status(400).json({ error: 'Invalid rating' });
+    if (r.fromUserId !== req.userId) return res.status(403).json({ error: 'Not your rating' });
+    const ex = await sbFetch(`deal_ratings?id=eq.${encodeURIComponent(req.params.id)}&from_user=eq.${encodeURIComponent(req.userId)}&select=id`, 'GET');
+    if (!ex.length) return res.status(404).json({ error: 'Rating not found' });
+    await sbFetch(`deal_ratings?id=eq.${encodeURIComponent(req.params.id)}`, 'PATCH', { data: r });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('PUT /social/rating error:', err.message);
+    res.status(500).json({ error: 'Could not update rating' });
+  }
+});
+
+app.delete('/social/rating/:id', requireAuth, async (req, res) => {
+  try {
+    await sbFetch(`deal_ratings?id=eq.${encodeURIComponent(req.params.id)}&from_user=eq.${encodeURIComponent(req.userId)}`, 'DELETE');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /social/rating error:', err.message);
+    res.status(500).json({ error: 'Could not delete rating' });
+  }
+});
+
 app.post('/social/notify', requireAuth, async (req, res) => {
   try {
     const n = req.body && req.body.notification;
