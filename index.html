@@ -1843,14 +1843,21 @@ function pullSocial(){
     })(j.ratings);
     // Saved ads come from the server, so they follow the account across devices.
     if(Array.isArray(j.saved) && UI.currentUserId){
-      DB.savedItems = (DB.savedItems || []).filter(function(x){ return x.userId !== UI.currentUserId; })
-        .concat(j.saved.map(function(id){ return {userId: UI.currentUserId, itemId: id}; }));
-      changed = true;
+      var __oldSaved = (DB.savedItems || []).filter(function(x){ return x.userId === UI.currentUserId; }).map(function(x){ return x.itemId; }).sort().join(",");
+      var __newSaved = j.saved.slice().sort().join(",");
+      if(__oldSaved !== __newSaved){
+        DB.savedItems = (DB.savedItems || []).filter(function(x){ return x.userId !== UI.currentUserId; })
+          .concat(j.saved.map(function(id){ return {userId: UI.currentUserId, itemId: id}; }));
+        changed = true;
+      }
     }
     // The server's block list is the source of truth, so it follows the account across devices.
     if(Array.isArray(j.blocked)){
       var meBlock = userById(UI.currentUserId);
-      if(meBlock){ meBlock.blockedUsers = j.blocked.slice(); changed = true; }
+      if(meBlock){
+        var __nb = j.blocked.slice().sort().join(","), __ob = (meBlock.blockedUsers || []).slice().sort().join(",");
+        if(__nb !== __ob){ meBlock.blockedUsers = j.blocked.slice(); changed = true; }
+      }
     }
     DB.notifications = DB.notifications || [];
     (j.notifications || []).forEach(function(n){
@@ -5235,6 +5242,7 @@ function syncFromServer(){
       '<div class="muted" style="margin-bottom:12px;">Report: <b>'+esc(it.title)+'</b></div>' +
       '<form data-form="report-ad" data-id="'+it.id+'">' +
         '<div class="form-row"><label>Why are you reporting this ad?</label><div class="report-reasons">'+radioOpts+'</div></div>' +
+        '<div class="form-row other-reason" style="display:none;"><label>Tell us the reason</label><textarea name="details" placeholder="Describe the problem"></textarea></div>' +
         '<button type="submit" class="btn btn-danger btn-block">Submit Report</button>' +
       '</form>';
   }
@@ -6540,7 +6548,8 @@ function syncFromServer(){
     if(type==="report-ad"){
       var fdR = new FormData(form);
       var reason = fdR.get("reason") || REPORT_REASONS[0];
-      var details = fdR.get("details") || "";
+      var details = (fdR.get("details") || "").trim();
+      if(reason === "Other" && !details){ showToast("Please tell us the reason."); return; }
       reportItem(form.dataset.id, reason, details);
       UI.modal = null;
       showToast("✅ Report submitted. Thank you for keeping Baganto safe!");
@@ -7152,6 +7161,15 @@ document.addEventListener('input', function(e){
   var t = e.target;
   if(t && t.name === 'price'){
     t.value = t.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+  }
+}, true);
+// Show the "Tell us the reason" box only when Other is selected.
+document.addEventListener('change', function(e){
+  var t = e.target;
+  if(t && t.name === 'reason'){
+    var f = t.closest('form');
+    var box = f ? f.querySelector('.other-reason') : null;
+    if(box) box.style.display = (t.value === 'Other') ? '' : 'none';
   }
 }, true);
 </script>
