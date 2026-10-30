@@ -3483,7 +3483,7 @@ function syncFromServer(){
     '<h2>6. Where Your Data Is Stored</h2>',
     '<p>Depending on how the app is configured, your data is stored locally on your device (browser/app storage) and/or synced to our backend server so it stays consistent across your devices. We take reasonable security practices and procedures, as contemplated under the IT Rules, 2011, to protect data we hold - but no method of transmission or storage is 100% secure, and we cannot guarantee absolute security.</p>',
     '<h2>7. Data Retention</h2>',
-    '<p>We retain your data for as long as your profile is active. If you delete a profile using the in-app "Delete This Profile" option, that profile\'s listings, trades, messages, and ratings are permanently removed from active use. We may retain limited records for longer where required for legal, fraud-prevention, or audit purposes.</p>',
+    '<p>We retain your data for as long as your profile is active. If you delete your account using the in-app "Delete account" option, your listings, trades, messages, and ratings are permanently removed from active use. We may retain limited records for longer where required for legal, fraud-prevention, or audit purposes.</p>',
     '<h2>8. Your Rights</h2>',
     '<p>As a Data Principal under the Digital Personal Data Protection Act, 2023, you have the right to:</p>',
     '<ul>',
@@ -4659,12 +4659,6 @@ function syncFromServer(){
         '<div style="font-weight:800;margin:8px 0 10px;">Reviews Received</div>' +
         reviewsHtml +
         '<div class="hr"></div>' +
-        '<div style="font-weight:800;margin:8px 0 10px;">Manage Profiles</div>' +
-        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">' +
-          '<button class="btn btn-primary" data-action="toggle-profile-form">'+profileToggleLabel+'</button>' +
-          '<button class="btn btn-danger" data-action="delete-profile" data-id="'+u.id+'"'+(deleteDisabled?' disabled title="Can\'t delete the only profile"':'')+'>Delete This Profile</button>' +
-        '</div>' +
-        profileFormHtml +
         '<div class="hr"></div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">✏️ Account Details</div>' +
         '<div class="card" style="padding:12px;margin-bottom:14px;">' +
