@@ -2499,6 +2499,7 @@ function syncFromServer(){
   function reportItem(itemId, reason, details){
     var report = {
       id: uid("r"),
+      type: "ad",
       itemId: itemId,
       reportedBy: UI.currentUserId,
       reason: reason,
@@ -5211,7 +5212,7 @@ function syncFromServer(){
     var u = userById(userId);
     var radioOpts = REPORT_REASONS.map(function(r,i){
       return '<label style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">' +
-        '<input type="radio" name="reason" value="'+esc(r)+'"'+(i===0?' checked':'')+' required> '+esc(r) +
+        '<input type="radio" name="reason" value="'+esc(r)+'"'+(i===0?' checked':'')+' required style="margin:0;flex:0 0 18px;width:18px;height:18px;"> <span style="flex:1;">'+esc(r)+'</span>' +
       '</label>';
     }).join("");
     return '' +
@@ -5227,7 +5228,7 @@ function syncFromServer(){
     var it = itemById(itemId);
     var radioOpts = REPORT_REASONS.map(function(r,i){
       return '<label style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">' +
-        '<input type="radio" name="reason" value="'+esc(r)+'"'+(i===0?' checked':'')+' required> '+esc(r) +
+        '<input type="radio" name="reason" value="'+esc(r)+'"'+(i===0?' checked':'')+' required style="margin:0;flex:0 0 18px;width:18px;height:18px;"> <span style="flex:1;">'+esc(r)+'</span>' +
       '</label>';
     }).join("");
     return '' +
