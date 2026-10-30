@@ -1464,7 +1464,19 @@
     storageSet(STORAGE_KEY, JSON.stringify(fresh));
     return fresh;
   }
-  function persistLocal(){ storageSet(STORAGE_KEY, JSON.stringify(DB)); }
+  // Browser copy of the data. Photos stored as long text (data:) are dropped here,
+  // because the server keeps the real photo links and refills ads on every sync.
+  function trimmedForStorage(){
+    var copy = JSON.parse(JSON.stringify(DB));
+    var isLink = function(x){ return typeof x === "string" && x.indexOf("data:") !== 0; };
+    (copy.items || []).forEach(function(it){ if(Array.isArray(it.photos)) it.photos = it.photos.filter(isLink); });
+    (copy.users || []).forEach(function(u){
+      if(u.id !== UI.currentUserId && u.avatarPhoto && !isLink(u.avatarPhoto)) u.avatarPhoto = null;
+    });
+    if(Array.isArray(copy.notifications) && copy.notifications.length > 200) copy.notifications = copy.notifications.slice(-200);
+    return copy;
+  }
+  function persistLocal(){ storageSet(STORAGE_KEY, JSON.stringify(trimmedForStorage())); }
   function saveDB(){ persistLocal(); syncToServer(); }
 
   // ---------------- Backend sync (optional) ----------------
