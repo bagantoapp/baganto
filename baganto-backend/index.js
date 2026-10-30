@@ -256,6 +256,7 @@ app.delete('/items/:id', requireAuth, async (req, res) => {
 
 // ============ TRADES (Proposals) ============
 app.get('/trades', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('trades');
     res.json(data);
@@ -265,6 +266,7 @@ app.get('/trades', async (req, res) => {
 });
 
 app.post('/trades', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { from_user_id, to_user_id, item_id, kind, status } = req.body;
     const data = await supabaseCall('trades', 'POST', { from_user_id, to_user_id, item_id, kind, status });
@@ -276,6 +278,7 @@ app.post('/trades', async (req, res) => {
 
 app.put('/trades/:id', async (req, res) => {
   return res.status(410).json({ error: 'This endpoint is disabled' });
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('trades', 'PATCH', req.body, `?id=eq.${req.params.id}`);
     res.json(data[0] || data);
@@ -286,6 +289,7 @@ app.put('/trades/:id', async (req, res) => {
 
 // ============ MESSAGES ============
 app.get('/messages/:tradeId', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('messages', 'GET', null, `?trade_id=eq.${req.params.tradeId}&order=created_at.asc`);
     res.json(data);
@@ -295,6 +299,7 @@ app.get('/messages/:tradeId', async (req, res) => {
 });
 
 app.post('/messages', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { trade_id, sender_id, content, photo } = req.body;
@@ -307,6 +312,7 @@ app.post('/messages', async (req, res) => {
 
 // ============ RATINGS ============
 app.get('/ratings/:userId', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const data = await supabaseCall('ratings', 'GET', null, `?to_user_id=eq.${req.params.userId}`);
     res.json(data);
@@ -316,6 +322,7 @@ app.get('/ratings/:userId', async (req, res) => {
 });
 
 app.post('/ratings', async (req, res) => {
+  return res.status(410).json({ error: 'This endpoint is disabled' });
   return res.status(410).json({ error: 'This endpoint is disabled' });
   try {
     const { from_user_id, to_user_id, trade_id, rating, review } = req.body;
