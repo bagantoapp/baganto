@@ -67,6 +67,14 @@ app.get('/health', (req, res) => {
 });
 
 // ============ ITEMS (Listings) ============
+// An ad whose end date has passed is shown as expired, even if its stored status still says available.
+function effectiveItem(it) {
+  if (it && it.status === 'available' && it.expires_at && new Date(it.expires_at) < new Date()) {
+    return Object.assign({}, it, { status: 'expired' });
+  }
+  return it;
+}
+
 function optionalUid(req) {
   const h = req.headers.authorization || '';
   return h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
@@ -85,7 +93,7 @@ app.get('/items', async (req, res) => {
   try {
     const data = await supabaseCall('items');
     const hidden = await blockedOtherIds(optionalUid(req));
-    res.json((data || []).filter(it => !hidden.has(it.owner_id)));
+    res.json((data || []).map(effectiveItem).filter(it => !hidden.has(it.owner_id)));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -96,7 +104,7 @@ app.get('/items/:id', async (req, res) => {
     const data = await supabaseCall('items', 'GET', null, `?id=eq.${req.params.id}`);
     const row = data[0] || null;
     if (row && (await blockedOtherIds(optionalUid(req))).has(row.owner_id)) return res.json(null);
-    res.json(row);
+    res.json(effectiveItem(row));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -223,8 +231,8 @@ app.put('/items/:id', requireAuth, async (req, res) => {
     if (!Object.keys(updates).length) return res.status(400).json({ error: 'Nothing to update' });
     // Reposting an expired ad counts as a new post: check the limit and move it into this month.
     if (req.body && req.body.status === 'available') {
-      const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}&select=status`);
-      if (cur[0] && cur[0].status !== 'available') {
+      const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}&select=status,expires_at`);
+      if (cur[0] && effectiveItem(cur[0]).status !== 'available') {
         if (!(await canPostAd(req.userId))) return res.status(429).json({ error: 'Monthly ad limit reached. Upgrade your plan to repost.' });
         updates.created_at = new Date().toISOString();
       }
@@ -453,7 +461,7 @@ app.get('/api/db', async (req, res) => {
       return safe;
     });
     const hiddenOwners = await blockedOtherIds(optionalUid(req));
-    const out = { items: (items || []).filter(it => !hiddenOwners.has(it.owner_id)), users };
+    const out = { items: (items || []).map(effectiveItem).filter(it => !hiddenOwners.has(it.owner_id)), users };
     // If the caller is logged in, include their real monthly ad count so every device shows the true limit
     const h = req.headers.authorization || '';
     const uid = h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
