@@ -3346,11 +3346,6 @@ function syncFromServer(){
     render();
   }
 
-  function reportItem(itemId, reason){
-    DB.reports.push({id:uid("rep"), userId:UI.currentUserId, itemId:itemId, reason:reason, createdAt:nowTs()});
-    saveDB();
-    showToast("Ad reported. Thank you - we\'ll review it.");
-  }
 
   function markItemSold(itemId){
     var it = itemById(itemId);
