@@ -1,6 +1,9 @@
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
+if (!process.env.service_role) {
+  throw new Error('The service_role environment variable must be set before the server starts');
+}
 
 const app = express();
 app.use(cors({ origin: 'https://baganto.com' }));
@@ -500,7 +503,7 @@ function makeSignupToken(email) {
   const exp = Date.now() + 15 * 60 * 1000;
   const payload = `${email}|${exp}`;
   const sig = require('crypto')
-    .createHmac('sha256', process.env.service_role || 'dev-only')
+    .createHmac('sha256', process.env.service_role)
     .update('signup-token:' + payload)
     .digest('hex');
   return Buffer.from(payload).toString('base64url') + '.' + sig;
@@ -512,7 +515,7 @@ function checkSignupToken(token, email) {
     const payload = Buffer.from(b, 'base64url').toString();
     const [tEmail, exp] = payload.split('|');
     const expect = require('crypto')
-      .createHmac('sha256', process.env.service_role || 'dev-only')
+      .createHmac('sha256', process.env.service_role)
       .update('signup-token:' + payload)
       .digest('hex');
     if (!sig || sig.length !== expect.length) return false;
@@ -624,7 +627,7 @@ const OTP_MAX_ATTEMPTS = 5;
 
 function otpHash(purpose, email, code) {
   return require('crypto')
-    .createHmac('sha256', process.env.service_role || 'dev-only')
+    .createHmac('sha256', process.env.service_role)
     .update(`${purpose}:${email}:${code}`)
     .digest('hex');
 }
@@ -672,6 +675,9 @@ app.post('/auth/otp/send', async (req, res) => {
     const { email, purpose } = req.body;
     if (!['signup', 'reset'].includes(purpose) || !validateEmail(email)) {
       return res.status(400).json({ error: 'valid email and purpose (signup or reset) required' });
+    }
+    if (!await checkLoginLimit('otp-send-email:' + String(email).toLowerCase())) {
+      return res.status(429).json({ error: 'Too many codes sent to this email, please wait a minute' });
     }
     if (!await checkLoginLimit('otp-send:' + req.ip)) {
       return res.status(429).json({ error: 'Too many requests, please wait a minute' });
@@ -1085,12 +1091,33 @@ app.listen(PORT, () => {
 });
 
 // Image upload endpoint
+const uploadHits = new Map();
+function uploadAllowed(uid) {
+  const now = Date.now();
+  const recent = (uploadHits.get(uid) || []).filter(t => now - t < 60000);
+  if (recent.length >= 30) { uploadHits.set(uid, recent); return false; }
+  recent.push(now);
+  uploadHits.set(uid, recent);
+  return true;
+}
+function detectImageType(buf) {
+  if (!buf || buf.length < 12) return null;
+  if (buf[0] === 0xFF && buf[1] === 0xD8 && buf[2] === 0xFF) return { mime: 'image/jpeg', ext: 'jpg' };
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) return { mime: 'image/png', ext: 'png' };
+  if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return { mime: 'image/webp', ext: 'webp' };
+  return null;
+}
+
 app.post('/items/upload', requireAuth, async (req, res) => {
   try {
     const { file, filename } = req.body;
     if (!file || !filename) return res.status(400).json({ error: 'Missing file or filename' });
     
+    if (!uploadAllowed(req.userId)) return res.status(429).json({ error: 'Too many uploads, please wait a minute' });
     const buffer = Buffer.from(file.split(',')[1] || file, 'base64');
+    if (buffer.length > 3 * 1024 * 1024) return res.status(413).json({ error: 'Photo is too large (max 3 MB)' });
+    const kind = detectImageType(buffer);
+    if (!kind) return res.status(415).json({ error: 'Only JPEG, PNG or WebP photos are allowed' });
     // Sanitize filename - remove spaces and special characters
     const sanitized = filename
       .toLowerCase()
@@ -1104,7 +1131,7 @@ app.post('/items/upload', requireAuth, async (req, res) => {
       headers: {
         'Authorization': `Bearer ${process.env.service_role}`,
         'apikey': process.env.service_role,
-        'Content-Type': 'image/jpeg'
+        'Content-Type': kind.mime
       },
       body: buffer
     });
