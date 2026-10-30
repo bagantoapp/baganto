@@ -398,8 +398,8 @@ app.post('/support', async (req, res) => {
       '📩 New support message on Baganto',
       'Category: ' + (category || '-'),
       'Subject: ' + (subject || '-'),
-      'From: ' + (contact_email || 'guest'),
-      'User ID: ' + (uid || 'guest'),
+      ...(await userContactLines(uid)),
+      'Ticket email: ' + (contact_email || '-'),
       'Message: ' + message.slice(0, 1000)
     ].join('\n'));
     res.json({ success: true });
@@ -861,6 +861,17 @@ async function notifyTelegram(text) {
   }
 }
 
+async function userContactLines(uid) {
+  if (!uid) return ['Account: guest'];
+  try {
+    const rows = await sbFetch(`users?id=eq.${encodeURIComponent(uid)}&select=name,email,phone`, 'GET');
+    const u = rows[0] || {};
+    return ['Name: ' + (u.name || '-'), 'Email: ' + (u.email || '-'), 'Phone: ' + (u.phone || '-')];
+  } catch (e) {
+    return ['Account ID: ' + uid];
+  }
+}
+
 app.post('/social/block', requireAuth, async (req, res) => {
   try {
     const userId = req.body && req.body.userId;
@@ -897,6 +908,7 @@ app.post('/social/report', requireAuth, async (req, res) => {
         'Type: ' + (r.type || 'ad'),
         'Reason: ' + (r.reason || '-'),
         'Details: ' + String(r.details || '-').slice(0, 500),
+        ...(await userContactLines(req.userId)),
         'Reporter ID: ' + req.userId,
         'Target: ' + (r.targetUserId || r.itemId || '-'),
         'Report ID: ' + r.id
