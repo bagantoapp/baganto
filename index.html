@@ -4287,7 +4287,7 @@ function syncFromServer(){
     var displayItems = UI.myAdsTab==="sold" ? soldItems : (UI.myAdsTab==="expired" ? expiredItems : activeItems);
 
     var formHtml = UI.listingFormOpen ? (UI.editingItemId ? renderEditListingForm(UI.editingItemId) : renderListingForm()) : "";
-    var toggleLabel = UI.listingFormOpen ? "Cancel" : "+ Post Free Ad";
+    var toggleLabel = UI.listingFormOpen ? "Cancel" : "+ Post Ad";
 
     var totalViews = mine.reduce(function(s, it){ return s + (it.views||0); }, 0);
 
@@ -4297,7 +4297,7 @@ function syncFromServer(){
         '<div class="card empty"><div class="empty-icon">🏷️</div>No sold or traded items yet.</div>' :
        UI.myAdsTab==="expired" ?
         '<div class="card empty"><div class="empty-icon">⏳</div>No expired ads. Every ad stays live for '+AD_LIFETIME_DAYS+' days.</div>' :
-        '<div class="card empty"><div class="empty-icon">📦</div>You haven\'t posted any ads yet.<br>Tap "Post Free Ad" to get started.</div>');
+        '<div class="card empty"><div class="empty-icon">📦</div>You haven\'t posted any ads yet.<br>Tap "Post Ad" to get started.</div>');
 
     return '' +
       '<div class="section-title">My Ads</div>' +
