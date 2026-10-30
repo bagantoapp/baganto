@@ -1808,7 +1808,25 @@ function pullSocial(){
       });
     }
     mergeLog("messages", j.messages, pushedSocial.messages);
-    mergeLog("ratings", j.ratings, pushedSocial.ratings);
+    (function(rows){
+      var arr = DB.ratings = DB.ratings || [];
+      var serverIds = {};
+      (rows || []).forEach(function(obj){
+        if(!obj || !obj.id) return;
+        serverIds[obj.id] = true;
+        var local = null;
+        for(var k = 0; k < arr.length; k++){ if(arr[k].id === obj.id){ local = arr[k]; break; } }
+        if(local){
+          if(local.stars !== obj.stars || local.review !== obj.review){ local.stars = obj.stars; local.review = obj.review; changed = true; }
+        } else { arr.push(obj); changed = true; }
+        pushedSocial.ratings[obj.id] = "1";
+      });
+      // Remove reviews the server no longer has (deleted by their author).
+      for(var m = arr.length - 1; m >= 0; m--){
+        var rt = arr[m];
+        if(rt && pushedSocial.ratings[rt.id] && !serverIds[rt.id]){ arr.splice(m, 1); delete pushedSocial.ratings[rt.id]; changed = true; }
+      }
+    })(j.ratings);
     DB.notifications = DB.notifications || [];
     (j.notifications || []).forEach(function(n){
       if(!n || !n.id) return;
