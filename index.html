@@ -2690,6 +2690,12 @@ function syncFromServer(){
     return blocker && blocker.blockedUsers && blocker.blockedUsers.indexOf(userId) >= 0;
   }
 
+  function chatBlockedNow(d){
+    if(!d || !UI.currentUserId) return false;
+    var other = d.fromUserId === UI.currentUserId ? d.toUserId : d.fromUserId;
+    return isUserBlocked(other, UI.currentUserId) || isUserBlocked(UI.currentUserId, other);
+  }
+
   function blockUser(userId, blockerUserId){
     var blocker = userById(blockerUserId);
     if(blocker && !isUserBlocked(userId, blockerUserId)){
@@ -2914,6 +2920,7 @@ function syncFromServer(){
     var dlk = DB.deals.filter(function(d){ return d.id===dealId; })[0];
     if(dlk && (dlk.status==="rejected" || dlk.status==="withdrawn")){ showToast("This chat is closed."); return; }
     if(dlk && dlk.status==="pending"){ showToast("Chat opens once the other person accepts."); return; }
+    if(chatBlockedNow(dlk)){ showToast("You can't message this user."); return; }
     if(dlk){
       var otherId = dlk.fromUserId===UI.currentUserId ? dlk.toUserId : dlk.fromUserId;
       if(isUserBlocked(otherId, UI.currentUserId)){
@@ -5357,7 +5364,7 @@ function syncFromServer(){
       '<div class="chat-thread">' +
         '<div class="chat-box">'+(msgsHtml || emptyThread)+typingHtml+'</div>' +
         renderChatImageStrip() +
-        (d.status==="pending" ? '<div class="muted" style="padding:12px;text-align:center;font-size:14px;">'+(d.toUserId===UI.currentUserId ? 'Accept this request to start chatting.' : 'Chat opens once '+esc(counterparty && counterparty.name ? counterparty.name : 'they')+' accepts.')+'</div>' : '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
+        ((d.status==="pending" || chatBlockedNow(d)) ? '<div class="muted" style="padding:12px;text-align:center;font-size:14px;">'+(chatBlockedNow(d) ? 'You can\'t message this user.' : (d.toUserId===UI.currentUserId ? 'Accept this request to start chatting.' : 'Chat opens once '+esc(counterparty && counterparty.name ? counterparty.name : 'they')+' accepts.'))+'</div>' : '<form data-form="send-message" data-id="'+d.id+'" class="chat-input-row">' +
           '<label class="chat-attach" title="Send a photo">📎' +
             '<input type="file" id="chatImgInput" accept="image/*" multiple>' +
           '</label>' +
