@@ -4961,6 +4961,7 @@ function syncFromServer(){
     if(m.type==="rate") return modalWrap("Rate This Trade", renderRateModalBody(m.dealId, m.toUserId));
     if(m.type==="delete-account") return modalWrap("Why are you leaving?", renderDeleteAccountBody());
     if(m.type==="seller") return modalWrap("Seller profile", renderSellerModalBody(m.userId));
+    if(m.type==="reportUser") return modalWrap("Report user", renderReportUserBody(m.userId));
     if(m.type==="id-verification") return modalWrap("🆔 ID Verification (Pro Seller)", renderIdVerificationModalBody());
     return "";
   }
@@ -4985,6 +4986,14 @@ function syncFromServer(){
       '</div>';
   }
 
+  function profileSafetyButtons(userId){
+    if(!UI.currentUserId || userId === UI.currentUserId) return '';
+    var blocked = isUserBlocked(userId, UI.currentUserId);
+    return '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;border-top:1px solid var(--border);padding-top:14px;">' +
+      '<button class="btn '+(blocked?'btn-ghost':'btn-danger')+' btn-sm" data-action="'+(blocked?'unblock-user':'block-user')+'" data-userid="'+userId+'">'+(blocked?'Unblock':'Block')+'</button>' +
+      '<button class="btn btn-ghost btn-sm" data-action="open-report-user" data-userid="'+userId+'" style="color:#ef4444;">⚑ Report user</button>' +
+    '</div>';
+  }
   function renderSellerModalBody(sellerId){
     var u = userById(sellerId);
     if(!u || !u.id) return '<div class="muted">This seller is no longer on Baganto.</div>';
@@ -5015,7 +5024,7 @@ function syncFromServer(){
     }).join('') : '<div class="muted">No reviews yet.</div>';
     return head + bio + hint +
       '<div style="font-weight:800;margin:6px 0 10px;">Active ads</div>' + grid +
-      '<div style="font-weight:800;margin:6px 0 10px;">Reviews</div>' + revHtml;
+      '<div style="font-weight:800;margin:6px 0 10px;">Reviews</div>' + revHtml + profileSafetyButtons(u.id);
   }
 
   function modalWrap(title, bodyHtml){
@@ -5191,6 +5200,22 @@ function syncFromServer(){
       '</label>' +
       '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Up to 4 photos. They are sent with your message.</div>' +
     '</div>';
+  }
+
+  function renderReportUserBody(userId){
+    var u = userById(userId);
+    var radioOpts = REPORT_REASONS.map(function(r,i){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">' +
+        '<input type="radio" name="reason" value="'+esc(r)+'"'+(i===0?' checked':'')+' required> '+esc(r) +
+      '</label>';
+    }).join("");
+    return '' +
+      '<div class="muted" style="margin-bottom:12px;">Report: <b>'+esc(u.name)+'</b></div>' +
+      '<form data-form="report-user" data-id="'+userId+'">' +
+        '<div class="form-row"><label>Why are you reporting this user?</label><div class="report-reasons">'+radioOpts+'</div></div>' +
+        '<div class="form-row"><label>Details (optional)</label><textarea name="details" placeholder="Tell us what happened"></textarea></div>' +
+        '<button type="submit" class="btn btn-danger btn-block">Submit Report</button>' +
+      '</form>';
   }
 
   function renderReportModalBody(itemId){
@@ -6035,6 +6060,9 @@ function syncFromServer(){
       return;
     }
     if(action==="view-seller"){ UI.modal = {type:"seller", userId: t.dataset.userid}; render(); return; }
+    if(action==="block-user"){ blockUser(t.dataset.userid, UI.currentUserId); render(); return; }
+    if(action==="unblock-user"){ unblockUser(t.dataset.userid, UI.currentUserId); render(); return; }
+    if(action==="open-report-user"){ UI.modal = {type:"reportUser", userId: t.dataset.userid}; render(); return; }
     if(action==="view-seller-item"){ UI.modal = {type:"item", itemId: t.dataset.id}; render(); return; }
     if(action==="delete-my-account"){ UI.delReasonSel = ""; UI.delOtherText = ""; UI.modal = {type:"delete-account"}; render(); return; }
     if(action==="confirm-delete-account"){
@@ -6407,6 +6435,17 @@ function syncFromServer(){
         submitRating(form.dataset.id, form.dataset.to, stars, fd4.get("review"));
       }
       UI.modal = null;
+      render();
+      return;
+    }
+    if(type==="report-user"){
+      var fdr = new FormData(form);
+      var repU = { id: uid("rep"), type: "user", itemId: null, targetUserId: form.dataset.id, reportedBy: UI.currentUserId, reason: fdr.get("reason")||"", details: (fdr.get("details")||"").trim(), createdAt: nowTs(), status: "open" };
+      DB.reports.push(repU);
+      saveDB();
+      fetch(API_BASE + "/social/report", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ report: repU }) }).catch(function(){});
+      UI.modal = null;
+      showToast("✅ Report submitted. Thank you for keeping Baganto safe!");
       render();
       return;
     }
