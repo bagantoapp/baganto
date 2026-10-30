@@ -4390,8 +4390,8 @@ function syncFromServer(){
           '</div>' +
         '</div>' +
         '<div class="form-row" id="priceRow"'+(prop?'':' style="display:none;"')+'>' +
-          '<label id="priceLabel">'+priceLabelFor(curCat)+(prop?'':' <small style="color:var(--muted);">Enter 0 for FREE</small>')+'</label>' +
-          '<input type="number" name="price" min="0" step="1" placeholder="'+(prop?(isRental(curCat)?'e.g. 25000':'e.g. 4500000'):'e.g. 1500')+'">' +
+          '<label id="priceLabel">'+priceLabelFor(curCat)+'</label>' +
+          '<input type="text" inputmode="numeric" name="price" placeholder="'+(prop?(isRental(curCat)?'e.g. 25000':'e.g. 4500000'):'e.g. 1500')+'">' +
           '<label style="margin-top:8px;font-weight:500;display:flex;align-items:center;gap:6px;"><input type="checkbox" name="negotiable"> Price is negotiable</label>' +
         '</div>' +
         '<div class="form-row" id="wantRow"'+(noTrade?' style="display:none;"':'')+'><label>What would you like in exchange?</label><input type="text" name="wantInExchange" placeholder="e.g. Sci-fi books, or \'open to offers\'"></div>' +
@@ -4432,8 +4432,8 @@ function syncFromServer(){
           '</div>' +
         '</div>' +
         '<div class="form-row" id="priceRow" style="'+((it.forSale||propE) && !isNoTrade(it.category)?"":"display:none;")+'">' +
-          '<label id="priceLabel">'+priceLabelFor(it.category)+(propE?'':' <small style="color:var(--muted);">Enter 0 for FREE</small>')+'</label>' +
-          '<input type="number" name="price" min="0" step="1" value="'+(it.price||0)+'">' +
+          '<label id="priceLabel">'+priceLabelFor(it.category)+'</label>' +
+          '<input type="text" inputmode="numeric" name="price" value="'+(it.price||0)+'">' +
           '<label style="margin-top:8px;font-weight:500;display:flex;align-items:center;gap:6px;"><input type="checkbox" name="negotiable"'+(it.negotiable?" checked":"")+'>  Price is negotiable</label>' +
         '</div>' +
         '<div class="form-row" id="wantRow" style="'+(it.forBarter && !isNoTrade(it.category)?"":"display:none;")+'">' +
@@ -5080,14 +5080,8 @@ function syncFromServer(){
       actionHtml = '<div class="muted">This item is no longer available.</div>';
     } else {
       var parts = [];
-      if(it.forSale && (it.price||0)>0 && !isProperty(it.category)){
-        parts.push('<button class="btn btn-primary btn-block" data-action="open-buy" data-id="'+it.id+'">Buy Now - '+formatINR(it.price)+'</button>');
-      }
       if(it.forSale && it.negotiable && (it.price||0)>0 && !isRental(it.category)){
         parts.push('<button class="btn btn-block" data-action="open-offer" data-id="'+it.id+'">💬 Make an Offer</button>');
-      }
-      if(it.forSale && (it.price||0)===0){
-        parts.push('<button class="btn btn-primary btn-block" data-action="open-buy" data-id="'+it.id+'">Claim for Free</button>');
       }
       if(it.forBarter && !isNoBarter(it.category)){
         if(hasPendingProposalOnItem(UI.currentUserId, it.id)){
@@ -5096,7 +5090,7 @@ function syncFromServer(){
           parts.push('<button class="btn btn-block" data-action="open-propose" data-id="'+it.id+'">Propose a Trade</button>');
         }
       }
-      parts.push('<button class="btn btn-ghost btn-block" data-action="send-available" data-id="'+it.id+'">💬 Is this still available?</button>');
+      parts.push('<button class="btn btn-primary btn-block" data-action="send-available" data-id="'+it.id+'">💬 Is this still available?</button>');
       actionHtml = parts.join('<div style="height:8px;"></div>');
     }
 
@@ -6264,7 +6258,7 @@ function syncFromServer(){
           bl.style.display = noBarter ? "none" : "";
           if(noBarter && bc){ bc.checked = false; if(wr) wr.style.display="none"; }
           else if(bc && bc.checked && wr){ wr.style.display = ""; }
-          if(pLab) pLab.innerHTML = priceLabelFor(e.target.value) + ' <small style="color:var(--muted);">Enter 0 for FREE</small>';
+          if(pLab) pLab.innerHTML = priceLabelFor(e.target.value);
           if(priceInput) priceInput.placeholder = "e.g. 1500";
           if(pr) pr.style.display = (sc && sc.checked) ? "" : "none";
         }
@@ -7151,6 +7145,13 @@ document.addEventListener('click', function(e){
   e.stopPropagation(); e.preventDefault();
   var imgs = Array.prototype.slice.call(img.parentElement.querySelectorAll('img'));
   openPhotoViewer(imgs.map(function(x){ return x.getAttribute('src'); }), imgs.indexOf(img));
+}, true);
+// Price fields accept whole numbers only: letters and symbols are removed, and a price of 0 is not allowed.
+document.addEventListener('input', function(e){
+  var t = e.target;
+  if(t && t.name === 'price'){
+    t.value = t.value.replace(/[^0-9]/g, '').replace(/^0+/, '');
+  }
 }, true);
 </script>
 </body>
