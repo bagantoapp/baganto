@@ -394,6 +394,14 @@ app.post('/support', async (req, res) => {
     const category = String(t.category || '').slice(0, 100);
     const contact_email = String(t.contactEmail || '').slice(0, 200);
     await sbFetch('support_tickets', 'POST', { user_id: uid || null, contact_email, category, subject, message, status: 'open' });
+    notifyTelegram([
+      '📩 New support message on Baganto',
+      'Category: ' + (category || '-'),
+      'Subject: ' + (subject || '-'),
+      'From: ' + (contact_email || 'guest'),
+      'User ID: ' + (uid || 'guest'),
+      'Message: ' + message.slice(0, 1000)
+    ].join('\n'));
     res.json({ success: true });
   } catch (err) {
     console.error('POST /support error:', err.message);
