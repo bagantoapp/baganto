@@ -5090,7 +5090,7 @@ function syncFromServer(){
         if(hasPendingProposalOnItem(UI.currentUserId, it.id)){
           parts.push('<button class="btn btn-block" disabled>Trade Proposal Already Sent</button>');
         } else {
-          parts.push('<button class="btn btn-block" data-action="open-propose" data-id="'+it.id+'">Propose a Trade</button>');
+          parts.push('<button class="btn btn-block" data-action="open-propose" data-id="'+it.id+'" style="background:#b5d4f4;color:#0c447c;border-color:#7fb8e6;">Propose a Trade</button>');
         }
       }
       parts.push('<button class="btn btn-primary btn-block" data-action="send-available" data-id="'+it.id+'">💬 Is this still available?</button>');
