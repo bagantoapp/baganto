@@ -830,12 +830,12 @@ app.post('/social/message', requireAuth, async (req, res) => {
     const dl = await sbFetch(`deals?id=eq.${encodeURIComponent(m.dealId)}&select=user_a,user_b,data`, 'GET');
     if (!dl.length) return res.status(404).json({ error: 'Deal not found' });
     if (dl[0].user_a !== req.userId && dl[0].user_b !== req.userId) return res.status(403).json({ error: 'Not your deal' });
+    const ex = await sbFetch(`deal_messages?id=eq.${encodeURIComponent(m.id)}&select=id`, 'GET');
+    if (ex.length) return res.json({ success: true });
     const dst = dl[0].data && dl[0].data.status;
     if (dst === 'rejected' || dst === 'withdrawn') return res.status(403).json({ error: 'This chat is closed' });
     const otherId = dl[0].user_a === req.userId ? dl[0].user_b : dl[0].user_a;
     if (await isBlockedEither(req.userId, otherId)) return res.status(403).json({ error: 'You cannot message this user' });
-    const ex = await sbFetch(`deal_messages?id=eq.${encodeURIComponent(m.id)}&select=id`, 'GET');
-    if (ex.length) return res.json({ success: true });
     await sbFetch('deal_messages', 'POST', { id: m.id, deal_id: m.dealId, sender_id: req.userId, data: m });
     res.json({ success: true });
   } catch (err) {
