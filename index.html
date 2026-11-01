@@ -3466,7 +3466,6 @@ function syncFromServer(){
   var PRIVACY_HTML = [
     '<h2>1. Introduction</h2>',
     '<p>This Privacy Policy explains how <strong>OROLU PRIVATE LIMITED</strong> ("Baganto", "we", "us") collects, uses, stores, shares, and protects personal data in connection with the Baganto app and website (the "Platform"), in accordance with the Information Technology Act, 2000; the Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011; and the Digital Personal Data Protection Act, 2023 together with the Digital Personal Data Protection Rules, 2025 notified under it. By using the Platform, you consent to the practices described here.</p>',
-    '<div class="legal-callout">This is a template Privacy Policy with placeholder business and contact details (shown in <span class="legal-placeholder">highlighted brackets</span>). Have it reviewed by a qualified lawyer before relying on it for a real launch - especially before submitting it as your public Privacy Policy URL to the Play Store / App Store.</div>',
     '<h2>2. Personal Data We Collect</h2>',
     '<ul>',
       '<li><strong>Profile data:</strong> name, chosen avatar, and city you select when creating a profile.</li>',
@@ -3769,11 +3768,28 @@ function syncFromServer(){
   }
 
   function renderFooter(){
-    var links = LEGAL_ORDER.map(function(k){
-      return '<button class="footer-link" data-action="open-legal" data-page="'+k+'">'+esc(LEGAL_DOCS[k].title)+'</button>';
-    }).join(' · ');
-    return '<div class="footer-note">Baganto - Sell. Exchange. Save.' +
-      '<div class="footer-links"><button class="footer-link" data-action="goto-support">💬 Contact Us</button> · '+links+'</div>' +
+    var fLink = function(attrs, label){
+      return '<button class="footer-link" style="display:block;text-decoration:none;padding:3px 0;color:var(--muted);font-size:12px;text-align:left;" '+attrs+'>'+label+'</button>';
+    };
+    var shortLabel = function(t){ return t.replace(' & Conditions','').replace(' & Cancellation','').replace(' Policy','').replace(' Redressal',''); };
+    var legal = LEGAL_ORDER.filter(function(k){ return k !== 'grievance'; }).map(function(k){
+      return fLink('data-action="open-legal" data-page="'+k+'"', esc(shortLabel(LEGAL_DOCS[k].title)));
+    }).join('');
+    var market = fLink('data-action="goto-tab" data-tab="market"', 'Browse ads') +
+      fLink('data-action="start-sell"', 'Post an ad') +
+      fLink('data-action="goto-tab" data-tab="pricing"', 'Plans');
+    var help = fLink('data-action="goto-support"', 'Contact us') +
+      fLink('data-action="open-legal" data-page="grievance"', 'Grievance');
+    var head = 'font-weight:700;color:var(--ink);margin-bottom:6px;font-size:13px;';
+    return '<div class="footer-note" style="text-align:left;margin:30px 0 10px;">' +
+      '<div style="font-weight:700;font-size:15px;color:var(--ink);">Baganto</div>' +
+      '<div style="margin-bottom:14px;">Sell. Exchange. Save.</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;">' +
+        '<div><div style="'+head+'">Marketplace</div>'+market+'</div>' +
+        '<div><div style="'+head+'">Help</div>'+help+'</div>' +
+        '<div><div style="'+head+'">Legal</div>'+legal+'</div>' +
+      '</div>' +
+      '<div style="border-top:1px solid var(--border);margin-top:14px;padding-top:10px;">© 2026 OROLU Private Limited</div>' +
     '</div>';
   }
 
