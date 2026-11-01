@@ -132,6 +132,10 @@
   .item-want{font-size:13px;color:var(--ink);background:var(--bg);border-radius:7px;padding:6px 9px;}
   .item-price{font-size:18px;font-weight:800;color:var(--primary-dark);}
   .item-owner{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-top:auto;padding-top:6px;border-top:1px solid var(--border);}
+  .item-owner.item-owner-row{align-items:flex-start;}
+  .io-left{display:flex;align-items:flex-start;gap:6px;flex:1;min-width:0;}
+  .io-txt{line-height:1.35;}
+  .io-right{display:flex;gap:8px;align-items:center;flex-shrink:0;white-space:nowrap;padding-top:1px;}
 
   .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
   .pill-cat{background:var(--primary-light);color:var(--primary-dark);}
@@ -4359,7 +4363,8 @@ function syncFromServer(){
         '<div class="item-meta">'+'<span class="pill pill-cat">'+esc(it.category)+'</span>'+statusPillForItem(it.status)+modeBadges+premiumBadge+mineBadge+'</div>' +
         priceLine +
         wantLine +
-        '<div class="item-owner">'+avatarOf(owner, 18)+' '+esc(owner.name)+' '+getSellerBadge(owner.id)+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+(rating.count?' · <span class="stars">★</span> '+rating.avg.toFixed(1):'')+' '+viewCount+'</div>' +
+        '<div class="item-owner item-owner-row"><div class="io-left">'+avatarOf(owner, 18)+'<span class="io-txt">'+esc(owner.name)+' '+getSellerBadge(owner.id)+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+'</span></div>' +
+        '<div class="io-right">'+(rating.count?'<span><span class="stars">★</span> '+rating.avg.toFixed(1)+'</span>':'')+viewCount+'</div></div>' +
       '</div>';
   }
 
