@@ -3710,6 +3710,30 @@ function syncFromServer(){
       '</div>';
     }
   }
+  // Long-press a chat to start selecting chats (touch and mouse).
+  var __pressTimer = null;
+  function __cancelPress(){ if(__pressTimer){ clearTimeout(__pressTimer); __pressTimer = null; } }
+  function __startPress(e){
+    if(UI.chatSelectMode) return;
+    var row = e.target && e.target.closest ? e.target.closest('.chat-row') : null;
+    if(!row) return;
+    __cancelPress();
+    var pressedId = row.getAttribute('data-id');
+    __pressTimer = setTimeout(function(){
+      __pressTimer = null;
+      UI.longPressAt = Date.now();
+      UI.chatSelectMode = true;
+      UI.chatSelected = {};
+      UI.chatSelected[pressedId] = true;
+      render();
+    }, 500);
+  }
+  document.addEventListener('touchstart', __startPress, {passive:true});
+  document.addEventListener('touchend', __cancelPress);
+  document.addEventListener('touchmove', __cancelPress, {passive:true});
+  document.addEventListener('mousedown', __startPress);
+  document.addEventListener('mouseup', __cancelPress);
+
   function render(){
     if(UI.authScreen){
       document.getElementById("app").innerHTML = renderAuth();
@@ -6030,7 +6054,7 @@ function syncFromServer(){
     if(action==="chats-select-on"){ UI.chatSelectMode = true; UI.chatSelected = {}; render(); return; }
     if(action==="chats-select-off"){ UI.chatSelectMode = false; UI.chatSelected = {}; render(); return; }
     if(action==="chats-select-all"){ UI.chatSelected = {}; (UI.chatVisibleIds || []).forEach(function(id){ UI.chatSelected[id] = true; }); render(); return; }
-    if(action==="toggle-chat-select"){ UI.chatSelected = UI.chatSelected || {}; var cid = t.dataset.id; UI.chatSelected[cid] = !UI.chatSelected[cid]; render(); return; }
+    if(action==="toggle-chat-select"){ if(UI.longPressAt && Date.now() - UI.longPressAt < 700) return; UI.chatSelected = UI.chatSelected || {}; var cid = t.dataset.id; UI.chatSelected[cid] = !UI.chatSelected[cid]; render(); return; }
     if(action==="chats-mark-all-read"){
       (DB.deals || []).forEach(function(d){ if(d.fromUserId===UI.currentUserId || d.toUserId===UI.currentUserId) markDealRead(d); });
       var nids = (DB.notifications || []).filter(function(n){ return n.userId===UI.currentUserId && !n.read && n.dealId; }).map(function(n){ n.read = true; return n.id; });
