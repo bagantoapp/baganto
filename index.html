@@ -5529,6 +5529,14 @@ function syncFromServer(){
     if(!t) return;
     var action = t.dataset.action;
 
+    // Actions that need an account: a logged-out visitor is sent to the login screen first.
+    var needsAccount = ["send-available","open-propose","open-report","open-report-user","toggle-save","block-user","unblock-user","open-rate"];
+    if(needsAccount.indexOf(action) >= 0 && (!getAuthToken() || !UI.currentUserId)){
+      UI.modal = null; UI.authScreen = true; UI.authPage = "login";
+      showToast("Please log in to continue.");
+      render(); return;
+    }
+
     if(action==="goto-tab"){
         var dest=t.dataset.tab;
         if(!UI.currentUserId && dest!=="market" && dest!=="pricing"){
