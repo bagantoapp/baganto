@@ -3798,7 +3798,7 @@ function syncFromServer(){
       fLink('data-action="open-legal" data-page="grievance"', 'Grievance');
     return '<footer class="bf"><div class="bf-in">' +
       '<div class="bf-row"><img src="'+BF_LOGO+'" alt="Baganto" class="bf-logo"><div class="bf-name"><span>b</span>aganto</div></div>' +
-      '<div class="bf-links">' + market + help + legal + '</div>' +
+      '<div class="bf-links">' + legal + fLink('data-action="open-legal" data-page="grievance"', 'Grievance') + fLink('data-action="goto-support"', 'Contact us') + '</div>' +
       '<div class="bf-copy">\u00a9 2026 OROLU Private Limited</div>' +
     '</div></footer>';
   }
