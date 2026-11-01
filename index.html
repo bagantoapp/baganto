@@ -3769,7 +3769,7 @@ function syncFromServer(){
 
   function renderFooter(){
     var fLink = function(attrs, label){
-      return '<button class="footer-link" style="display:block;text-decoration:none;padding:3px 0;color:var(--muted);font-size:12px;text-align:left;" '+attrs+'>'+label+'</button>';
+      return '<div style="padding:3px 0;"><button class="footer-link" style="text-decoration:none;color:var(--muted);font-size:12px;padding:0;text-align:left;" '+attrs+'>'+label+'</button></div>';
     };
     var shortLabel = function(t){ return t.replace(' & Conditions','').replace(' & Cancellation','').replace(' Policy','').replace(' Redressal',''); };
     var legal = LEGAL_ORDER.filter(function(k){ return k !== 'grievance'; }).map(function(k){
