@@ -4585,6 +4585,7 @@ function syncFromServer(){
 
   // -------- Profile --------
   function renderProfile(){
+    if(!UI.currentUserId){ UI.authScreen = true; UI.authPage = "login"; return renderAuth(); }
     var u = currentUser();
     var rating = userRating(u.id);
     var mine = myItems();
@@ -5818,7 +5819,7 @@ function syncFromServer(){
       }
       return;
     }
-    if(action==="logout"){ UI.currentUserId=""; UI.authScreen=true; UI.authPage="login"; UI.loginMode="phone"; UI.loginPassDraft=""; UI.notifOpen=false; storageSet(USER_KEY,""); render(); return; }
+    if(action==="logout"){ UI.currentUserId=""; UI.authScreen=true; UI.authPage="login"; UI.loginMode="phone"; UI.loginPassDraft=""; UI.notifOpen=false; storageSet(USER_KEY,""); setAuthToken(""); UI.tab="market"; render(); return; }
 
     // Notifications
     if(action==="toggle-notifs"){ UI.notifOpen = !UI.notifOpen; render(); return; }
