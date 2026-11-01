@@ -78,6 +78,16 @@ function effectiveItem(it) {
   return it;
 }
 
+// Ids of accounts that are deactivated. If the lookup fails, nothing is hidden.
+async function deactivatedIds() {
+  try {
+    const rows = await sbFetch('users?deactivated=eq.true&select=id', 'GET');
+    return new Set(rows.map(r => r.id));
+  } catch (e) {
+    return new Set();
+  }
+}
+
 function optionalUid(req) {
   const h = req.headers.authorization || '';
   return h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
@@ -96,7 +106,8 @@ app.get('/items', async (req, res) => {
   try {
     const data = await supabaseCall('items');
     const hidden = await blockedOtherIds(optionalUid(req));
-    res.json((data || []).map(effectiveItem).filter(it => !hidden.has(it.owner_id)));
+    const offIds = await deactivatedIds();
+    res.json((data || []).map(effectiveItem).filter(it => !hidden.has(it.owner_id) && !offIds.has(it.owner_id)));
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -342,6 +353,7 @@ app.get('/users/:id', async (req, res) => {
     const data = await supabaseCall('users', 'GET', null, `?id=eq.${req.params.id}`);
     const u = data[0];
     if (!u) return res.json(null);
+    if (u.deactivated && optionalUid(req) !== u.id) return res.json(null);
     const { password, ...rest } = u;
     const uid = optionalUid(req);
     if (uid && uid === u.id) return res.json(rest);
@@ -471,7 +483,8 @@ app.get('/api/db', async (req, res) => {
       return safe;
     });
     const hiddenOwners = await blockedOtherIds(optionalUid(req));
-    const out = { items: (items || []).map(effectiveItem).filter(it => !hiddenOwners.has(it.owner_id)), users };
+    const offIds = await deactivatedIds();
+    const out = { items: (items || []).map(effectiveItem).filter(it => !hiddenOwners.has(it.owner_id) && !offIds.has(it.owner_id)), users };
     // If the caller is logged in, include their real monthly ad count so every device shows the true limit
     const h = req.headers.authorization || '';
     const uid = h.startsWith('Bearer ') ? verifyAuthToken(h.slice(7)) : '';
@@ -942,6 +955,16 @@ app.delete('/saved/:itemId', requireAuth, async (req, res) => {
   }
 });
 
+app.post('/users/me/deactivate', requireAuth, async (req, res) => {
+  try {
+    await supabaseCall('users', 'PATCH', { deactivated: true }, `?id=eq.${encodeURIComponent(req.userId)}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('deactivate error:', err.message);
+    res.status(500).json({ error: 'Could not deactivate account' });
+  }
+});
+
 app.post('/social/block', requireAuth, async (req, res) => {
   try {
     const userId = req.body && req.body.userId;
@@ -1068,6 +1091,10 @@ app.post('/auth/login', async (req, res) => {
       return res.status(401).json({ error: 'Incorrect email/phone or password' });
     }
     delete match.password;
+    if (match.deactivated) {
+      await supabaseCall('users', 'PATCH', { deactivated: false }, `?id=eq.${encodeURIComponent(match.id)}`);
+      match.deactivated = false;
+    }
     res.json({ success: true, user: match, token: process.env.AUTH_SECRET ? makeAuthToken(match.id) : null });
   } catch (err) {
     console.error('POST /auth/login error:', err.message);
