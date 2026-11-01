@@ -5629,7 +5629,7 @@ function syncFromServer(){
           UI.authScreen=true; UI.authPage="login"; UI.authReturnTab=dest; render(); return;
         }
         if(dest==="market") UI.homeSection=null;
-        UI.tab=dest; UI.modal=null; UI.legalPage=null; render(); return;
+        UI.tab=dest; UI.modal=null; UI.legalPage=null; render(); window.scrollTo(0,0); return;
       }
     if(action==="close-modal"){ UI.modal=null; UI.chatPhotoView=null; UI.chatImages=[]; render(); return; }
     // ---- Chat photo attachments ----
