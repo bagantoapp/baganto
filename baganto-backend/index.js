@@ -539,9 +539,24 @@ function checkSignupToken(token, email) {
   }
 }
 
+// True only if the date of birth (YYYY-MM-DD) gives an age of 18 or more.
+function isAdult(dob) {
+  if (typeof dob !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dob)) return false;
+  const b = new Date(dob + 'T00:00:00Z');
+  if (isNaN(b.getTime())) return false;
+  const t = new Date();
+  let age = t.getUTCFullYear() - b.getUTCFullYear();
+  const m = t.getUTCMonth() - b.getUTCMonth();
+  if (m < 0 || (m === 0 && t.getUTCDate() < b.getUTCDate())) age--;
+  return age >= 18 && age <= 120;
+}
+
 app.post('/auth/signup', async (req, res) => {
   try {
-    const { email, phone, name, city, bio, password } = req.body;
+    const { email, phone, name, city, bio, password, dob } = req.body;
+    if (!isAdult(dob)) {
+      return res.status(403).json({ error: 'You must be 18 or older to create a Baganto account' });
+    }
     // Validate input
     if (!validateString(name, 1, 100)) {
     return res.status(400).json({ error: 'name must be 1-100 characters' });
@@ -567,6 +582,7 @@ app.post('/auth/signup', async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
     const newUser = {
       id: userId,
+      date_of_birth: dob,
       email: email || null,
       phone: phone || null,
       name: name,

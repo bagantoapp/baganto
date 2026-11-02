@@ -3719,6 +3719,8 @@ function syncFromServer(){
           '<form data-form="auth-signup">'+
             '<div class="auth-field"><label>Full Name</label>'+
               '<input type="text" name="fullname" placeholder="Your name" required></div>'+
+            '<div class="auth-field"><label>Date of birth</label>'+
+              '<input type="date" name="dob" id="signupDob" required></div>'+
             '<div class="auth-field"><label>Email Address</label>'+
               '<div style="display:flex;gap:8px;"><input type="email" name="email" id="signupEmail" placeholder="your@email.com" required style="flex:1;"><button type="button" class="auth-btn" id="signupSendOtp" data-action="send-signup-otp" style="width:auto;padding:0 14px;">Send OTP</button></div>'+
             '<div id="signupEmailStatus" style="font-size:13px;margin-top:6px;"></div>'+
@@ -6733,6 +6735,11 @@ function syncFromServer(){
       var sPass  = (fdS.get("password")||"").trim();
       var sErr   = document.getElementById("authError");
       if(!sName){ if(sErr) sErr.textContent="Enter your name."; return; }
+      var sDob = (fdS.get("dob")||"").trim();
+      if(!sDob){ if(sErr) sErr.textContent="Enter your date of birth."; return; }
+      var sAge = (function(){ var b=new Date(sDob+"T00:00:00"); var t=new Date(); var a=t.getFullYear()-b.getFullYear(); var m=t.getMonth()-b.getMonth(); if(m<0||(m===0&&t.getDate()<b.getDate())) a--; return a; })();
+      if(isNaN(sAge) || sAge>120){ if(sErr) sErr.textContent="Enter a valid date of birth."; return; }
+      if(sAge<18){ if(sErr) sErr.textContent="You must be 18 or older to create a Baganto account."; return; }
       if(!/^[^@]+@[^@]+\.[^@]+$/.test(sEmail)){ if(sErr) sErr.textContent="Enter a valid email address."; return; }
       if(!/^[6-9]\d{9}$/.test(sPhone)){ if(sErr) sErr.textContent="Enter a valid 10-digit mobile number."; return; }
       if(sPass.length < 6){ if(sErr) sErr.textContent="Password must be at least 6 characters."; return; }
@@ -6749,7 +6756,7 @@ function syncFromServer(){
       fetch(API_BASE + "/auth/signup", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass, signupToken: UI.signupToken })
+        body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass, dob: sDob, signupToken: UI.signupToken })
       }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
       .then(function(s){
         if(!s.ok || !s.body || !s.body.user){
