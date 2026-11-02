@@ -557,6 +557,9 @@ app.post('/auth/signup', async (req, res) => {
     if (!isAdult(dob)) {
       return res.status(403).json({ error: 'You must be 18 or older to create a Baganto account' });
     }
+    if (req.body.acceptTerms !== true) {
+      return res.status(400).json({ error: 'You must agree to the Terms and Conditions and Privacy Policy' });
+    }
     // Validate input
     if (!validateString(name, 1, 100)) {
     return res.status(400).json({ error: 'name must be 1-100 characters' });
@@ -583,6 +586,7 @@ app.post('/auth/signup', async (req, res) => {
     const newUser = {
       id: userId,
       date_of_birth: dob,
+      terms_accepted_at: new Date().toISOString(),
       email: email || null,
       phone: phone || null,
       name: name,

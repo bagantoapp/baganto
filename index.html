@@ -3731,8 +3731,11 @@ function syncFromServer(){
               '<select name="city">'+CITIES.map(function(c){ return '<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>'; }).join("")+'</select></div>'+
             '<div class="auth-field"><label>Password</label>'+
               '<div class="pw-wrap"><input type="password" name="password" id="signupPassField" placeholder="Create a password" required><button type="button" class="pw-toggle" data-action="toggle-pw" data-target="signupPassField">show</button></div></div>'+
+            '<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink);margin:6px 0 12px;line-height:1.5;cursor:pointer;">'+
+              '<input type="checkbox" name="agree" id="signupAgree" style="margin-top:3px;width:auto;flex:0 0 auto;">'+
+              '<span>I have read and agree to the <button type="button" class="footer-link" style="font-size:13px;padding:0;" data-action="open-legal-modal" data-page="terms">Terms and Conditions</button> and <button type="button" class="footer-link" style="font-size:13px;padding:0;" data-action="open-legal-modal" data-page="privacy">Privacy Policy</button>, and I confirm I am 18 or older.</span>'+
+            '</label>'+
             '<button type="submit" class="auth-btn" id="signupSubmit" disabled style="opacity:0.5;">Create Account</button>'+
-            '<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:10px;">By signing up you agree to our <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal-modal" data-page="terms">Terms</button> and <button type="button" class="footer-link" style="font-size:12px;" data-action="open-legal-modal" data-page="privacy">Privacy Policy</button>.</div>'+
           '</form>'+
           '<div class="auth-switch" style="margin-top:16px;">Already have an account? <a data-action="goto-login">Login</a></div>'+
         '</div>'+
@@ -6740,6 +6743,7 @@ function syncFromServer(){
       var sAge = (function(){ var b=new Date(sDob+"T00:00:00"); var t=new Date(); var a=t.getFullYear()-b.getFullYear(); var m=t.getMonth()-b.getMonth(); if(m<0||(m===0&&t.getDate()<b.getDate())) a--; return a; })();
       if(isNaN(sAge) || sAge>120){ if(sErr) sErr.textContent="Enter a valid date of birth."; return; }
       if(sAge<18){ if(sErr) sErr.textContent="You must be 18 or older to create a Baganto account."; return; }
+      if(!fdS.get("agree")){ if(sErr) sErr.textContent="Tick the box to agree to the Terms and Conditions and Privacy Policy."; return; }
       if(!/^[^@]+@[^@]+\.[^@]+$/.test(sEmail)){ if(sErr) sErr.textContent="Enter a valid email address."; return; }
       if(!/^[6-9]\d{9}$/.test(sPhone)){ if(sErr) sErr.textContent="Enter a valid 10-digit mobile number."; return; }
       if(sPass.length < 6){ if(sErr) sErr.textContent="Password must be at least 6 characters."; return; }
@@ -6756,7 +6760,7 @@ function syncFromServer(){
       fetch(API_BASE + "/auth/signup", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass, dob: sDob, signupToken: UI.signupToken })
+        body: JSON.stringify({ name: sName, email: sEmail, phone: sPhone, city: sCity, password: sPass, dob: sDob, acceptTerms: true, signupToken: UI.signupToken })
       }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
       .then(function(s){
         if(!s.ok || !s.body || !s.body.user){
