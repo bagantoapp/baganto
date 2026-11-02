@@ -1668,6 +1668,7 @@ function mergeDuplicateDeals(){
   if(!DB || !DB.deals) return;
   var skip = { id: 1, createdAt: 1, readAt: 1, fromUserId: 1, toUserId: 1, typingUsers: 1 };
   var merged = false;
+  var justSent = false;
   var fresh = DB.deals.filter(function(d){ return d && d.id && pushedSocial.deals[d.id] === undefined && dealAdKey(d); });
   fresh.forEach(function(n){
     if(DB.deals.indexOf(n) === -1) return;
@@ -1686,8 +1687,9 @@ function mergeDuplicateDeals(){
     if(UI.modal && UI.modal.dealId === n.id) UI.modal.dealId = older.id;
     DB.deals = DB.deals.filter(function(d){ return d !== n; });
     merged = true;
+    if(n.fromUserId === UI.currentUserId && (Date.now() - (n.createdAt || 0)) < 120000) justSent = true;
   });
-  if(merged){ persistLocal(); render(); showToast("Added to your existing chat for this ad."); }
+  if(merged){ persistLocal(); render(); if(justSent) showToast("Added to your existing chat for this ad."); }
 }
 function isChatHidden(d){
   if(!d || !UI.currentUserId) return false;
