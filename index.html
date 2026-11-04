@@ -1358,6 +1358,7 @@
     loginPassDraft: "",             // keeps the typed password when switching phone/email
     forgotPasswordEmail: ""        // temp storage during forgot password flow         // "all" | "barter" | "sale" | "offer"
   };
+  try{ restoreFromHash(); }catch(e){}
 
   // ---------------- Password hashing ----------------
   // Passwords are never stored as typed. Each account gets a random salt and we
@@ -3766,6 +3767,43 @@ function syncFromServer(){
   document.addEventListener('mousedown', __startPress);
   document.addEventListener('mouseup', __cancelPress);
 
+  // Keep the current page in the address bar, so a refresh stays on the same page.
+  var HASH_TABS = { trades:"chats", listings:"my-ads", profile:"profile", pricing:"plans", support:"contact" };
+  function pageHash(){
+    if(UI.modal && UI.modal.type==="trade" && UI.modal.dealId) return "#chat-" + UI.modal.dealId;
+    if(UI.modal && UI.modal.type==="item" && UI.modal.itemId) return "#ad-" + UI.modal.itemId;
+    if(UI.tab==="profile" && UI.profileView==="settings") return "#settings";
+    var name = HASH_TABS[UI.tab];
+    return name ? "#" + name : "";
+  }
+  function syncHash(){
+    try{
+      var want = pageHash();
+      if((location.hash || "") !== want){
+        history.replaceState(null, "", location.pathname + location.search + want);
+      }
+    }catch(e){}
+  }
+  function restoreFromHash(){
+    var h = (location.hash || "").replace(/^#/, "");
+    if(!h) return;
+    if(h.indexOf("ad-")===0){
+      var adId = h.slice(3);
+      if(DB.items.some(function(x){ return x.id===adId; })) UI.modal = {type:"item", itemId: adId};
+      return;
+    }
+    if(h==="plans"){ UI.tab = "pricing"; return; }
+    if(!UI.currentUserId) return;
+    if(h.indexOf("chat-")===0){
+      var dId = h.slice(5);
+      UI.tab = "trades";
+      if(findDeal(dId)) UI.modal = {type:"trade", dealId: dId};
+      return;
+    }
+    if(h==="settings"){ UI.tab = "profile"; UI.profileView = "settings"; return; }
+    for(var k in HASH_TABS){ if(HASH_TABS[k]===h){ UI.tab = k; return; } }
+  }
+
   function render(){
     if(UI.authScreen){
       document.getElementById("app").innerHTML = renderAuth();
@@ -3781,6 +3819,7 @@ function syncFromServer(){
 
     var html = renderNav() + renderStorageWarning() + '<div class="wrap">' + renderTabContent() + '</div>' + renderModal() + renderPhotoViewer() + renderToast() + renderFooter();
     app.innerHTML = html;
+    syncHash();
 
     if(activeId){
       var el = document.getElementById(activeId);
