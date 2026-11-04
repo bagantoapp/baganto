@@ -3721,7 +3721,8 @@ function syncFromServer(){
             '<div class="auth-field"><label>Full Name</label>'+
               '<input type="text" name="fullname" placeholder="Your name" required></div>'+
             '<div class="auth-field"><label>Date of birth</label>'+
-              '<input type="date" name="dob" id="signupDob" required></div>'+
+              '<input type="date" name="dob" id="signupDob" required max="'+dobLimit(18)+'" min="'+dobLimit(120)+'" onchange="bagantoCheckDob(this)" oninput="bagantoCheckDob(this)">'+
+              '<div id="signupDobError" style="color:#dc2626;font-size:13px;margin-top:6px;display:none;"></div></div>'+
             '<div class="auth-field"><label>Email Address</label>'+
               '<div style="display:flex;gap:8px;"><input type="email" name="email" id="signupEmail" placeholder="your@email.com" required style="flex:1;"><button type="button" class="auth-btn" id="signupSendOtp" data-action="send-signup-otp" style="width:auto;padding:0 14px;">Send OTP</button></div>'+
             '<div id="signupEmailStatus" style="font-size:13px;margin-top:6px;"></div>'+
@@ -3766,6 +3767,32 @@ function syncFromServer(){
   document.addEventListener('touchmove', __cancelPress, {passive:true});
   document.addEventListener('mousedown', __startPress);
   document.addEventListener('mouseup', __cancelPress);
+
+  // Date of birth: latest/earliest allowed dates, and a live check on the signup form.
+  function dobLimit(years){
+    var d = new Date(); d.setFullYear(d.getFullYear() - years);
+    var m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
+  window.bagantoCheckDob = function(el){
+    var box = document.getElementById("signupDobError");
+    if(!box || !el) return;
+    var v = el.value, msg = "";
+    if(v){
+      var b = new Date(v + "T00:00:00"), t = new Date();
+      if(isNaN(b.getTime())) msg = "Enter a valid date of birth.";
+      else if(b > t) msg = "Date of birth can't be in the future.";
+      else {
+        var a = t.getFullYear() - b.getFullYear(), mo = t.getMonth() - b.getMonth();
+        if(mo < 0 || (mo === 0 && t.getDate() < b.getDate())) a--;
+        if(a < 18) msg = "You must be 18 or older to create a Baganto account.";
+        else if(a > 120) msg = "Enter a valid date of birth.";
+      }
+    }
+    box.textContent = msg;
+    box.style.display = msg ? "block" : "none";
+    el.style.borderColor = msg ? "#dc2626" : "";
+  };
 
   // Keep the current page in the address bar, so a refresh stays on the same page.
   var HASH_TABS = { trades:"chats", listings:"my-ads", profile:"profile", pricing:"plans", support:"contact" };
