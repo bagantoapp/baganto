@@ -3426,7 +3426,6 @@ function syncFromServer(){
   // Placeholder business/contact details are wrapped in [brackets] throughout -
   // replace them with real registered-entity details before a real launch, and
   // have this content reviewed by a qualified lawyer. Not legal advice.
-  var LEGAL_UPDATED = "24 June 2026";
 
   var TERMS_HTML = [
     '<p>Last updated: 4 November 2026</p>',
@@ -3583,6 +3582,7 @@ function syncFromServer(){
   ].join("");
 
   var GRIEVANCE_HTML = [
+    '<p>Last updated: 4 November 2026</p>',
     '<h2>Grievance Officer</h2>',
     '<p>In accordance with Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, and the Consumer Protection (E-Commerce) Rules, 2020, the contact details of the Grievance Officer for Baganto are published below.</p>',
     '<div class="legal-contact"><strong>Name:</strong> Kiran<br><strong>Designation:</strong> Grievance Officer<br><strong>Email:</strong> contact@baganto.com<br><strong>Address:</strong> 405 5th Main, 1st Stage, Vijayanagar, Mysuru, Karnataka 570017<br><strong>Working hours:</strong> Monday-Friday, 10:00 AM - 6:00 PM IST</div>',
@@ -3618,7 +3618,6 @@ function syncFromServer(){
     return '<div class="card legal-doc" style="padding:28px 30px;">' +
       '<button class="btn btn-ghost btn-sm" data-action="close-legal" style="margin-bottom:14px;">← Back to Baganto</button>' +
       '<h1>'+esc(doc.title)+'</h1>' +
-      '<div class="legal-updated">Last updated: '+esc(LEGAL_UPDATED)+' &middot; Template document - not legal advice. Replace placeholder details before relying on this for a real launch.</div>' +
       '<div class="legal-toc">'+toc+'</div>' +
       doc.html +
     '</div>';
