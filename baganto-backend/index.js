@@ -1051,7 +1051,13 @@ app.post('/payments/order', requireAuth, async (req, res) => {
       user_id: req.userId, product_id: productId, product_type: p.type,
       amount_paise: p.paise, razorpay_order_id: order.id, status: 'created'
     });
-    res.json({ orderId: order.id, amount: p.paise, currency: 'INR', keyId: process.env.RAZORPAY_KEY_ID, name: p.name });
+    // The buyer's own details, so the payment window never shows anything remembered in the browser.
+    let prefill = {};
+    try {
+      const me = await supabaseCall('users', 'GET', null, `?id=eq.${encodeURIComponent(req.userId)}&select=name,email,phone`);
+      if (me && me[0]) prefill = { name: me[0].name || '', email: me[0].email || '', contact: me[0].phone || '' };
+    } catch (e) { /* the window still opens without prefill */ }
+    res.json({ orderId: order.id, amount: p.paise, currency: 'INR', keyId: process.env.RAZORPAY_KEY_ID, name: p.name, prefill });
   } catch (err) {
     console.error('payments/order error:', err.message);
     const notSetUp = err.message === 'Payments are not set up';

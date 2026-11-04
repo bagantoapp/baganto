@@ -2200,7 +2200,7 @@ function syncFromServer(){
       var rzp = new window.Razorpay({
         key: od.keyId, amount: od.amount, currency: od.currency, order_id: od.orderId,
         name: "Baganto", description: od.name,
-        prefill: { name: u.name || "", email: u.email || "", contact: u.phone || "" },
+        prefill: (od.prefill && (od.prefill.contact || od.prefill.email)) ? od.prefill : { name: u.name || "", email: u.email || "", contact: u.phone || "" },
         theme: { color: "#E8701A" },
         handler: function(resp){
           showToast("Confirming your payment…");
