@@ -1544,7 +1544,9 @@ function mapBackendData(data){
       })(),
       negotiable: false,
       views: it.views || 0,
-      isFeatured: false,
+      boostedUntil: it.boosted_until ? new Date(it.boosted_until).getTime() : null,
+      premiumUntil: it.premium_until ? new Date(it.premium_until).getTime() : null,
+      isFeatured: !!(it.boosted_until && new Date(it.boosted_until).getTime() > Date.now()),
       createdAt: it.created_at ? new Date(it.created_at).getTime() : Date.now()
     };
   }
@@ -1976,7 +1978,18 @@ function syncFromServer(){
         });
         DB.users = mapped.users;
       }
-        if(data.my_plan){ var __mu = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0]; if(__mu) __mu.adsUsedThisPeriod = data.my_plan.ads_used_this_month; }
+        if(data.my_plan){ var __mu = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0]; if(__mu){
+          var __mp = data.my_plan;
+          __mu.adsUsedThisPeriod = __mp.ads_used_this_month;
+          __mu.serverBilling = true;
+          __mu.plan = __mp.plan_type || "free";
+          __mu.planExpiry = __mp.plan_expires_at ? new Date(__mp.plan_expires_at).getTime() : null;
+          __mu.boostCredits = __mp.boosts_available || 0;
+          var __pc = [], __i;
+          for(__i = 0; __i < (__mp.premium7_credits || 0); __i++) __pc.push({ days:7, addonId:"prem7" });
+          for(__i = 0; __i < (__mp.premium30_credits || 0); __i++) __pc.push({ days:30, addonId:"prem30" });
+          __mu.premiumCredits = __pc;
+        } }
         var __meNew = DB.users.filter(function(x){ return x.id===UI.currentUserId; })[0];
         if(__meNew && __meContact){ if(!__meNew.email) __meNew.email = __meContact.email; if(!__meNew.phone) __meNew.phone = __meContact.phone; }
         persistLocal();
@@ -2110,6 +2123,7 @@ function syncFromServer(){
   // Rolls the monthly quota over when a 30-day period has elapsed.
   function refreshBillingPeriod(u){
     if(!u || !u.id) return u;
+    if(u.serverBilling) return u;
     var now = nowTs();
     if(!u.planPeriodStart) u.planPeriodStart = now;
     if(now - u.planPeriodStart >= 30*DAY){
@@ -2149,59 +2163,121 @@ function syncFromServer(){
       amount: amount, note: note||"", createdAt: nowTs()
     });
   }
+  // ---- Payments (Razorpay). The server sets every price; the app only sends a product id. ----
+  var __rzpLoading = null;
+  function loadRazorpay(){
+    if(window.Razorpay) return Promise.resolve();
+    if(__rzpLoading) return __rzpLoading;
+    __rzpLoading = new Promise(function(resolve, reject){
+      var s = document.createElement("script");
+      s.src = "https://checkout.razorpay.com/v1/checkout.js";
+      s.onload = function(){ resolve(); };
+      s.onerror = function(){ __rzpLoading = null; reject(new Error("Razorpay did not load")); };
+      document.head.appendChild(s);
+    });
+    return __rzpLoading;
+  }
+  function apiPost(path, body){
+    return fetch(API_BASE + path, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body || {}) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(j){ return { ok:r.ok, status:r.status, body:j }; }); });
+  }
+  var __payBusy = false;
+  function startPayment(productId){
+    if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; UI.authReturnTab="pricing"; render(); return; }
+    if(__payBusy) return;
+    __payBusy = true;
+    showToast("Opening secure payment…");
+    var u = currentUser() || {};
+    loadRazorpay().then(function(){
+      return apiPost("/payments/order", { productId: productId });
+    }).then(function(o){
+      if(!o.ok || !o.body || !o.body.orderId){
+        __payBusy = false;
+        showToast((o.body && o.body.error) || "Could not start the payment. Try again.");
+        return;
+      }
+      var od = o.body;
+      var rzp = new window.Razorpay({
+        key: od.keyId, amount: od.amount, currency: od.currency, order_id: od.orderId,
+        name: "Baganto", description: od.name,
+        prefill: { name: u.name || "", email: u.email || "", contact: u.phone || "" },
+        theme: { color: "#E8701A" },
+        handler: function(resp){
+          showToast("Confirming your payment…");
+          apiPost("/payments/verify", {
+            razorpay_order_id: resp.razorpay_order_id,
+            razorpay_payment_id: resp.razorpay_payment_id,
+            razorpay_signature: resp.razorpay_signature
+          }).then(function(v){
+            __payBusy = false;
+            if(v.ok && v.body && v.body.success){
+              showToast("Payment successful. " + od.name + " added to your account.");
+              syncFromServer();
+            } else {
+              showToast((v.body && v.body.error) || "We could not confirm the payment. If money was taken, contact support.");
+            }
+          }).catch(function(){
+            __payBusy = false;
+            showToast("We could not confirm the payment. If money was taken, contact support.");
+          });
+        },
+        modal: { ondismiss: function(){ __payBusy = false; } }
+      });
+      rzp.on("payment.failed", function(r){
+        __payBusy = false;
+        showToast("Payment failed" + (r && r.error && r.error.description ? ": " + r.error.description : ". Please try again."));
+      });
+      rzp.open();
+    }).catch(function(){
+      __payBusy = false;
+      showToast("Could not open the payment window. Check your connection and try again.");
+    });
+  }
   function selectPlan(planId){
     if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; return; }
     var plan = planById(planId);
-    var u = refreshBillingPeriod(currentUser());
-    if(u.plan===plan.id){ showToast("You are already on the "+plan.name+" plan."); return; }
-    u.plan = plan.id;
-    u.planPeriodStart = nowTs();
-    u.planExpiry = plan.price>0 ? nowTs() + 30*DAY : null;
-    u.adsUsedThisPeriod = u.adsUsedThisPeriod || 0;
-    u.boostCredits = (u.boostCredits||0) + plan.boosts;
-    recordPurchase("plan", plan.id, plan.price, plan.name+" plan");
-    saveDB();
-    showToast(plan.price>0 ? ("Upgraded to "+plan.name+" - "+formatINR(plan.price)+"/month.") : "Switched to the Free plan.");
+    var u = currentUser() || {};
+    if(plan.price <= 0){
+      if(u.plan && u.plan !== "free" && u.planExpiry && u.planExpiry > nowTs()){
+        showToast("Your " + planById(u.plan).name + " plan stays active until " + new Date(u.planExpiry).toLocaleDateString("en-IN") + ". It does not renew automatically.");
+      } else {
+        showToast("You are on the Free plan.");
+      }
+      return;
+    }
+    startPayment(plan.id);
   }
   function buyAddon(addonId){
-    if(!UI.currentUserId){ UI.authScreen=true; UI.authPage="login"; return; }
-    var a = addonById(addonId);
-    if(!a){ showToast("That add-on is not available."); return; }
-    var u = refreshBillingPeriod(currentUser());
-    if(a.type==="boost"){
-      u.boostCredits = (u.boostCredits||0) + a.qty;
-      showToast("Added "+a.qty+" boost"+(a.qty===1?"":"s")+" to your account.");
-    } else {
-      if(!u.premiumCredits) u.premiumCredits = [];
-      u.premiumCredits.push({ days:a.days, addonId:a.id });
-      showToast("Premium listing credit ("+a.days+" days) added.");
-    }
-    recordPurchase("addon", a.id, a.price, addonLabel(a));
-    saveDB();
+    if(!addonById(addonId)){ showToast("That add-on is not available."); return; }
+    startPayment(addonId);
   }
   function applyBoostToItem(itemId){
-    var u = refreshBillingPeriod(currentUser());
+    var u = currentUser();
+    if(!u) return false;
     if((u.boostCredits||0) <= 0){ showToast("No boosts left. Buy one from the Plans tab."); return false; }
-    var it = itemById(itemId);
-    if(!it || !it.id){ showToast("Listing not found."); return false; }
-    u.boostCredits = u.boostCredits - 1;
-    it.boostedUntil = nowTs() + BOOST_DAYS*DAY;
-    it.isFeatured = true;
-    saveDB();
-    showToast("Boosted! This ad stays at the top for " + BOOST_DAYS + " days.");
+    apiPost("/items/" + encodeURIComponent(itemId) + "/boost", {}).then(function(r){
+      if(!r.ok){ showToast((r.body && r.body.error) || "Could not boost the ad."); return; }
+      var it = itemById(itemId);
+      if(it && it.id){ it.boostedUntil = new Date(r.body.boosted_until).getTime(); it.isFeatured = true; }
+      if(typeof r.body.boosts_available === "number") u.boostCredits = r.body.boosts_available;
+      persistLocal(); render();
+      showToast("Boosted! This ad stays at the top for " + BOOST_DAYS + " days.");
+    }).catch(function(){ showToast("Could not boost the ad. Check your connection and try again."); });
     return true;
   }
   function applyPremiumToItem(itemId){
     var u = currentUser();
-    var credits = u.premiumCredits || [];
+    var credits = (u && u.premiumCredits) || [];
     if(!credits.length){ showToast("No premium credits. Buy one from the Plans tab."); return false; }
-    var it = itemById(itemId);
-    if(!it || !it.id){ showToast("Listing not found."); return false; }
-    var c = credits.shift();
-    u.premiumCredits = credits;
-    it.premiumUntil = nowTs() + (c.days||7)*DAY;
-    saveDB();
-    showToast("Premium listing active for "+(c.days||7)+" days.");
+    var days = credits[0].days === 30 ? 30 : 7;
+    apiPost("/items/" + encodeURIComponent(itemId) + "/premium", { days: days }).then(function(r){
+      if(!r.ok){ showToast((r.body && r.body.error) || "Could not make the ad premium."); return; }
+      var it = itemById(itemId);
+      if(it && it.id) it.premiumUntil = new Date(r.body.premium_until).getTime();
+      u.premiumCredits = (u.premiumCredits || []).slice(1);
+      persistLocal(); render();
+      showToast("Premium listing active for " + days + " days.");
+    }).catch(function(){ showToast("Could not make the ad premium. Check your connection and try again."); });
     return true;
   }
   // ---- Ad lifetime: every ad runs for 30 days, as stated on the Plans page ----
@@ -3560,8 +3636,8 @@ function syncFromServer(){
     '<p>If you are charged twice for the same item, or you are charged but the feature does not activate, we refund the extra or failed amount in full. The 24-hour limit does not apply to these cases.</p>',
     '<h2>4. After 24 hours or after use</h2>',
     '<p>Payments are not refundable after 24 hours or once a paid feature has been used, except where the feature failed because of a fault on our side (for example, a boost that never went live), or where Indian consumer law gives you a right to a refund.</p>',
-    '<h2>5. Monthly plans and cancellation</h2>',
-    '<p>You can cancel a monthly plan at any time. Cancelling stops the next renewal. The current period is not refunded unless it falls within the 24-hour window in Section 2. Boosts and premium listings are one-time purchases and do not renew.</p>',
+    '<h2>5. Plans and renewals</h2>',
+    '<p>Paid plans are 30-day passes and do not renew automatically. When a plan ends, your account returns to the Free plan unless you buy it again. Unused time on a plan is not refunded unless the payment falls within the 24-hour window in Section 2. Boosts and premium listings are one-time purchases and do not renew.</p>',
     '<h2>6. How refunds are approved and paid</h2>',
     '<ol style="padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);">',
       '<li>We check your request against our payment records and may ask for details to confirm the payment.</li>',
@@ -4306,7 +4382,7 @@ function syncFromServer(){
     // Boosted (paid) ads always come first, then the chosen sort decides the rest
     var boostFirst = function(inner){
       return function(a, b){
-        var ba = isBoosted(a) ? 1 : 0, bb = isBoosted(b) ? 1 : 0;
+        var ba = isBoosted(a) ? 2 : (isPremium(a) ? 1 : 0), bb = isBoosted(b) ? 2 : (isPremium(b) ? 1 : 0);
         if(ba !== bb) return bb - ba;
         return inner(a, b);
       };
@@ -4889,6 +4965,7 @@ function syncFromServer(){
       '<div style="font-size:17px;font-weight:800;">'+esc(p.name)+'</div>' +
       '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'+esc(p.tagline)+'</div>' +
       '<div style="font-size:28px;font-weight:800;">'+formatINR(p.price)+'<span style="font-size:13px;font-weight:500;color:var(--muted);">/month</span></div>' +
+      (p.price>0 ? '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">30-day pass, no automatic renewal</div>' : '') +
       '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">'+p.ads+' ads · '+p.boosts+' boost'+(p.boosts===1?'':'s')+' included<br>Every ad runs for 30 days</div>' +
       '<ul style="margin:0 0 14px;padding:0;flex:1;">'+feats+'</ul>' +
       '<button class="btn btn-sm '+(isActive?'btn-ghost':'btn-primary')+'" data-action="select-plan" data-plan="'+p.id+'"'+(isActive?' disabled':'')+'>'+btnLabel+'</button>' +
@@ -4908,7 +4985,7 @@ function syncFromServer(){
       var pct = allowed>0 ? Math.min(100, Math.round(used/allowed*100)) : 0;
       var renew = u.planExpiry ? new Date(u.planExpiry).toLocaleDateString("en-IN") : "-";
       usageHtml = '<div class="card" style="padding:14px;margin-bottom:16px;">' +
-        '<div style="font-weight:800;margin-bottom:8px;">Your plan: '+esc(plan.name)+' '+(plan.price>0?('· '+formatINR(plan.price)+'/month · renews '+esc(renew)):'')+'</div>' +
+        '<div style="font-weight:800;margin-bottom:8px;">Your plan: '+esc(plan.name)+' '+(plan.price>0?('· '+formatINR(plan.price)+' · 30-day pass, active until '+esc(renew)):'')+'</div>' +
         '<div style="font-size:13px;margin-bottom:6px;">Ads used this month: <b>'+used+' / '+allowed+'</b> · Boosts left: <b>'+boostCredits(u.id)+'</b> · Premium credits: <b>'+premiumCredits(u.id).length+'</b></div>' +
         '<div style="height:8px;background:var(--border);border-radius:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:var(--primary);"></div></div>' +
       '</div>';
