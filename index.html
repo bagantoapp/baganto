@@ -3795,12 +3795,12 @@ function syncFromServer(){
   };
 
   // Keep the current page in the address bar, so a refresh stays on the same page.
-  var HASH_TABS = { trades:"chats", listings:"my-ads", profile:"profile", pricing:"plans", support:"contact" };
+  function hashTabs(){ return { trades:"chats", listings:"my-ads", profile:"profile", pricing:"plans", support:"contact" }; }
   function pageHash(){
     if(UI.modal && UI.modal.type==="trade" && UI.modal.dealId) return "#chat-" + UI.modal.dealId;
     if(UI.modal && UI.modal.type==="item" && UI.modal.itemId) return "#ad-" + UI.modal.itemId;
     if(UI.tab==="profile" && UI.profileView==="settings") return "#settings";
-    var name = HASH_TABS[UI.tab];
+    var name = hashTabs()[UI.tab];
     return name ? "#" + name : "";
   }
   function syncHash(){
@@ -3828,7 +3828,8 @@ function syncFromServer(){
       return;
     }
     if(h==="settings"){ UI.tab = "profile"; UI.profileView = "settings"; return; }
-    for(var k in HASH_TABS){ if(HASH_TABS[k]===h){ UI.tab = k; return; } }
+    var tabs = hashTabs();
+    for(var k in tabs){ if(tabs[k]===h){ UI.tab = k; return; } }
   }
 
   function render(){
