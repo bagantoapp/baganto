@@ -358,7 +358,7 @@ app.get('/users/:id', async (req, res) => {
     const uid = optionalUid(req);
     if (uid && uid === u.id) return res.json(rest);
     if ((await blockedOtherIds(uid)).has(u.id)) return res.json(null);
-    const { email, phone, ...pub } = rest;
+    const { email, phone, date_of_birth, terms_accepted_at, ...pub } = rest;
     res.json(pub);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -479,7 +479,7 @@ app.get('/api/db', async (req, res) => {
   try {
     const items = await supabaseCall('items');
     const users = ((await supabaseCall('users')) || []).map(u => {
-      const { password, email, phone, ...safe } = u;
+      const { password, email, phone, date_of_birth, terms_accepted_at, ...safe } = u;
       return safe;
     });
     const hiddenOwners = await blockedOtherIds(optionalUid(req));
