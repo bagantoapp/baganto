@@ -197,7 +197,7 @@ async function canPostAd(userId) {
     professional: 50,
     business: 100
   };
-  const limit = limits[plan.plan_type] || 3;
+  const limit = limits[planTypeOf(plan)] || 3;
   const used = await countPostsThisMonth(userId);
   return used < limit;
 }
@@ -218,7 +218,7 @@ app.post('/items', requireAuth, async (req, res) => {
     if (!canPost) {
       const plan = await getUserPlan(req.userId);
       const limits = { free: 3, growth: 25, professional: 50, business: 100 };
-      const limit = limits[plan.plan_type] || 3;
+      const limit = limits[planTypeOf(plan)] || 3;
       return res.status(429).json({ error: `Monthly ad limit (${limit}) reached. Upgrade your plan or wait for reset.` });
     }
     
@@ -493,7 +493,9 @@ app.get('/api/db', async (req, res) => {
         const plan = await getUserPlan(uid);
         const today = new Date().toISOString().split('T')[0];
         const used = await countPostsThisMonth(uid);
-        out.my_plan = { user_id: uid, plan_type: plan.plan_type, ads_used_this_month: used };
+        out.my_plan = { user_id: uid, plan_type: planTypeOf(plan), ads_used_this_month: used,
+          plan_expires_at: plan.plan_expires_at || null, boosts_available: plan.boosts_available || 0,
+          premium7_credits: plan.premium7_credits || 0, premium30_credits: plan.premium30_credits || 0 };
       } catch (e) { /* plan lookup failed; still return items */ }
     }
     res.json(out);
@@ -972,6 +974,172 @@ app.delete('/saved/:itemId', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('DELETE /saved error:', err.message);
     res.status(500).json({ error: 'Could not remove saved ad' });
+  }
+});
+
+// ============ PAYMENTS (Razorpay) ============
+// Prices live here on the server, in paise (₹1 = 100 paise). The app only sends a product id.
+const PAY_CATALOG = {
+  growth:       { type: 'plan',    name: 'Growth plan (30 days)',       paise: 19900, plan: 'growth',       boosts: 2 },
+  professional: { type: 'plan',    name: 'Professional plan (30 days)', paise: 49900, plan: 'professional', boosts: 4 },
+  business:     { type: 'plan',    name: 'Business plan (30 days)',     paise: 89900, plan: 'business',     boosts: 8 },
+  boost3:       { type: 'boost',   name: 'Boost to Top (3 days)',       paise: 2900,  qty: 1 },
+  mega3:        { type: 'boost',   name: 'Boost 3-Pack',                paise: 6900,  qty: 3 },
+  prem7:        { type: 'premium', name: 'Premium Listing (7 days)',    paise: 4900,  days: 7 },
+  prem30:       { type: 'premium', name: 'Premium Listing (30 days)',   paise: 14900, days: 30 }
+};
+const BOOST_DAYS = 3;
+const PLAN_DAYS = 30;
+
+// A paid plan whose end date has passed counts as Free.
+function planTypeOf(plan) {
+  if (!plan || !plan.plan_type) return 'free';
+  if (plan.plan_type !== 'free' && plan.plan_expires_at && new Date(plan.plan_expires_at) < new Date()) return 'free';
+  return plan.plan_type;
+}
+
+async function razorpay(path, method = 'GET', body = null) {
+  const id = process.env.RAZORPAY_KEY_ID, secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!id || !secret) throw new Error('Payments are not set up');
+  const options = {
+    method,
+    headers: {
+      'Authorization': 'Basic ' + Buffer.from(id + ':' + secret).toString('base64'),
+      'Content-Type': 'application/json'
+    }
+  };
+  if (body) options.body = JSON.stringify(body);
+  const r = await fetch('https://api.razorpay.com/v1' + path, options);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((j.error && j.error.description) || ('Razorpay error ' + r.status));
+  return j;
+}
+
+// Add what was bought to the buyer's account. Runs once per paid order.
+async function grantPurchase(userId, productId) {
+  const p = PAY_CATALOG[productId];
+  const plan = await getUserPlan(userId);
+  const updates = {};
+  if (p.type === 'plan') {
+    const now = Date.now();
+    const sameAndActive = planTypeOf(plan) === p.plan && plan.plan_expires_at && new Date(plan.plan_expires_at).getTime() > now;
+    const from = sameAndActive ? new Date(plan.plan_expires_at).getTime() : now;
+    updates.plan_type = p.plan;
+    updates.plan_expires_at = new Date(from + PLAN_DAYS * 86400000).toISOString();
+    updates.boosts_available = (plan.boosts_available || 0) + p.boosts;
+  } else if (p.type === 'boost') {
+    updates.boosts_available = (plan.boosts_available || 0) + p.qty;
+  } else if (p.type === 'premium') {
+    const col = p.days === 30 ? 'premium30_credits' : 'premium7_credits';
+    updates[col] = (plan[col] || 0) + 1;
+  }
+  await supabaseCall('user_plans', 'PATCH', updates, `?user_id=eq.${encodeURIComponent(userId)}`);
+}
+
+// Step 1: the app asks for an order. The server sets the price.
+app.post('/payments/order', requireAuth, async (req, res) => {
+  try {
+    const productId = req.body && req.body.productId;
+    const p = PAY_CATALOG[productId];
+    if (!p) return res.status(400).json({ error: 'Unknown product' });
+    const receipt = 'bg_' + require('crypto').randomBytes(8).toString('hex');
+    const order = await razorpay('/orders', 'POST', {
+      amount: p.paise, currency: 'INR', receipt,
+      notes: { user_id: req.userId, product_id: productId }
+    });
+    await supabaseCall('payments', 'POST', {
+      user_id: req.userId, product_id: productId, product_type: p.type,
+      amount_paise: p.paise, razorpay_order_id: order.id, status: 'created'
+    });
+    res.json({ orderId: order.id, amount: p.paise, currency: 'INR', keyId: process.env.RAZORPAY_KEY_ID, name: p.name });
+  } catch (err) {
+    console.error('payments/order error:', err.message);
+    const notSetUp = err.message === 'Payments are not set up';
+    res.status(notSetUp ? 503 : 500).json({ error: notSetUp ? err.message : 'Could not start the payment. Try again.' });
+  }
+});
+
+// Step 2: after Razorpay's window closes, the app sends the result. The server checks it before granting anything.
+app.post('/payments/verify', requireAuth, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) return res.status(400).json({ error: 'Missing payment details' });
+    const rows = await supabaseCall('payments', 'GET', null,
+      `?razorpay_order_id=eq.${encodeURIComponent(razorpay_order_id)}&user_id=eq.${encodeURIComponent(req.userId)}`);
+    const row = rows && rows[0];
+    if (!row) return res.status(404).json({ error: 'Payment not found' });
+    if (row.status === 'paid') return res.json({ success: true, already: true });
+
+    // The signature proves the result came from Razorpay and was not edited.
+    const expected = require('crypto').createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+      .update(razorpay_order_id + '|' + razorpay_payment_id).digest('hex');
+    const sigOk = typeof razorpay_signature === 'string' && razorpay_signature.length === expected.length &&
+      require('crypto').timingSafeEqual(Buffer.from(razorpay_signature), Buffer.from(expected));
+    if (!sigOk) return res.status(400).json({ error: 'Payment could not be verified' });
+
+    // Double-check with Razorpay: right order, right amount, money captured.
+    let pay = await razorpay('/payments/' + encodeURIComponent(razorpay_payment_id));
+    if (pay.order_id !== razorpay_order_id || pay.amount !== row.amount_paise || pay.currency !== 'INR') {
+      return res.status(400).json({ error: 'Payment does not match the order' });
+    }
+    if (pay.status === 'authorized') {
+      pay = await razorpay('/payments/' + encodeURIComponent(razorpay_payment_id) + '/capture', 'POST', { amount: row.amount_paise, currency: 'INR' });
+    }
+    if (pay.status !== 'captured') return res.status(400).json({ error: 'Payment was not completed' });
+
+    // Mark paid only if still unpaid, so a repeated request can never grant twice.
+    const marked = await supabaseCall('payments', 'PATCH',
+      { status: 'paid', razorpay_payment_id, paid_at: new Date().toISOString() },
+      `?razorpay_order_id=eq.${encodeURIComponent(razorpay_order_id)}&status=eq.created`);
+    if (!marked || !marked.length) return res.json({ success: true, already: true });
+
+    await grantPurchase(req.userId, row.product_id);
+    notifyTelegram(`💰 Payment received: ${PAY_CATALOG[row.product_id].name}, ₹${row.amount_paise / 100} (user ${req.userId})`).catch(() => {});
+    res.json({ success: true });
+  } catch (err) {
+    console.error('payments/verify error:', err.message);
+    res.status(500).json({ error: 'Could not confirm the payment. If money was taken, contact support.' });
+  }
+});
+
+// Use one boost credit on one of your own live ads.
+app.post('/items/:id/boost', requireAuth, async (req, res) => {
+  try {
+    const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    const it = cur && cur[0];
+    if (!it || it.owner_id !== req.userId) return res.status(403).json({ error: 'Not your listing' });
+    if (effectiveItem(it).status !== 'available') return res.status(400).json({ error: 'Only live ads can be boosted' });
+    const plan = await getUserPlan(req.userId);
+    if ((plan.boosts_available || 0) < 1) return res.status(402).json({ error: 'No boosts left' });
+    await supabaseCall('user_plans', 'PATCH', { boosts_available: plan.boosts_available - 1 }, `?user_id=eq.${encodeURIComponent(req.userId)}`);
+    const until = new Date(Date.now() + BOOST_DAYS * 86400000).toISOString();
+    const data = await supabaseCall('items', 'PATCH', { boosted_until: until }, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    res.json({ success: true, boosted_until: until, item: data[0] || null, boosts_available: plan.boosts_available - 1 });
+  } catch (err) {
+    console.error('boost error:', err.message);
+    res.status(500).json({ error: 'Could not boost the ad' });
+  }
+});
+
+// Use one premium credit (7 or 30 days) on one of your own live ads.
+app.post('/items/:id/premium', requireAuth, async (req, res) => {
+  try {
+    const days = Number(req.body && req.body.days) === 30 ? 30 : 7;
+    const col = days === 30 ? 'premium30_credits' : 'premium7_credits';
+    const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    const it = cur && cur[0];
+    if (!it || it.owner_id !== req.userId) return res.status(403).json({ error: 'Not your listing' });
+    if (effectiveItem(it).status !== 'available') return res.status(400).json({ error: 'Only live ads can be made premium' });
+    const plan = await getUserPlan(req.userId);
+    if ((plan[col] || 0) < 1) return res.status(402).json({ error: 'No premium credits left' });
+    await supabaseCall('user_plans', 'PATCH', { [col]: plan[col] - 1 }, `?user_id=eq.${encodeURIComponent(req.userId)}`);
+    const base = it.premium_until && new Date(it.premium_until) > new Date() ? new Date(it.premium_until).getTime() : Date.now();
+    const until = new Date(base + days * 86400000).toISOString();
+    const data = await supabaseCall('items', 'PATCH', { premium_until: until }, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    res.json({ success: true, premium_until: until, item: data[0] || null });
+  } catch (err) {
+    console.error('premium error:', err.message);
+    res.status(500).json({ error: 'Could not make the ad premium' });
   }
 });
 
