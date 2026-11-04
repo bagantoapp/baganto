@@ -2083,13 +2083,12 @@ function syncFromServer(){
       features:["100 ads per month","Each ad runs for 30 days","8 free boosts every month","Ad performance stats","Verified business badge"] }
   ];
 
+  var BOOST_DAYS = 3;  // how long one boost keeps an ad at the top
   var PRICING_ADDONS = [
-    { id:"boost7",   type:"boost",   name:"Boost to Top",      price:49,  days:7,   qty:1, desc:"Push one ad to the top of search for 7 days." },
-    { id:"mega7",    type:"boost",   name:"Mega Boost Bundle", price:129, days:7,   qty:3, desc:"3 boosts for the price of 2.6 - best value." },
-    { id:"prem7",    type:"premium", name:"Premium Listing",   price:49,  days:7,   qty:1, desc:"Highlighted listing with premium badge for 7 days." },
-    { id:"prem30",   type:"premium", name:"Premium Listing",   price:149, days:30,  qty:1, desc:"Premium visibility for a full month." },
-    { id:"prem90",   type:"premium", name:"Premium Listing",   price:349, days:90,  qty:1, desc:"Premium visibility for 3 months." },
-    { id:"prem365",  type:"premium", name:"Premium Listing",   price:799, days:365, qty:1, desc:"Premium seller status for a full year." }
+    { id:"boost3",   type:"boost",   name:"Boost to Top",      price:29,  days:3,   qty:1, desc:"Push one ad to the top of search for 3 days." },
+    { id:"mega3",    type:"boost",   name:"Boost 3-Pack",      price:69,  days:3,   qty:3, desc:"3 boosts of 3 days each. Save ₹18." },
+    { id:"prem7",    type:"premium", name:"Premium Listing",   price:49,  days:7,   qty:1, desc:"Premium badge and a higher spot for one ad for 7 days." },
+    { id:"prem30",   type:"premium", name:"Premium Listing",   price:149, days:30,  qty:1, desc:"Premium badge and a higher spot for one ad for its full 30 days." }
   ];
 
   function planById(id){
@@ -2186,10 +2185,10 @@ function syncFromServer(){
     var it = itemById(itemId);
     if(!it || !it.id){ showToast("Listing not found."); return false; }
     u.boostCredits = u.boostCredits - 1;
-    it.boostedUntil = nowTs() + 7*DAY;
+    it.boostedUntil = nowTs() + BOOST_DAYS*DAY;
     it.isFeatured = true;
     saveDB();
-    showToast("Boosted! This ad stays at the top for 7 days.");
+    showToast("Boosted! This ad stays at the top for " + BOOST_DAYS + " days.");
     return true;
   }
   function applyPremiumToItem(itemId){
@@ -4964,13 +4963,13 @@ function syncFromServer(){
 
     var examples = [
       { title:"Individual seller", sub:"Casual bartering, a few items a month",
-        rows:[["Growth plan","₹199"],["2 extra boosts","₹98"]], total:"₹297" },
+        rows:[["Growth plan","₹199"],["2 extra boosts","₹58"]], total:"₹257" },
       { title:"Small dealer", sub:"Regular listings, 20-30 items a month",
-        rows:[["Professional plan","₹499"],["2 extra boosts","₹98"]], total:"₹597" },
+        rows:[["Professional plan","₹499"],["2 extra boosts","₹58"]], total:"₹557" },
       { title:"Professional dealer", sub:"High volume, 50+ items a month",
-        rows:[["Business plan","₹899"],["2 mega boost bundles","₹258"]], total:"₹1,157" }
+        rows:[["Business plan","₹899"],["2 boost 3-packs","₹138"]], total:"₹1,037" }
     ];
-    var examplesHtml = '<div class="section-title" style="font-size:18px;">What people actually pay</div>' +
+    var examplesHtml = '<div class="section-title" style="font-size:18px;">Example monthly costs</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 22px;">' +
       examples.map(function(ex){
         var rows = ex.rows.map(function(r){
@@ -4984,7 +4983,7 @@ function syncFromServer(){
       }).join("") + '</div>';
 
     var compareRows = [
-      ["Ads per month", "3", "25", "60", "100"],
+      ["Ads per month", "3", "25", "50", "100"],
       ["How long each ad runs", "30 days", "30 days", "30 days", "30 days"],
       ["Boosts included", "0", "2", "4", "8"],
       ["Search and filters", "✓", "✓", "✓", "✓"],
