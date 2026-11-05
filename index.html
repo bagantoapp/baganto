@@ -4079,6 +4079,7 @@ function syncFromServer(){
       {id:"profile",  label:"Profile"},
       {id:"pricing",  label:"👑 Plans"}
     ];
+    var __me = currentUser(); if(__me && __me.plan && __me.plan !== "free") tabs.splice(2,0,{id:"stats", label:"📊 Stats"});
     if(isCurrentUserAdmin()) tabs.push({id:"admin", label:"⚙️ Admin"});
     var tabsHtml = tabs.map(function(t){
       var cls = "nav-tab" + (UI.tab===t.id ? " active" : "");
@@ -4148,6 +4149,7 @@ function syncFromServer(){
     if(UI.legalPage) return renderLegalPage();
     if(UI.tab==="market") return renderMarket();
     if(UI.tab==="listings") return renderListings();
+    if(UI.tab==="stats") return renderStats();
     if(UI.tab==="trades") return renderTrades();
     if(UI.tab==="profile") return renderProfile();
     if(UI.tab==="pricing") return renderPricing();
@@ -4529,6 +4531,63 @@ function syncFromServer(){
   }
 
   // -------- My Ads --------
+  // Loads saves and enquiries for one of your ads. Requested once; render() shows the result.
+  function requestAdStats(id){
+    UI.adStats = UI.adStats || {};
+    UI.adStatsRequested = UI.adStatsRequested || {};
+    if(UI.adStats[id] || UI.adStatsRequested[id]) return;
+    UI.adStatsRequested[id] = true;
+    fetch(API_BASE + "/items/" + encodeURIComponent(id) + "/stats")
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ if(j){ UI.adStats[id] = j; render(); } })
+      .catch(function(){});
+  }
+
+  function renderStats(){
+    var u = currentUser();
+    if(!u || !u.plan || u.plan === "free"){
+      return '<div class="card" style="padding:24px;text-align:center;">' +
+        '<div style="font-size:18px;font-weight:800;margin-bottom:6px;">📊 Ad stats are for paid plans</div>' +
+        '<div style="color:var(--muted);font-size:14px;margin-bottom:14px;">See views, saves and enquiries for all your ads.</div>' +
+        '<button class="btn btn-primary" data-action="goto-tab" data-tab="pricing">See plans</button>' +
+      '</div>';
+    }
+    UI.adStats = UI.adStats || {};
+    var ads = myItems().filter(function(it){ return it.status === "available"; });
+    var totals = { views:0, saves:0, enquiries:0 };
+    ads.forEach(function(it){
+      totals.views += it.views || 0;
+      requestAdStats(it.id);
+      if(UI.adStats[it.id]){ totals.saves += UI.adStats[it.id].saves; totals.enquiries += UI.adStats[it.id].enquiries; }
+    });
+    ads.sort(function(a,b){ return (b.views||0) - (a.views||0); });
+    var card = function(label, value){
+      return '<div class="card" style="padding:14px;text-align:center;"><div style="font-size:22px;font-weight:800;">' + value + '</div><div style="font-size:12px;color:var(--muted);">' + label + '</div></div>';
+    };
+    var rows = ads.map(function(it){
+      var st = UI.adStats[it.id];
+      return '<tr style="border-top:1px solid var(--border);">' +
+        '<td style="padding:8px;">' + esc(it.title) + '</td>' +
+        '<td style="padding:8px;text-align:center;">' + (it.views||0) + '</td>' +
+        '<td style="padding:8px;text-align:center;">' + (st ? st.saves : '…') + '</td>' +
+        '<td style="padding:8px;text-align:center;">' + (st ? st.enquiries : '…') + '</td>' +
+      '</tr>';
+    }).join('');
+    var table = ads.length ?
+      '<div class="card" style="padding:8px;overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;">' +
+        '<thead><tr style="color:var(--muted);font-size:12px;"><th style="padding:8px;text-align:left;">Ad</th><th style="padding:8px;">Views</th><th style="padding:8px;">Saves</th><th style="padding:8px;">Enquiries</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>' :
+      '<div class="card" style="padding:18px;color:var(--muted);">You have no live ads yet. Post one to see its stats.</div>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+        '<div class="section-title" style="font-size:18px;margin:0;">📊 Your ad stats</div>' +
+        '<button class="btn btn-sm btn-outline" data-action="refresh-stats">Refresh</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;">' +
+        card("Views", totals.views) + card("Saves", totals.saves) + card("Enquiries", totals.enquiries) +
+      '</div>' +
+      table;
+  }
+
   function renderListings(){
     if(!UI.currentUserId) return '<div class="card empty" style="text-align:center;padding:40px 20px;">'+
       '<div style="font-size:48px;margin-bottom:12px;">🔒</div>'+
@@ -5775,6 +5834,7 @@ function syncFromServer(){
       UI.currentUserId = ""; UI.profileView = null; UI.authScreen = true; UI.authPage = "login";
       storageSet(USER_KEY, ""); setAuthToken(""); render(); return;
     }
+    if(action==="refresh-stats"){ UI.adStats = {}; UI.adStatsRequested = {}; render(); return; }
     if(action==="goto-tab"){
         var dest=t.dataset.tab;
         if(!UI.currentUserId && dest!=="market" && dest!=="pricing"){
