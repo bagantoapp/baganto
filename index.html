@@ -4239,12 +4239,13 @@ function syncFromServer(){
 
     // ---------- fresh picks (newest) ----------
     var fresh = DB.items.filter(function(it){ return it.status==="available" && !isUserBlocked(it.ownerId, UI.currentUserId); });
-    fresh.sort(function(a,b){ return b.createdAt-a.createdAt; });
+    var paidRank = function(it){ return isBoosted(it) ? 2 : (isPremium(it) ? 1 : 0); };
+    fresh.sort(function(a,b){ return (paidRank(b)-paidRank(a)) || (b.createdAt-a.createdAt); });
     var freshSlice = fresh.slice(0,8);
 
     // ---------- nearby ----------
     var nearby = DB.items.filter(function(it){ return it.status==="available" && !isUserBlocked(it.ownerId, UI.currentUserId); });
-    nearby.sort(function(a,b){ return distanceKm(cu.city,a.city)-distanceKm(cu.city,b.city); });
+    nearby.sort(function(a,b){ return (paidRank(b)-paidRank(a)) || (distanceKm(cu.city,a.city)-distanceKm(cu.city,b.city)); });
     var nearbySlice = nearby.slice(0,8);
 
     var searchBar = renderSearchBar("Search for anything…");
@@ -4977,7 +4978,7 @@ function syncFromServer(){
     var u = loggedIn ? refreshBillingPeriod(currentUser()) : null;
     var active = loggedIn ? (u.plan||"free") : "";
     var plan = planById(active||"free");
-    var isAnnual = UI.billingPeriod === "annual";
+    var isAnnual = false;  // only 30-day passes are sold; yearly prices are not shown until the server sells them
 
     var usageHtml = '';
     if(loggedIn){
@@ -5004,6 +5005,7 @@ function syncFromServer(){
       '<button class="btn btn-sm" data-action="set-billing-period" data-period="monthly" style="padding:8px 18px;background:'+monthlyBg+';color:'+monthlyCol+';border:none;border-radius:8px 0 0 8px;font-weight:700;font-size:13px;cursor:pointer;">Monthly</button>' +
       '<button class="btn btn-sm" data-action="set-billing-period" data-period="annual" style="padding:8px 18px;background:'+annualBg+';color:'+annualCol+';border:none;border-radius:0 8px 8px 0;font-weight:700;font-size:13px;cursor:pointer;">Annual <span style="color:'+savingCol+';font-size:11px;margin-left:4px;">-15%</span></button>' +
     '</div>';
+    billingToggle = '';
 
     var plansHtml = '<div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:22px;">' +
       PRICING_PLANS.map(function(p){
