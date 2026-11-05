@@ -1546,7 +1546,7 @@ function mapBackendData(data){
       views: it.views || 0,
       boostedUntil: it.boosted_until ? new Date(it.boosted_until).getTime() : null,
       premiumUntil: it.premium_until ? new Date(it.premium_until).getTime() : null,
-      isFeatured: !!(it.boosted_until && new Date(it.boosted_until).getTime() > Date.now()),
+      isFeatured: false,
       createdAt: it.created_at ? new Date(it.created_at).getTime() : Date.now()
     };
   }
@@ -4211,7 +4211,7 @@ function syncFromServer(){
     }).join("");
 
     // ---------- featured listings ----------
-    var featured = DB.items.filter(function(it){ return it.isFeatured && it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId); });
+    var featured = DB.items.filter(function(it){ return isPremium(it) && it.status==="available" && it.ownerId!==UI.currentUserId && !isUserBlocked(it.ownerId, UI.currentUserId); });
 
     // ---------- recently viewed ----------
     var rvItems = [];
@@ -4235,7 +4235,7 @@ function syncFromServer(){
 
     var featuredHtml = featured.length ? (
       '<div class="home-section">' +
-        '<div class="home-section-head"><span class="home-section-title">⭐ Featured Ads</span>' +
+        '<div class="home-section-head"><span class="home-section-title">👑 Premium Ads</span>' +
           '<button class="home-see-all" data-action="see-all-featured">See all</button>' +
         '</div>' +
         '<div class="grid">'+featured.map(renderItemCard).join("")+'</div>' +
@@ -4492,7 +4492,7 @@ function syncFromServer(){
     }
     var wantLine   = (it.forBarter && !isNoBarter(it.category)) ? '<div class="item-want">Wants: '+esc(it.wantInExchange||"Open to offers")+'</div>' : '';
     var viewCount  = '<span class="view-count">👁 '+(it.views||0)+'</span>';
-    var ribbon     = isPremium(it) ? '<div class="featured-ribbon">👑 Premium</div>' : (it.isFeatured ? '<div class="featured-ribbon">⭐ Featured</div>' : '');
+    var ribbon     = isPremium(it) ? '<div class="featured-ribbon">👑 Premium</div>' : '';
     var premiumBadge = isPremium(it) ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>' : '';
     var mineBadge = (it.ownerId===UI.currentUserId) ? '<span class="pill" style="background:#fef3c7;color:#92400e;">Your ad</span>' : '';
     var heartBtn   = '<button class="heart-btn '+(saved?'saved':'')+'" data-action="toggle-save" data-id="'+it.id+'" title="'+(saved?'Remove from saved':'Save ad')+'">'+(saved?'❤️':'🤍')+'</button>';
