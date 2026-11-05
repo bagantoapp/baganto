@@ -4864,6 +4864,7 @@ function syncFromServer(){
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
         '<button class="btn btn-sm btn-primary" data-action="goto-pricing">Upgrade subscription</button>' +
         '<button class="btn btn-sm btn-outline" data-action="restore-purchases">Restore purchases</button>' +
+        '<button class="btn btn-sm btn-outline" data-action="request-refund">Request refund</button>' +
       '</div>' +
     '</div>';
     return '' +
@@ -5833,6 +5834,13 @@ function syncFromServer(){
     if(action==="close-stats"){ UI.profileView = null; render(); return; }
     if(action==="open-settings"){ UI.profileView = "settings"; render(); return; }
     if(action==="close-settings"){ UI.profileView = null; render(); return; }
+    if(action==="request-refund"){
+      if(!window.confirm("Request a refund for your last payment? Refunds are only possible within 24 hours of paying, and only if you have not used any paid feature.")) return;
+      apiPost("/payments/refund-request", {}).then(function(r){
+        showToast((r.body && (r.body.message || r.body.error)) || "Request sent.");
+      }).catch(function(){ showToast("Could not send the request. Try again."); });
+      return;
+    }
     if(action==="restore-purchases"){ showToast("Restore purchases works once app store purchases are set up."); return; }
     if(action==="deactivate-account"){
       if(!window.confirm("Deactivate your account? Your profile and ads will be hidden until you log in again.")) return;

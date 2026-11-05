@@ -1117,7 +1117,7 @@ app.post('/items/:id/premium', requireAuth, async (req, res) => {
     await supabaseCall('user_plans', 'PATCH', { [col]: plan[col] - 1 }, `?user_id=eq.${encodeURIComponent(req.userId)}`);
     const base = it.premium_until && new Date(it.premium_until) > new Date() ? new Date(it.premium_until).getTime() : Date.now();
     const until = new Date(base + days * 86400000).toISOString();
-    const data = await supabaseCall('items', 'PATCH', { premium_until: until }, `?id=eq.${encodeURIComponent(req.params.id)}`);
+    const data = await supabaseCall('items', 'PATCH', { premium_until: until, premium_started_at: new Date().toISOString() }, `?id=eq.${encodeURIComponent(req.params.id)}`);
     res.json({ success: true, premium_until: until, item: data[0] || null });
   } catch (err) {
     console.error('premium error:', err.message);
@@ -1162,6 +1162,43 @@ app.get('/items/:id/stats', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('stats error:', err.message);
     res.status(500).json({ error: 'Could not load stats' });
+  }
+});
+
+// ---- Refund requests ----
+// Approved only within 24 hours of paying, and only if nothing has been used since.
+app.post('/payments/refund-request', requireAuth, async (req, res) => {
+  try {
+    const rows = await supabaseCall('payments', 'GET', null,
+      `?user_id=eq.${encodeURIComponent(req.userId)}&status=eq.paid&order=paid_at.desc&limit=1`);
+    const pay = rows && rows[0];
+    if (!pay) return res.status(404).json({ error: 'No paid payment found on your account.' });
+    const since = encodeURIComponent(pay.paid_at);
+    let reason = '';
+    if ((Date.now() - new Date(pay.paid_at).getTime()) > 24 * 3600000) {
+      reason = 'The 24-hour refund window for your last payment has passed.';
+    }
+    if (!reason) {
+      const posted = await supabaseCall('items', 'GET', null,
+        `?owner_id=eq.${encodeURIComponent(req.userId)}&created_at=gte.${since}&select=id&limit=1`);
+      if (posted && posted.length) reason = 'You have posted an ad since paying, so this payment is not refundable.';
+    }
+    if (!reason) {
+      const premium = await supabaseCall('items', 'GET', null,
+        `?owner_id=eq.${encodeURIComponent(req.userId)}&premium_started_at=gte.${since}&select=id&limit=1`);
+      if (premium && premium.length) reason = 'A premium listing has been used since paying, so this payment is not refundable.';
+    }
+    if (reason) return res.json({ eligible: false, message: reason });
+
+    await supabaseCall('refund_requests', 'POST', {
+      user_id: req.userId, razorpay_order_id: pay.razorpay_order_id,
+      amount_paise: pay.amount_paise, status: 'pending'
+    });
+    notifyTelegram(`↩️ Refund request: ₹${pay.amount_paise / 100} for ${PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id} (user ${req.userId}, payment ${pay.razorpay_payment_id || pay.razorpay_order_id}). Eligible: nothing used, within 24 hours.`).catch(() => {});
+    res.json({ eligible: true, message: 'Refund request received. If approved, it is paid to your original payment method within 7 working days.' });
+  } catch (err) {
+    console.error('refund request error:', err.message);
+    res.status(500).json({ error: 'Could not send the request. Try again.' });
   }
 });
 
