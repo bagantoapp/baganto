@@ -3371,12 +3371,9 @@ function syncFromServer(){
   }
 
   function incrementViews(itemId){
-    var it = itemById(itemId);
-    if(!it || it.id==="__missing__") return;
-    it.views = (it.views||0) + 1;
-    saveDB();
+    if(!itemId || itemId==="__missing__") return;
+    apiPost("/items/" + encodeURIComponent(itemId) + "/view", {}).catch(function(){});
   }
-
   function trackRecentlyViewed(itemId){
     UI.recentlyViewed = UI.recentlyViewed.filter(function(id){ return id!==itemId; });
     UI.recentlyViewed.unshift(itemId);
@@ -3891,6 +3888,26 @@ function syncFromServer(){
     if(h==="settings"){ UI.tab = "profile"; UI.profileView = "settings"; return; }
     var tabs = hashTabs();
     for(var k in tabs){ if(tabs[k]===h){ UI.tab = k; return; } }
+  }
+
+  // Saves and enquiries for one of your own ads (paid plans). Loaded once, then shown.
+  function adStatsText(it){
+    var u = currentUser();
+    if(!u || !u.plan || u.plan === "free") return "";
+    UI.adStats = UI.adStats || {};
+    UI.adStatsRequested = UI.adStatsRequested || {};
+    if(!UI.adStats[it.id]){
+      if(!UI.adStatsRequested[it.id]){
+        UI.adStatsRequested[it.id] = true;
+        fetch(API_BASE + "/items/" + encodeURIComponent(it.id) + "/stats")
+          .then(function(r){ return r.ok ? r.json() : null; })
+          .then(function(j){ if(j){ UI.adStats[it.id] = j; render(); } })
+          .catch(function(){});
+      }
+      return "";
+    }
+    var st = UI.adStats[it.id];
+    return " · ♡ " + st.saves + " saves · 💬 " + st.enquiries + " enquiries";
   }
 
   function render(){
@@ -4663,7 +4680,7 @@ function syncFromServer(){
         '<div style="flex:1;min-width:0;">' +
           '<div class="item-title">'+esc(it.title)+'</div>' +
           '<div class="my-ad-meta">'+statusPillForItem(it.status)+modeBadges+'</div>' +
-          '<div class="my-ad-meta"><span class="muted" style="font-size:12px;">'+esc(it.city)+' · '+timeAgo(it.createdAt)+'</span><span class="my-ad-views">👁 '+(it.views||0)+' views</span></div>' +
+          '<div class="my-ad-meta"><span class="muted" style="font-size:12px;">'+esc(it.city)+' · '+timeAgo(it.createdAt)+'</span><span class="my-ad-views">👁 '+(it.views||0)+' views'+adStatsText(it)+'</span></div>' +
           (expiryNote ? '<div class="my-ad-meta">'+expiryNote+'</div>' : '') +
         '</div>' +
         '<div class="my-ad-actions">' +

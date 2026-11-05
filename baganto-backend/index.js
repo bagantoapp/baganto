@@ -1125,6 +1125,46 @@ app.post('/items/:id/premium', requireAuth, async (req, res) => {
   }
 });
 
+// ---- Ad stats ----
+// One view per viewer per ad per day. Signed-in users count by account, others by IP.
+app.post('/items/:id/view', async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const viewer = optionalUid(req) || ('ip:' + req.ip);
+    const day = new Date().toISOString().slice(0, 10);
+    try {
+      await supabaseCall('item_views', 'POST', { item_id: itemId, viewer, day });
+    } catch (e) {
+      return res.json({ counted: false });
+    }
+    const rows = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(itemId)}&select=views`);
+    const views = ((rows && rows[0] && rows[0].views) || 0) + 1;
+    await supabaseCall('items', 'PATCH', { views }, `?id=eq.${encodeURIComponent(itemId)}`);
+    res.json({ counted: true, views });
+  } catch (err) {
+    res.json({ counted: false });
+  }
+});
+
+// Saves and enquiries for your own ad. Paid plans only.
+app.get('/items/:id/stats', requireAuth, async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const rows = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(itemId)}&select=owner_id,views`);
+    const it = rows && rows[0];
+    if (!it || it.owner_id !== req.userId) return res.status(403).json({ error: 'Not your listing' });
+    const plan = await getUserPlan(req.userId);
+    if (planTypeOf(plan) === 'free') return res.status(403).json({ error: 'Ad stats are included in paid plans' });
+    const saves = await sbFetch(`saved_items?item_id=eq.${encodeURIComponent(itemId)}&select=user_id`, 'GET');
+    const mine = await sbFetch(`deals?or=(user_a.eq.${encodeURIComponent(req.userId)},user_b.eq.${encodeURIComponent(req.userId)})&select=data`, 'GET');
+    const enquiries = mine.filter(d => d.data && d.data.itemId === itemId).length;
+    res.json({ views: it.views || 0, saves: saves.length, enquiries });
+  } catch (err) {
+    console.error('stats error:', err.message);
+    res.status(500).json({ error: 'Could not load stats' });
+  }
+});
+
 app.post('/users/me/deactivate', requireAuth, async (req, res) => {
   try {
     await supabaseCall('users', 'PATCH', { deactivated: true }, `?id=eq.${encodeURIComponent(req.userId)}`);
