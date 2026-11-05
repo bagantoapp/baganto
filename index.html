@@ -3612,37 +3612,53 @@ function syncFromServer(){
   ].join("");
 
   var REFUND_HTML = [
+    '<p>Last updated: 5 November 2026</p>',
     '<h2>1. Scope</h2>',
-    '<p>This Refund and Cancellation Policy explains how refunds work on Baganto for paid plans and premium listings, and for trades and sales between users. Last updated: 2 November 2026.</p>',
+    '<p>This Refund and Cancellation Policy explains how refunds work on Baganto for paid plans and premium listings, and for trades and sales between users.</p>',
     '<p>Paid plans and premium listings are not charged yet. This policy takes effect when paid features go live, and we will tell you in the app before any charge is made.</p>',
-    '<h2>2. Mistaken payments: refund within 24 hours</h2>',
-    '<p>If you pay by mistake and have not used any paid feature within 24 hours of paying, you can ask for a full refund.</p>',
+    '<h2>2. What counts as used</h2>',
+    '<p>A paid payment counts as used as soon as any of these happens after you pay:</p>',
     '<ul>',
-      '<li>Using a paid feature means switching on a premium listing, or posting an ad that uses your plan allowance.</li>',
-      '<li>The refund goes back to the same card, UPI account, bank account or wallet you paid with.</li>',
-      '<li>To ask for a refund, email contact@baganto.com with the subject "Refund request", your registered email address or phone number, and the payment date. An in-app request button will be added before paid features go live.</li>',
+      '<li>you post an ad, or</li>',
+      '<li>you switch on a premium listing (including one included in your plan).</li>',
     '</ul>',
-    '<h2>3. Duplicate and failed payments</h2>',
-    '<p>If you are charged twice for the same item, or you are charged but the feature does not activate, we refund the extra or failed amount in full. The 24-hour limit does not apply to these cases.</p>',
-    '<h2>4. After 24 hours or after use</h2>',
-    '<p>Payments are not refundable after 24 hours or once a paid feature has been used, except where the feature failed because of a fault on our side (for example, a premium listing that never went live), or where Indian consumer law gives you a right to a refund.</p>',
-    '<h2>5. Plans and renewals</h2>',
-    '<p>Paid plans are 30-day passes and do not renew automatically. When a plan ends, your account returns to the Free plan unless you buy it again. Unused time on a plan is not refunded unless the payment falls within the 24-hour window in Section 2. Premium listings are one-time purchases and do not renew.</p>',
-    '<h2>6. How refunds are approved and paid</h2>',
+    '<p>Logging in, browsing, and saving ads do not count as use.</p>',
+    '<h2>3. Mistaken payments: refund within 24 hours</h2>',
+    '<p>If you pay by mistake and have not used the payment within 24 hours, you can request a refund of your most recent payment. Approved refunds return the amount paid minus the service fee in Section 6.</p>',
+    '<h2>4. Duplicate and failed payments</h2>',
+    '<p>If you are charged twice for the same item, or you are charged but the feature does not activate, we refund the full amount. No service fee is deducted, and the 24-hour limit does not apply.</p>',
+    '<h2>5. Requests after 24 hours or after use</h2>',
+    '<p>Payments are not refundable after 24 hours or once they have been used, except where:</p>',
+    '<ul>',
+      '<li>a paid feature failed because of a fault on our side (for example, a premium listing that never went live), or</li>',
+      '<li>Indian consumer law gives you a right to a refund.</li>',
+    '</ul>',
+    '<p>You can still explain your situation in a refund request. Our team reads every request and will reply by email, but we are not obliged to refund a payment that has been used, except in the cases above.</p>',
+    '<h2>6. Service fee</h2>',
+    '<p>Payment processing costs about 2% of each payment. We keep this 2% as a service fee. So an approved refund returns 98% of the amount paid. Refunds for duplicate and failed payments in Section 4 are full, with no fee.</p>',
+    '<h2>7. How to request a refund</h2>',
     '<ol style="padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);">',
-      '<li>We check your request against our payment records and may ask for details to confirm the payment.</li>',
-      '<li>Our team approves or rejects each refund manually. You receive the decision by email within 2 working days of your request.</li>',
-      '<li>Approved refunds are paid to the original payment method within 7 working days of approval. Your bank may take extra time to show the credit.</li>',
+      '<li>Open Profile, then Settings, then Subscription.</li>',
+      '<li>In the Request a refund box, explain your reason. Requests are for your most recent payment.</li>',
+      '<li>Tap Send refund request. You will see a reply straight away.</li>',
     '</ol>',
-    '<h2>7. Barter trades</h2>',
+    '<h2>8. How refunds are decided and paid</h2>',
+    '<ol style="padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);">',
+      '<li>We check the payment date and whether it has been used, then read your explanation.</li>',
+      '<li>We email you the decision within 2 working days of your request.</li>',
+      '<li>Approved refunds are paid to the original payment method (card, UPI, bank or wallet) within 7 working days of approval. Your bank may take extra time to show the credit.</li>',
+    '</ol>',
+    '<h2>9. Plans and renewals</h2>',
+    '<p>Paid plans are 30-day passes and do not renew automatically. When a plan ends, your account returns to the Free plan unless you buy it again. Unused time on a plan is not refunded unless the payment falls within the 24-hour window in Section 3. Premium listings are one-time purchases and do not renew.</p>',
+    '<h2>10. Barter trades</h2>',
     '<p>A trade proposal can be withdrawn by the sender, or rejected by the recipient, at any time before it is accepted, at no cost, inside the app. Once both users mark a trade Complete, it is final on the Platform. Any return of items must be agreed directly between the two users. Baganto does not mediate returns of physical goods.</p>',
-    '<h2>8. Sales between users</h2>',
+    '<h2>11. Sales between users</h2>',
     '<p>Baganto is a platform, not the seller of any item. There is no Buy Now or instant purchase button. Sales are agreed in chat, and payment and handover happen directly between the two people. Baganto does not hold or process money for these sales, so it cannot refund them.</p>',
-    '<h2>9. Your legal rights</h2>',
+    '<h2>12. Your legal rights</h2>',
     '<p>Nothing in this policy takes away any refund, cancellation or other right you have under Indian law, including the Consumer Protection Act, 2019 and the rules made under it.</p>',
-    '<h2>10. Contact</h2>',
+    '<h2>13. Contact</h2>',
     '<p>Email contact@baganto.com. For complaints, see the <button class="footer-link" style="font-size:14px;" data-action="open-legal" data-page="grievance">Grievance Redressal page</button>.</p>',
-    '<h2>11. Changes to this policy</h2>',
+    '<h2>14. Changes to this policy</h2>',
     '<p>We may update this policy. Changes apply only to payments made after the updated policy is published.</p>'
   ].join("");
 
@@ -4870,7 +4886,12 @@ function syncFromServer(){
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
         '<button class="btn btn-sm btn-primary" data-action="goto-pricing">Upgrade subscription</button>' +
         '<button class="btn btn-sm btn-outline" data-action="restore-purchases">Restore purchases</button>' +
-        '<button class="btn btn-sm btn-outline" data-action="request-refund">Request refund</button>' +
+        '<div style="width:100%;margin-top:10px;border-top:1px solid var(--border);padding-top:10px;">' +
+          '<div style="font-weight:700;margin-bottom:4px;">Request a refund</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Explain why you want a refund for your most recent payment. Every request is read by our team.</div>' +
+          '<textarea id="refundReason" maxlength="1000" rows="3" placeholder="Explain your reason here" oninput="window.__refundDraft=this.value" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;">' + esc(window.__refundDraft || '') + '</textarea>' +
+          '<button class="btn btn-sm btn-outline" data-action="request-refund" style="margin-top:8px;">Send refund request</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
     return '' +
@@ -5841,9 +5862,12 @@ function syncFromServer(){
     if(action==="open-settings"){ UI.profileView = "settings"; render(); return; }
     if(action==="close-settings"){ UI.profileView = null; render(); return; }
     if(action==="request-refund"){
-      if(!window.confirm("Request a refund for your last payment? Refunds are only possible within 24 hours of paying, and only if you have not used any paid feature.")) return;
-      apiPost("/payments/refund-request", {}).then(function(r){
+      var __reason = (window.__refundDraft || "").trim();
+      if(__reason.length < 10){ showToast("Please explain your reason (at least 10 characters)."); return; }
+      apiPost("/payments/refund-request", { reason: __reason }).then(function(r){
+        if(r.ok){ window.__refundDraft = ""; }
         showToast((r.body && (r.body.message || r.body.error)) || "Request sent.");
+        render();
       }).catch(function(){ showToast("Could not send the request. Try again."); });
       return;
     }

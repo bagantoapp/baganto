@@ -1166,36 +1166,46 @@ app.get('/items/:id/stats', requireAuth, async (req, res) => {
 });
 
 // ---- Refund requests ----
-// Approved only within 24 hours of paying, and only if nothing has been used since.
+// Every request is saved and sent to the owner with the reason. The checks only decide the message shown.
 app.post('/payments/refund-request', requireAuth, async (req, res) => {
   try {
+    const reason = String((req.body && req.body.reason) || '').trim().slice(0, 1000);
+    if (reason.length < 10) return res.status(400).json({ error: 'Please explain your reason (at least 10 characters).' });
     const rows = await supabaseCall('payments', 'GET', null,
       `?user_id=eq.${encodeURIComponent(req.userId)}&status=eq.paid&order=paid_at.desc&limit=1`);
     const pay = rows && rows[0];
     if (!pay) return res.status(404).json({ error: 'No paid payment found on your account.' });
     const since = encodeURIComponent(pay.paid_at);
-    let reason = '';
-    if ((Date.now() - new Date(pay.paid_at).getTime()) > 24 * 3600000) {
-      reason = 'The 24-hour refund window for your last payment has passed.';
-    }
-    if (!reason) {
-      const posted = await supabaseCall('items', 'GET', null,
-        `?owner_id=eq.${encodeURIComponent(req.userId)}&created_at=gte.${since}&select=id&limit=1`);
-      if (posted && posted.length) reason = 'You have posted an ad since paying, so this payment is not refundable.';
-    }
-    if (!reason) {
-      const premium = await supabaseCall('items', 'GET', null,
-        `?owner_id=eq.${encodeURIComponent(req.userId)}&premium_started_at=gte.${since}&select=id&limit=1`);
-      if (premium && premium.length) reason = 'A premium listing has been used since paying, so this payment is not refundable.';
-    }
-    if (reason) return res.json({ eligible: false, message: reason });
+    const notes = [];
+    if ((Date.now() - new Date(pay.paid_at).getTime()) > 24 * 3600000) notes.push('over 24 hours since paying');
+    const posted = await supabaseCall('items', 'GET', null,
+      `?owner_id=eq.${encodeURIComponent(req.userId)}&created_at=gte.${since}&select=id&limit=1`);
+    if (posted && posted.length) notes.push('ad posted since paying');
+    const premium = await supabaseCall('items', 'GET', null,
+      `?owner_id=eq.${encodeURIComponent(req.userId)}&premium_started_at=gte.${since}&select=id&limit=1`);
+    if (premium && premium.length) notes.push('premium listing used since paying');
+    const eligible = notes.length === 0;
+    const refundPaise = Math.round(pay.amount_paise * 0.98);
 
     await supabaseCall('refund_requests', 'POST', {
       user_id: req.userId, razorpay_order_id: pay.razorpay_order_id,
-      amount_paise: pay.amount_paise, status: 'pending'
+      amount_paise: pay.amount_paise, refund_paise: refundPaise,
+      eligible, reason, status: 'pending'
     });
-    notifyTelegram(`↩️ Refund request: ₹${pay.amount_paise / 100} for ${PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id} (user ${req.userId}, payment ${pay.razorpay_payment_id || pay.razorpay_order_id}). Eligible: nothing used, within 24 hours.`).catch(() => {});
-    res.json({ eligible: true, message: 'Refund request received. If approved, it is paid to your original payment method within 7 working days.' });
+    const product = PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id;
+    notifyTelegram(
+      `↩️ Refund request (${eligible ? 'ELIGIBLE: nothing used, within 24 hours' : 'NOT AUTO-ELIGIBLE: ' + notes.join(', ')})\n` +
+      `${product}, paid ₹${pay.amount_paise / 100}, refund ₹${refundPaise / 100} after 2% fee\n` +
+      `User: ${req.userId}\nPayment: ${pay.razorpay_payment_id || pay.razorpay_order_id}\n` +
+      `Reason: ${reason}`
+    ).catch(() => {});
+
+    res.json({
+      eligible,
+      message: eligible
+        ? 'Request received. If approved, you will get ₹' + (refundPaise / 100) + ' (the amount minus a 2% service fee) within 7 working days.'
+        : 'Request received. Because you have already used this payment or passed 24 hours, our team will read your reason and email you the decision.'
+    });
   } catch (err) {
     console.error('refund request error:', err.message);
     res.status(500).json({ error: 'Could not send the request. Try again.' });
