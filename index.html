@@ -1973,7 +1973,13 @@ function syncFromServer(){
         lastSyncRaw = __raw;
         var mapped = mapBackendData(data);
         if(!DB){ DB = mapped; } else {
-        DB.items = mapped.items;
+        // Keep ads posted in the last 2 minutes that the server has not returned yet,
+        // so a background refresh does not remove a new ad while it is still saving.
+        var __fresh = (DB.items || []).filter(function(x){
+          return x.ownerId === UI.currentUserId && x.createdAt && (Date.now() - x.createdAt) < 120000 &&
+            !mapped.items.some(function(m){ return m.id === x.id; });
+        });
+        DB.items = mapped.items.concat(__fresh);
         // Server doesn't send billing fields, so carry them over from this device's copy.
         var __oldUsers = DB.users || [];
         mapped.users.forEach(function(nu){
