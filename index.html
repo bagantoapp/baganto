@@ -4079,7 +4079,6 @@ function syncFromServer(){
       {id:"profile",  label:"Profile"},
       {id:"pricing",  label:"👑 Plans"}
     ];
-    var __me = currentUser(); if(__me && __me.plan && __me.plan !== "free") tabs.splice(2,0,{id:"stats", label:"📊 Stats"});
     if(isCurrentUserAdmin()) tabs.push({id:"admin", label:"⚙️ Admin"});
     var tabsHtml = tabs.map(function(t){
       var cls = "nav-tab" + (UI.tab===t.id ? " active" : "");
@@ -4149,7 +4148,6 @@ function syncFromServer(){
     if(UI.legalPage) return renderLegalPage();
     if(UI.tab==="market") return renderMarket();
     if(UI.tab==="listings") return renderListings();
-    if(UI.tab==="stats") return renderStats();
     if(UI.tab==="trades") return renderTrades();
     if(UI.tab==="profile") return renderProfile();
     if(UI.tab==="pricing") return renderPricing();
@@ -4915,6 +4913,7 @@ function syncFromServer(){
     if(!UI.currentUserId){ UI.authScreen = true; UI.authPage = "login"; return renderAuth(); }
     var u = currentUser();
     if(UI.profileView === "settings") return renderSettingsView(u);
+    if(UI.profileView === "stats") return '<button class="btn btn-ghost btn-sm" data-action="close-stats" style="margin-bottom:12px;">← Back to profile</button>' + renderStats();
     var rating = userRating(u.id);
     var mine = myItems();
     var completedCount = DB.deals.filter(function(d){ return d.status==="completed" && (d.fromUserId===u.id || d.toUserId===u.id); }).length;
@@ -4985,6 +4984,7 @@ function syncFromServer(){
             '👑 Plan: <b>'+esc(currentPlan(u.id).name)+'</b> · '+adsRemaining(u.id)+'/'+adsAllowed(u.id)+' ads left · 👑 '+premiumCredits(u.id).length+' premium ' +
             '<button class="btn btn-sm btn-ghost" data-action="goto-pricing" style="margin-left:6px;">Manage</button>' +
           '</div>' +
+          (u.plan && u.plan !== "free" ? '<button class="btn btn-ghost btn-sm" data-action="open-stats" style="margin-top:12px;">📊 Stats</button>' : '') +
           '<button class="btn btn-ghost btn-sm" data-action="open-settings" style="margin-top:12px;">⚙️ Settings</button>' +
           '<button class="btn btn-outline btn-sm" data-action="logout" style="margin-top:12px;color:#ef4444;border-color:#ef4444;">&#x1F512; Logout</button>' +
         '</div>' +
@@ -5825,6 +5825,8 @@ function syncFromServer(){
       render(); return;
     }
 
+    if(action==="open-stats"){ UI.profileView = "stats"; render(); return; }
+    if(action==="close-stats"){ UI.profileView = null; render(); return; }
     if(action==="open-settings"){ UI.profileView = "settings"; render(); return; }
     if(action==="close-settings"){ UI.profileView = null; render(); return; }
     if(action==="restore-purchases"){ showToast("Restore purchases works once app store purchases are set up."); return; }
