@@ -980,15 +980,12 @@ app.delete('/saved/:itemId', requireAuth, async (req, res) => {
 // ============ PAYMENTS (Razorpay) ============
 // Prices live here on the server, in paise (₹1 = 100 paise). The app only sends a product id.
 const PAY_CATALOG = {
-  growth:       { type: 'plan',    name: 'Growth plan (30 days)',       paise: 19900, plan: 'growth',       boosts: 2 },
-  professional: { type: 'plan',    name: 'Professional plan (30 days)', paise: 49900, plan: 'professional', boosts: 4 },
-  business:     { type: 'plan',    name: 'Business plan (30 days)',     paise: 89900, plan: 'business',     boosts: 8 },
-  boost3:       { type: 'boost',   name: 'Boost to Top (3 days)',       paise: 2900,  qty: 1 },
-  mega3:        { type: 'boost',   name: 'Boost 3-Pack',                paise: 6900,  qty: 3 },
+  growth:       { type: 'plan',    name: 'Growth plan (30 days)',       paise: 19900, plan: 'growth',       premium7: 2 },
+  professional: { type: 'plan',    name: 'Professional plan (30 days)', paise: 49900, plan: 'professional', premium7: 4 },
+  business:     { type: 'plan',    name: 'Business plan (30 days)',     paise: 89900, plan: 'business',     premium7: 8 },
   prem7:        { type: 'premium', name: 'Premium Listing (7 days)',    paise: 4900,  days: 7 },
   prem30:       { type: 'premium', name: 'Premium Listing (30 days)',   paise: 14900, days: 30 }
 };
-const BOOST_DAYS = 3;
 const PLAN_DAYS = 30;
 
 // A paid plan whose end date has passed counts as Free.
@@ -1026,9 +1023,7 @@ async function grantPurchase(userId, productId) {
     const from = sameAndActive ? new Date(plan.plan_expires_at).getTime() : now;
     updates.plan_type = p.plan;
     updates.plan_expires_at = new Date(from + PLAN_DAYS * 86400000).toISOString();
-    updates.boosts_available = (plan.boosts_available || 0) + p.boosts;
-  } else if (p.type === 'boost') {
-    updates.boosts_available = (plan.boosts_available || 0) + p.qty;
+    updates.premium7_credits = (plan.premium7_credits || 0) + p.premium7;
   } else if (p.type === 'premium') {
     const col = p.days === 30 ? 'premium30_credits' : 'premium7_credits';
     updates[col] = (plan[col] || 0) + 1;
@@ -1105,25 +1100,6 @@ app.post('/payments/verify', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('payments/verify error:', err.message);
     res.status(500).json({ error: 'Could not confirm the payment. If money was taken, contact support.' });
-  }
-});
-
-// Use one boost credit on one of your own live ads.
-app.post('/items/:id/boost', requireAuth, async (req, res) => {
-  try {
-    const cur = await supabaseCall('items', 'GET', null, `?id=eq.${encodeURIComponent(req.params.id)}`);
-    const it = cur && cur[0];
-    if (!it || it.owner_id !== req.userId) return res.status(403).json({ error: 'Not your listing' });
-    if (effectiveItem(it).status !== 'available') return res.status(400).json({ error: 'Only live ads can be boosted' });
-    const plan = await getUserPlan(req.userId);
-    if ((plan.boosts_available || 0) < 1) return res.status(402).json({ error: 'No boosts left' });
-    await supabaseCall('user_plans', 'PATCH', { boosts_available: plan.boosts_available - 1 }, `?user_id=eq.${encodeURIComponent(req.userId)}`);
-    const until = new Date(Date.now() + BOOST_DAYS * 86400000).toISOString();
-    const data = await supabaseCall('items', 'PATCH', { boosted_until: until }, `?id=eq.${encodeURIComponent(req.params.id)}`);
-    res.json({ success: true, boosted_until: until, item: data[0] || null, boosts_available: plan.boosts_available - 1 });
-  } catch (err) {
-    console.error('boost error:', err.message);
-    res.status(500).json({ error: 'Could not boost the ad' });
   }
 });
 

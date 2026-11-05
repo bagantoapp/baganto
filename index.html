@@ -2089,17 +2089,14 @@ function syncFromServer(){
     { id:"free", name:"Free", price:0, ads:3, boosts:0, badge:"", tagline:"Try Baganto",
       features:["3 ads per month","Each ad runs for 30 days","Chat with buyers and sellers"] },
     { id:"growth", name:"Growth", price:199, ads:25, boosts:2, badge:"Popular", tagline:"For regular sellers",
-      features:["25 ads per month","Each ad runs for 30 days","2 free boosts every month","Ad performance stats"] },
+      features:["25 ads per month","Each ad runs for 30 days","2 premium listings (7 days) every month","Ad performance stats"] },
     { id:"professional", name:"Professional", price:499, ads:50, boosts:4, badge:"", tagline:"For small dealers",
-      features:["50 ads per month","Each ad runs for 30 days","4 free boosts every month","Ad performance stats"] },
+      features:["50 ads per month","Each ad runs for 30 days","4 premium listings (7 days) every month","Ad performance stats"] },
     { id:"business", name:"Business", price:899, ads:100, boosts:8, badge:"Best value", tagline:"For professional dealers",
-      features:["100 ads per month","Each ad runs for 30 days","8 free boosts every month","Ad performance stats","Verified business badge"] }
+      features:["100 ads per month","Each ad runs for 30 days","8 premium listings (7 days) every month","Ad performance stats","Verified business badge"] }
   ];
 
-  var BOOST_DAYS = 3;  // how long one boost keeps an ad at the top
   var PRICING_ADDONS = [
-    { id:"boost3",   type:"boost",   name:"Boost to Top",      price:29,  days:3,   qty:1, desc:"Push one ad to the top of search for 3 days." },
-    { id:"mega3",    type:"boost",   name:"Boost 3-Pack",      price:69,  days:3,   qty:3, desc:"3 boosts of 3 days each. Save ₹18." },
     { id:"prem7",    type:"premium", name:"Premium Listing",   price:49,  days:7,   qty:1, desc:"Premium badge and a higher spot for one ad for 7 days." },
     { id:"prem30",   type:"premium", name:"Premium Listing",   price:149, days:30,  qty:1, desc:"Premium badge and a higher spot for one ad for its full 30 days." }
   ];
@@ -2250,20 +2247,6 @@ function syncFromServer(){
   function buyAddon(addonId){
     if(!addonById(addonId)){ showToast("That add-on is not available."); return; }
     startPayment(addonId);
-  }
-  function applyBoostToItem(itemId){
-    var u = currentUser();
-    if(!u) return false;
-    if((u.boostCredits||0) <= 0){ showToast("No boosts left. Buy one from the Plans tab."); return false; }
-    apiPost("/items/" + encodeURIComponent(itemId) + "/boost", {}).then(function(r){
-      if(!r.ok){ showToast((r.body && r.body.error) || "Could not boost the ad."); return; }
-      var it = itemById(itemId);
-      if(it && it.id){ it.boostedUntil = new Date(r.body.boosted_until).getTime(); it.isFeatured = true; }
-      if(typeof r.body.boosts_available === "number") u.boostCredits = r.body.boosts_available;
-      persistLocal(); render();
-      showToast("Boosted! This ad stays at the top for " + BOOST_DAYS + " days.");
-    }).catch(function(){ showToast("Could not boost the ad. Check your connection and try again."); });
-    return true;
   }
   function applyPremiumToItem(itemId){
     var u = currentUser();
@@ -3530,7 +3513,7 @@ function syncFromServer(){
       '<li>Once both people mark a trade Complete, it is final on the Platform. Returns must be agreed directly between the two people.</li>',
     '</ul>',
     '<h2>8. Paid features</h2>',
-    '<p>Paid plans (Growth, Professional and Business), boosts and premium listings are not charged yet. Before any charge, we will show you the price, what you get, how long it lasts and how renewal and cancellation work. Payments and refunds will follow our Refund and Cancellation Policy.</p>',
+    '<p>Paid plans (Growth, Professional and Business) and premium listings are not charged yet. Before any charge, we will show you the price, what you get, how long it lasts and how renewal and cancellation work. Payments and refunds will follow our Refund and Cancellation Policy.</p>',
     '<h2>9. Reviews</h2>',
     '<p>Reviews must reflect your real experience with another user. Do not post false, defamatory or retaliatory reviews. You can edit or delete your own reviews, and we may remove reviews that break these Terms.</p>',
     '<h2>10. Reporting, blocking and moderation</h2>',
@@ -3623,21 +3606,21 @@ function syncFromServer(){
 
   var REFUND_HTML = [
     '<h2>1. Scope</h2>',
-    '<p>This Refund and Cancellation Policy explains how refunds work on Baganto for paid plans, boosts and premium listings, and for trades and sales between users. Last updated: 2 November 2026.</p>',
-    '<p>Paid plans, boosts and premium listings are not charged yet. This policy takes effect when paid features go live, and we will tell you in the app before any charge is made.</p>',
+    '<p>This Refund and Cancellation Policy explains how refunds work on Baganto for paid plans and premium listings, and for trades and sales between users. Last updated: 2 November 2026.</p>',
+    '<p>Paid plans and premium listings are not charged yet. This policy takes effect when paid features go live, and we will tell you in the app before any charge is made.</p>',
     '<h2>2. Mistaken payments: refund within 24 hours</h2>',
     '<p>If you pay by mistake and have not used any paid feature within 24 hours of paying, you can ask for a full refund.</p>',
     '<ul>',
-      '<li>Using a paid feature means switching on a boost, switching on a premium listing, or posting an ad that uses your plan allowance.</li>',
+      '<li>Using a paid feature means switching on a premium listing, or posting an ad that uses your plan allowance.</li>',
       '<li>The refund goes back to the same card, UPI account, bank account or wallet you paid with.</li>',
       '<li>To ask for a refund, email contact@baganto.com with the subject "Refund request", your registered email address or phone number, and the payment date. An in-app request button will be added before paid features go live.</li>',
     '</ul>',
     '<h2>3. Duplicate and failed payments</h2>',
     '<p>If you are charged twice for the same item, or you are charged but the feature does not activate, we refund the extra or failed amount in full. The 24-hour limit does not apply to these cases.</p>',
     '<h2>4. After 24 hours or after use</h2>',
-    '<p>Payments are not refundable after 24 hours or once a paid feature has been used, except where the feature failed because of a fault on our side (for example, a boost that never went live), or where Indian consumer law gives you a right to a refund.</p>',
+    '<p>Payments are not refundable after 24 hours or once a paid feature has been used, except where the feature failed because of a fault on our side (for example, a premium listing that never went live), or where Indian consumer law gives you a right to a refund.</p>',
     '<h2>5. Plans and renewals</h2>',
-    '<p>Paid plans are 30-day passes and do not renew automatically. When a plan ends, your account returns to the Free plan unless you buy it again. Unused time on a plan is not refunded unless the payment falls within the 24-hour window in Section 2. Boosts and premium listings are one-time purchases and do not renew.</p>',
+    '<p>Paid plans are 30-day passes and do not renew automatically. When a plan ends, your account returns to the Free plan unless you buy it again. Unused time on a plan is not refunded unless the payment falls within the 24-hour window in Section 2. Premium listings are one-time purchases and do not renew.</p>',
     '<h2>6. How refunds are approved and paid</h2>',
     '<ol style="padding-left:20px;font-size:14px;line-height:1.7;color:var(--ink);">',
       '<li>We check your request against our payment records and may ask for details to confirm the payment.</li>',
@@ -4239,7 +4222,7 @@ function syncFromServer(){
 
     // ---------- fresh picks (newest) ----------
     var fresh = DB.items.filter(function(it){ return it.status==="available" && !isUserBlocked(it.ownerId, UI.currentUserId); });
-    var paidRank = function(it){ return isBoosted(it) ? 2 : (isPremium(it) ? 1 : 0); };
+    var paidRank = function(it){ return isPremium(it) ? 1 : 0; };
     fresh.sort(function(a,b){ return (paidRank(b)-paidRank(a)) || (b.createdAt-a.createdAt); });
     var freshSlice = fresh.slice(0,8);
 
@@ -4383,7 +4366,7 @@ function syncFromServer(){
     // Boosted (paid) ads always come first, then the chosen sort decides the rest
     var boostFirst = function(inner){
       return function(a, b){
-        var ba = isBoosted(a) ? 2 : (isPremium(a) ? 1 : 0), bb = isBoosted(b) ? 2 : (isPremium(b) ? 1 : 0);
+        var ba = isPremium(a) ? 1 : 0, bb = isPremium(b) ? 1 : 0;
         if(ba !== bb) return bb - ba;
         return inner(a, b);
       };
@@ -4509,7 +4492,7 @@ function syncFromServer(){
     }
     var wantLine   = (it.forBarter && !isNoBarter(it.category)) ? '<div class="item-want">Wants: '+esc(it.wantInExchange||"Open to offers")+'</div>' : '';
     var viewCount  = '<span class="view-count">👁 '+(it.views||0)+'</span>';
-    var ribbon     = isBoosted(it) ? '<div class="featured-ribbon">⚡ Boosted</div>' : (it.isFeatured ? '<div class="featured-ribbon">⭐ Featured</div>' : '');
+    var ribbon     = isPremium(it) ? '<div class="featured-ribbon">👑 Premium</div>' : (it.isFeatured ? '<div class="featured-ribbon">⭐ Featured</div>' : '');
     var premiumBadge = isPremium(it) ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>' : '';
     var mineBadge = (it.ownerId===UI.currentUserId) ? '<span class="pill" style="background:#fef3c7;color:#92400e;">Your ad</span>' : '';
     var heartBtn   = '<button class="heart-btn '+(saved?'saved':'')+'" data-action="toggle-save" data-id="'+it.id+'" title="'+(saved?'Remove from saved':'Save ad')+'">'+(saved?'❤️':'🤍')+'</button>';
@@ -4559,7 +4542,7 @@ function syncFromServer(){
       '<div class="card" style="padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;">' +
         '<span><b>'+esc(currentPlan(UI.currentUserId).name)+'</b> plan</span>' +
         '<span>· '+adsRemaining(UI.currentUserId)+' of '+adsAllowed(UI.currentUserId)+' ads left this month</span>' +
-        '<span>· ⚡ '+boostCredits(UI.currentUserId)+' boosts</span>' +
+        '<span>· 👑 '+premiumCredits(UI.currentUserId).length+' premium</span>' +
         '<span>· 👑 '+premiumCredits(UI.currentUserId).length+' premium credits</span>' +
         '<button class="btn btn-sm btn-outline" data-action="goto-pricing" style="margin-left:auto;">View plans</button>' +
       '</div>' +
@@ -4687,9 +4670,6 @@ function syncFromServer(){
           (expired ? '<button class="btn btn-sm btn-primary" data-action="repost-listing" data-id="'+it.id+'">↻ Repost</button>' : '') +
           (!isSold && !expired ? '<button class="btn btn-sm btn-primary" data-action="edit-listing" data-id="'+it.id+'">Edit</button>' : '') +
           (!isSold && !expired ? '<button class="btn btn-sm" data-action="mark-sold" data-id="'+it.id+'">Mark Sold</button>' : '') +
-          (!isSold && !expired ? (isBoosted(it)
-              ? '<span class="pill" style="background:#fef3c7;color:#92400e;">⚡ Boosted</span>'
-              : '<button class="btn btn-sm btn-outline" data-action="boost-listing" data-id="'+it.id+'" title="Uses 1 boost credit">⚡ Boost ('+boostCredits(UI.currentUserId)+')</button>') : '') +
           (!isSold && !expired ? (isPremium(it)
               ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>'
               : '<button class="btn btn-sm btn-outline" data-action="premium-listing" data-id="'+it.id+'" title="Uses 1 premium credit">👑 Premium ('+premiumCredits(UI.currentUserId).length+')</button>') : '') +
@@ -4926,7 +4906,7 @@ function syncFromServer(){
             '</div>' +
           '</div>' +
           '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);">' +
-            '👑 Plan: <b>'+esc(currentPlan(u.id).name)+'</b> · '+adsRemaining(u.id)+'/'+adsAllowed(u.id)+' ads left · ⚡ '+boostCredits(u.id)+' boosts · 👑 '+premiumCredits(u.id).length+' premium ' +
+            '👑 Plan: <b>'+esc(currentPlan(u.id).name)+'</b> · '+adsRemaining(u.id)+'/'+adsAllowed(u.id)+' ads left · 👑 '+premiumCredits(u.id).length+' premium ' +
             '<button class="btn btn-sm btn-ghost" data-action="goto-pricing" style="margin-left:6px;">Manage</button>' +
           '</div>' +
           '<button class="btn btn-ghost btn-sm" data-action="open-settings" style="margin-top:12px;">⚙️ Settings</button>' +
@@ -4967,7 +4947,7 @@ function syncFromServer(){
       '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">'+esc(p.tagline)+'</div>' +
       '<div style="font-size:28px;font-weight:800;">'+formatINR(p.price)+'<span style="font-size:13px;font-weight:500;color:var(--muted);">/month</span></div>' +
       (p.price>0 ? '<div style="font-size:12px;color:var(--muted);margin-bottom:4px;">30-day pass, no automatic renewal</div>' : '') +
-      '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">'+p.ads+' ads · '+p.boosts+' boost'+(p.boosts===1?'':'s')+' included<br>Every ad runs for 30 days</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:10px;">'+p.ads+' ads · '+p.boosts+' premium listing'+(p.boosts===1?'':'s')+' included<br>Every ad runs for 30 days</div>' +
       '<ul style="margin:0 0 14px;padding:0;flex:1;">'+feats+'</ul>' +
       '<button class="btn btn-sm '+(isActive?'btn-ghost':'btn-primary')+'" data-action="select-plan" data-plan="'+p.id+'"'+(isActive?' disabled':'')+'>'+btnLabel+'</button>' +
     '</div>';
@@ -4987,7 +4967,7 @@ function syncFromServer(){
       var renew = u.planExpiry ? new Date(u.planExpiry).toLocaleDateString("en-IN") : "-";
       usageHtml = '<div class="card" style="padding:14px;margin-bottom:16px;">' +
         '<div style="font-weight:800;margin-bottom:8px;">Your plan: '+esc(plan.name)+' '+(plan.price>0?('· '+formatINR(plan.price)+' · 30-day pass, active until '+esc(renew)):'')+'</div>' +
-        '<div style="font-size:13px;margin-bottom:6px;">Ads used this month: <b>'+used+' / '+allowed+'</b> · Boosts left: <b>'+boostCredits(u.id)+'</b> · Premium credits: <b>'+premiumCredits(u.id).length+'</b></div>' +
+        '<div style="font-size:13px;margin-bottom:6px;">Ads used this month: <b>'+used+' / '+allowed+'</b> · Premium listings left: <b>'+premiumCredits(u.id).length+'</b></div>' +
         '<div style="height:8px;background:var(--border);border-radius:6px;overflow:hidden;"><div style="height:100%;width:'+pct+'%;background:var(--primary);"></div></div>' +
       '</div>';
     } else {
@@ -5022,7 +5002,6 @@ function syncFromServer(){
         return cardHtml;
       }).join("") + '</div>';
 
-    var boostAddons = PRICING_ADDONS.filter(function(a){ return a.type==="boost"; });
     var premAddons  = PRICING_ADDONS.filter(function(a){ return a.type==="premium"; });
     var addonCard = function(a){
       return '<div class="card" style="padding:14px;">' +
@@ -5033,20 +5012,17 @@ function syncFromServer(){
       '</div>';
     };
     var addonsHtml =
-      '<div class="section-title" style="font-size:18px;">⚡ Boosts</div>' +
-      '<div class="section-sub">Push any single ad to the top of search results.</div>' +
-      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:10px 0 22px;">'+boostAddons.map(addonCard).join("")+'</div>' +
       '<div class="section-title" style="font-size:18px;">👑 Premium listings</div>' +
       '<div class="section-sub">Highlight an ad with a premium badge so buyers notice it first.</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:10px 0 22px;">'+premAddons.map(addonCard).join("")+'</div>';
 
     var examples = [
       { title:"Individual seller", sub:"Casual bartering, a few items a month",
-        rows:[["Growth plan","₹199"],["2 extra boosts","₹58"]], total:"₹257" },
+        rows:[["Growth plan","₹199"],["2 extra premium listings (7 days)","₹98"]], total:"₹297" },
       { title:"Small dealer", sub:"Regular listings, 20-30 items a month",
-        rows:[["Professional plan","₹499"],["2 extra boosts","₹58"]], total:"₹557" },
+        rows:[["Professional plan","₹499"],["2 extra premium listings (7 days)","₹98"]], total:"₹597" },
       { title:"Professional dealer", sub:"High volume, 50+ items a month",
-        rows:[["Business plan","₹899"],["2 boost 3-packs","₹138"]], total:"₹1,037" }
+        rows:[["Business plan","₹899"],["2 extra premium listings (7 days)","₹98"]], total:"₹997" }
     ];
     var examplesHtml = '<div class="section-title" style="font-size:18px;">Example monthly costs</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 22px;">' +
@@ -5064,7 +5040,7 @@ function syncFromServer(){
     var compareRows = [
       ["Ads per month", "3", "25", "50", "100"],
       ["How long each ad runs", "30 days", "30 days", "30 days", "30 days"],
-      ["Boosts included", "0", "2", "4", "8"],
+      ["Premium listings included", "0", "2", "4", "8"],
       ["Search and filters", "✓", "✓", "✓", "✓"],
       ["Ad performance stats", "-", "✓", "✓", "✓"],
       ["Verified business badge", "-", "-", "-", "✓"]
@@ -5086,7 +5062,7 @@ function syncFromServer(){
       ["Can I change plans any time?", "Yes. Upgrades apply immediately and your ad quota updates straight away."],
       ["Do unused ads roll over?", "No. Your ad quota resets at the start of each 30-day billing period."],
       ["What happens if I hit my ad limit?", "You can still edit, chat and complete deals - you just need to upgrade or wait for the reset to post new ads."],
-      ["Are boosts and premium listings separate?", "Yes. A boost lifts an ad to the top of search; a premium listing highlights it with a badge. You can use both on the same ad."],
+      ["What does a premium listing do?", "It shows a 👑 Premium badge on your ad and moves it above normal ads in Home, Fresh Picks and Near You, for 7 or 30 days."],
       ["Is GST included?", "Prices shown are inclusive of applicable taxes."]
     ].map(function(f){
       return '<div class="card" style="padding:12px;margin-bottom:8px;">' +
@@ -5822,7 +5798,6 @@ function syncFromServer(){
     if(action==="select-plan"){ selectPlan(t.dataset.plan); render(); return; }
     if(action==="set-billing-period"){ UI.billingPeriod = t.dataset.period || "monthly"; storageSet("baganto_billing_period", UI.billingPeriod); render(); return; }
     if(action==="buy-addon"){ buyAddon(t.dataset.addon); render(); return; }
-    if(action==="boost-listing"){ applyBoostToItem(t.dataset.id); render(); return; }
     if(action==="premium-listing"){ applyPremiumToItem(t.dataset.id); render(); return; }
     if(action==="repost-listing"){ repostListing(t.dataset.id); render(); return; }
     if(action==="open-legal"){ UI.legalPage = t.dataset.page; UI.modal=null; render(); window.scrollTo(0,0); return; }
