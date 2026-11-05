@@ -2093,7 +2093,7 @@ function syncFromServer(){
     { id:"professional", name:"Professional", price:499, ads:50, boosts:4, badge:"", tagline:"For small dealers",
       features:["50 ads per month","Each ad runs for 30 days","4 premium listings (7 days) every month","Ad performance stats"] },
     { id:"business", name:"Business", price:899, ads:100, boosts:8, badge:"Best value", tagline:"For professional dealers",
-      features:["100 ads per month","Each ad runs for 30 days","8 premium listings (7 days) every month","Ad performance stats","Verified business badge"] }
+      features:["100 ads per month","Each ad runs for 30 days","8 premium listings (7 days) every month","Ad performance stats"] }
   ];
 
   var PRICING_ADDONS = [
@@ -5043,7 +5043,6 @@ function syncFromServer(){
       ["Premium listings included", "0", "2", "4", "8"],
       ["Search and filters", "✓", "✓", "✓", "✓"],
       ["Ad performance stats", "-", "✓", "✓", "✓"],
-      ["Verified business badge", "-", "-", "-", "✓"]
     ].map(function(r){
       return '<tr>' + r.map(function(c,i){
         return '<td style="padding:8px 6px;border-bottom:1px solid var(--border);font-size:13px;'+(i===0?'font-weight:600;':'text-align:center;')+'">'+esc(c)+'</td>';
