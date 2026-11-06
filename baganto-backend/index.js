@@ -1167,6 +1167,24 @@ app.get('/items/:id/stats', requireAuth, async (req, res) => {
 
 // ---- Refund requests ----
 // Every request is saved and sent to the owner with the reason. The checks only decide the message shown.
+// The most recent paid payment, so the refund box can show what will be refunded.
+app.get('/payments/latest', requireAuth, async (req, res) => {
+  try {
+    const rows = await supabaseCall('payments', 'GET', null,
+      `?user_id=eq.${encodeURIComponent(req.userId)}&status=eq.paid&order=paid_at.desc&limit=1`);
+    const pay = rows && rows[0];
+    if (!pay) return res.json(null);
+    res.json({
+      name: PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id,
+      amount_paise: pay.amount_paise,
+      refund_paise: Math.round(pay.amount_paise * 0.98),
+      paid_at: pay.paid_at
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not load payment' });
+  }
+});
+
 app.post('/payments/refund-request', requireAuth, async (req, res) => {
   try {
     const reason = String((req.body && req.body.reason) || '').trim().slice(0, 1000);
