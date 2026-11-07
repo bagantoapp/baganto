@@ -4300,21 +4300,29 @@ function syncFromServer(){
       '</div>'
     ) : '';
 
+    var emptySection = function(msg){
+      return '<div class="card" style="padding:18px;text-align:center;">' +
+        '<div style="color:var(--muted);font-size:14px;margin-bottom:10px;">' + msg + '</div>' +
+        '<button class="btn btn-primary btn-sm" data-action="start-sell">+ Post Ad</button>' +
+      '</div>';
+    };
+    var cityShort = esc(String(cu.city || "").split(",")[0] || "you");
+
     var freshHtml = (
       '<div class="home-section">' +
         '<div class="home-section-head"><span class="home-section-title">🆕 Fresh Picks</span>' +
-          '<button class="home-see-all" data-action="see-all-fresh">See all</button>' +
+          (freshSlice.length ? '<button class="home-see-all" data-action="see-all-fresh">See all</button>' : '') +
         '</div>' +
-        '<div class="grid">'+freshSlice.map(renderItemCard).join("")+'</div>' +
+        (freshSlice.length ? '<div class="grid">'+freshSlice.map(renderItemCard).join("")+'</div>' : emptySection('No ads yet. Be the first to post!')) +
       '</div>'
     );
 
     var nearbyHtml = (
       '<div class="home-section">' +
         '<div class="home-section-head"><span class="home-section-title">📍 Near You - '+esc(cu.city)+'</span>' +
-          '<button class="home-see-all" data-action="see-all-nearby">See all</button>' +
+          (nearbySlice.length ? '<button class="home-see-all" data-action="see-all-nearby">See all</button>' : '') +
         '</div>' +
-        '<div class="grid">'+nearbySlice.map(renderItemCard).join("")+'</div>' +
+        (nearbySlice.length ? '<div class="grid">'+nearbySlice.map(renderItemCard).join("")+'</div>' : emptySection('No ads near ' + cityShort + ' yet. Be the first to post!')) +
       '</div>'
     );
 
