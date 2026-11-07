@@ -3518,6 +3518,12 @@ function syncFromServer(){
     '<h2>6. Prohibited items and conduct</h2>',
     '<p>You must not post, offer or request anything that is illegal to possess, exchange or sell in India, including: weapons, firearms, ammunition or explosives; drugs, controlled substances or prescription medicines; counterfeit, pirated, stolen or recalled goods; live animals or wildlife products (the Pet Supplies category is for pet food, accessories and supplies only); adult or sexual content or services; human organs or body parts; and hazardous materials.</p>',
     '<p>You must not harass, threaten, scam or defraud other users, post false reviews, send spam, collect other users’ personal information, interfere with the Platform’s security, or use the Platform for any unlawful purpose.</p>',
+    '<h2>6A. Category rules</h2>',
+    '<ul>',
+      '<li><strong>Properties:</strong> only the owner may advertise a property, and must confirm ownership or written authority to sell or let it. Ads must not claim to be a broker, agent or RERA-registered unless they are. Baganto does not verify titles.</li>',
+      '<li><strong>Jobs:</strong> employers must be genuine. No applicant may be asked to pay any registration, processing, training, security or travel fee. Such ads are blocked, and the post form warns against job fee scams.</li>',
+      '<li><strong>Services:</strong> providers must be real people or businesses. Where the law requires a qualification or licence, the ad must state it.</li>',
+    '</ul>',
     '<h2>7. How deals work</h2>',
     '<ul>',
       '<li>To show interest in an ad, you send an enquiry ("Is this still available?"). The chat opens once the ad owner accepts it. For barter ads, you can also propose a trade.</li>',
@@ -3596,7 +3602,8 @@ function syncFromServer(){
       '<li><strong>Active accounts:</strong> for as long as your account exists. A deactivated account keeps its data until you log in again or delete it.</li>',
       '<li><strong>Deleted accounts:</strong> your profile, ads, chats, reviews and saved ads are removed from our live systems, and disappear from our backups within 12 months as older backups are deleted.</li>',
       '<li><strong>Reports and support messages:</strong> kept as long as needed to keep users safe, handle disputes and meet legal obligations.</li>',
-      '<li><strong>Backups:</strong> we keep encrypted copies of our database, made about once a month, so we can recover from a failure. Each backup is kept for up to 12 months and then permanently deleted, so it may contain data from accounts deleted during that time. Access to backups is restricted, and they are used only for recovery. If we ever restore a backup, we delete again the data of accounts that had been deleted.</li>',
+      '<li><strong>Backups:</strong> backups are kept only for disaster recovery, so that we can restore the service after a failure. They are encrypted, access is restricted to the owner, and backups are deleted automatically after 12 months. A restored backup has any deleted account removed again before it goes live. Deleting your account removes your data from live systems straight away; copies in backups remain until those backups expire.</li>',
+      '<li><strong>Backups (previous wording):</strong> we keep encrypted copies of our database, made about once a month, so we can recover from a failure. Each backup is kept for up to 12 months and then permanently deleted, so it may contain data from accounts deleted during that time. Access to backups is restricted, and they are used only for recovery. If we ever restore a backup, we delete again the data of accounts that had been deleted.</li>',
     '</ul>',
     '<h2>9. How we protect your data</h2>',
     '<p>We use encrypted connections (HTTPS), password hashing, restricted database access, limits on login attempts and checks on what can be uploaded. No system is perfectly secure. If a personal data breach happens, we will inform the Data Protection Board of India and the affected users, as the DPDP Act and its rules require.</p>',
@@ -4682,6 +4689,7 @@ function syncFromServer(){
     var cityOpts = CITIES.map(function(c){ return '<option value="'+esc(c.name)+'"'+(c.name===currentUser().city?' selected':'')+'>'+esc(c.name)+'</option>'; }).join("");
     return '' +
       '<form class="card" data-form="add-listing" style="padding:20px;margin-bottom:18px;">' +
+        '<div style="background:#FEF3C7;border-radius:8px;padding:10px;font-size:13px;margin-bottom:12px;">⚠️ Job scams are common. Never pay a registration, training, security or travel fee to get a job. Ads asking for payment are blocked.</div>' +
         '<div class="form-row"><label>📸 Upload Photos (up to 5)</label><input type="file" id="imgFileInput" multiple accept="image/*" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><div id="imgPreviews" class="img-previews"></div></div>' +
         '<div class="form-row"><label>Title</label><input type="text" name="title" required placeholder="e.g. Mixer Grinder or Cricket Kit"></div>' +
         '<div class="form-2col">' +

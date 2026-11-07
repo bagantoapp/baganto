@@ -224,6 +224,12 @@ app.post('/items', requireAuth, async (req, res) => {
     
     const { title, description, category, price, condition, listing_type, photos } = req.body;
     const owner_id = req.userId;
+    // Category rules: no fee requests for jobs, and no payment demands in any listing.
+    const adText = `${title || ''} ${description || ''}`.toLowerCase();
+    const feeRequest = /(registration|processing|training|joining|security|application|visa|deposit)\s*(fee|charge|amount)s?|pay (us|first|before)|send (money|payment)|advance (fee|payment)|travel (fee|cost)s?|overseas (job|work)/.test(adText);
+    if (feeRequest && (category === 'jobs' || category === 'services' || /job|work|vacanc|hiring/.test(adText))) {
+      return res.status(400).json({ error: 'Job and service ads may not ask anyone to pay a fee. Remove the fee or travel-cost request and try again.' });
+    }
     const photosArray = Array.isArray(photos) ? photos : [];
     const data = await supabaseCall('items', 'POST', { owner_id, title, description, category, price, condition, listing_type, photos: photosArray });
     
