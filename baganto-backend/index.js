@@ -365,6 +365,7 @@ app.get('/users/:id', async (req, res) => {
     if (uid && uid === u.id) return res.json(rest);
     if ((await blockedOtherIds(uid)).has(u.id)) return res.json(null);
     const { email, phone, date_of_birth, terms_accepted_at, ...pub } = rest;
+    if (!pub.business_show) { delete pub.business_name; delete pub.business_contact; }
     res.json(pub);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -411,11 +412,14 @@ app.post('/users/:id/change-password', requireAuth, async (req, res) => {
 app.put('/users/:id', requireAuth, async (req, res) => {
   try {
     if (req.userId !== req.params.id) return res.status(403).json({ error: 'Not allowed' });
-    const allowed = ['name', 'city', 'bio', 'avatar', 'avatarPhoto'];
+    const allowed = ['name', 'city', 'bio', 'avatar', 'avatarPhoto', 'business_name', 'business_contact', 'business_show'];
     const updates = {};
     for (const k of allowed) {
       if (req.body && k in req.body) updates[k] = req.body[k];
     }
+    if ('business_name' in updates) updates.business_name = String(updates.business_name || '').trim().slice(0, 100);
+    if ('business_contact' in updates) updates.business_contact = String(updates.business_contact || '').trim().slice(0, 100);
+    if ('business_show' in updates) updates.business_show = updates.business_show === true;
     if (typeof updates.avatarPhoto === 'string' && updates.avatarPhoto.length > 300000) {
       return res.status(413).json({ error: 'Photo is too large' });
     }
@@ -491,6 +495,7 @@ app.get('/api/db', async (req, res) => {
     const items = await supabaseCall('items');
     const users = ((await supabaseCall('users')) || []).map(u => {
       const { password, email, phone, date_of_birth, terms_accepted_at, ...safe } = u;
+      if (!safe.business_show) { delete safe.business_name; delete safe.business_contact; }
       return safe;
     });
     const hiddenOwners = await blockedOtherIds(optionalUid(req));

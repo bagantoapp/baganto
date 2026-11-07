@@ -1571,7 +1571,10 @@ function mapBackendData(data){
       city: u.city,
       bio: u.bio,
       isVerified: !!u.is_verified,
-      avatarPhoto: u.avatarPhoto || null
+      avatarPhoto: u.avatarPhoto || null,
+      businessName: u.business_name || "",
+      businessContact: u.business_contact || "",
+      businessShow: !!u.business_show
     };
   }
   return {
@@ -4571,7 +4574,7 @@ function syncFromServer(){
         '<div class="item-meta">'+'<span class="pill pill-cat">'+esc(it.category)+'</span>'+statusPillForItem(it.status)+modeBadges+premiumBadge+mineBadge+'</div>' +
         priceLine +
         wantLine +
-        '<div class="item-owner item-owner-row"><div class="io-left">'+avatarOf(owner, 18)+'<span class="io-txt">'+esc(owner.name)+' '+getSellerBadge(owner.id)+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+'</span></div>' +
+        '<div class="item-owner item-owner-row"><div class="io-left">'+avatarOf(owner, 18)+'<span class="io-txt">'+esc(owner.name)+' '+getSellerBadge(owner.id)+(owner.businessShow && owner.businessName ? ' · 🏪 '+esc(owner.businessName)+(owner.businessContact ? ' ('+esc(owner.businessContact)+')' : '') : '')+' · '+esc(it.city)+(dist>0?' · '+dist+' km':'')+'</span></div>' +
         '<div class="io-right">'+(rating.count?'<span><span class="stars">★</span> '+rating.avg.toFixed(1)+'</span>':'')+viewCount+'</div></div>' +
       '</div>';
   }
@@ -4944,6 +4947,9 @@ function syncFromServer(){
           '<div class="form-row"><label>Name</label><input id="accName" type="text" maxlength="100" value="'+esc(u.name||'')+'"></div>' +
           '<div class="form-row"><label>City</label><select id="accCity">'+CITIES.map(function(c){ return '<option value="'+esc(c.name)+'"'+(c.name===u.city?' selected':'')+'>'+esc(c.name)+'</option>'; }).join('')+'</select></div>' +
           '<div class="form-row"><label>Bio</label><input id="accBio" type="text" maxlength="200" value="'+esc(u.bio||'')+'"></div>' +
+          '<div class="form-row"><label>Business name (optional)</label><input id="accBizName" type="text" maxlength="100" value="'+esc(u.businessName||'')+'"></div>' +
+          '<div class="form-row"><label>Business contact (optional, phone or email)</label><input id="accBizContact" type="text" maxlength="100" value="'+esc(u.businessContact||'')+'"></div>' +
+          '<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;margin:6px 0 10px;"><input type="checkbox" id="accBizShow"'+(u.businessShow?' checked':'')+' style="margin-top:3px;width:auto;"><span>Show my business name and contact on my ads. Leave unticked to keep them private.</span></label>' +
           '<button class="btn btn-sm btn-primary" data-action="save-account">Save details</button>' +
         '</div>' +
         '<div style="font-weight:800;margin:8px 0 10px;">🔑 Change Password</div>' +
@@ -6068,17 +6074,20 @@ function syncFromServer(){
       var nName = (document.getElementById("accName").value||"").trim();
       var nCity = document.getElementById("accCity").value;
       var nBio  = (document.getElementById("accBio").value||"").trim();
+      var nBizName = (document.getElementById("accBizName") ? document.getElementById("accBizName").value : "").trim();
+      var nBizContact = (document.getElementById("accBizContact") ? document.getElementById("accBizContact").value : "").trim();
+      var nBizShow = !!(document.getElementById("accBizShow") && document.getElementById("accBizShow").checked);
       if(!nName || nName.length > 100){ showToast("Name must be 1 to 100 characters."); return; }
       if(!API_BASE){ showToast("Cannot reach the server. Try again later."); return; }
       fetch(API_BASE + "/users/" + au3.id, {
         method: "PUT",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ name: nName, city: nCity, bio: nBio })
+        body: JSON.stringify({ name: nName, city: nCity, bio: nBio, business_name: nBizName, business_contact: nBizContact, business_show: nBizShow })
       }).then(function(r){ return r.json().then(function(j){ return {ok:r.ok, body:j}; }); })
       .then(function(res){
         if(!res.ok){ showToast((res.body && res.body.error) || "Could not save details."); return; }
         lastAvatarChangeAt = Date.now();
-        au3.name = nName; au3.city = nCity; au3.bio = nBio;
+        au3.name = nName; au3.city = nCity; au3.bio = nBio; au3.businessName = nBizName; au3.businessContact = nBizContact; au3.businessShow = nBizShow;
         saveDB(); showToast("Details saved."); render();
       }).catch(function(){ showToast("Network error. Details not saved."); });
       return;
