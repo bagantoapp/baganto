@@ -454,10 +454,15 @@ app.post('/support', async (req, res) => {
     const category = String(t.category || '').slice(0, 100);
     const contact_email = String(t.contactEmail || '').slice(0, 200);
     await sbFetch('support_tickets', 'POST', { user_id: uid || null, contact_email, category, subject, message, status: 'open' });
+    const ref = 'BG-' + require('crypto').randomBytes(3).toString('hex').toUpperCase();
+    if (contact_email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact_email) && process.env.RESEND_API_KEY) {
+      sendGrievanceCopy(contact_email, ref, subject, message).catch((e) => console.error('ticket copy email failed:', e.message));
+    }
     notifyTelegram([
       '📩 New support message on Baganto',
       'Category: ' + (category || '-'),
       'Subject: ' + (subject || '-'),
+      'Reference: ' + ref,
       'User ID: ' + (uid || 'not logged in'),
       'Message: ' + message.slice(0, 1000),
       'Contact details: see support_tickets in Supabase'
@@ -688,6 +693,25 @@ async function sbFetch(path, method, body) {
   if (!res.ok) throw new Error(`Supabase ${method} ${path} failed: ${res.status}`);
   const text = await res.text();
   return text ? JSON.parse(text) : [];
+}
+
+// Sends the person who contacted us a copy of their message, with a reference number.
+async function sendGrievanceCopy(to, ref, subject, message) {
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const r = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: process.env.OTP_FROM || 'Baganto <onboarding@resend.dev>',
+      to: [to],
+      subject: `Baganto: we received your message (ref ${ref})`,
+      html: `<p>Thank you for contacting Baganto. Your reference number is <strong>${esc(ref)}</strong>.</p>` +
+        `<p>We acknowledge complaints within 24 hours and aim to resolve them within 15 days. Complaints under the Consumer Protection (E-Commerce) Rules are acknowledged within 48 hours and resolved within one month.</p>` +
+        `<p><strong>Subject:</strong> ${esc(subject || '-')}</p><p><strong>Your message:</strong></p><p>${esc(message)}</p>` +
+        `<p>Grievance Officer: Kiran Ramegowda, OROLU PRIVATE LIMITED, contact@baganto.com</p>`
+    })
+  });
+  if (!r.ok) throw new Error(`Resend send failed: ${r.status}`);
 }
 
 async function sendOtpEmail(to, code, purpose) {
