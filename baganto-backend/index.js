@@ -452,9 +452,9 @@ app.post('/support', async (req, res) => {
       '📩 New support message on Baganto',
       'Category: ' + (category || '-'),
       'Subject: ' + (subject || '-'),
-      ...(await userContactLines(uid)),
-      'Ticket email: ' + (contact_email || '-'),
-      'Message: ' + message.slice(0, 1000)
+      'User ID: ' + (uid || 'not logged in'),
+      'Message: ' + message.slice(0, 1000),
+      'Contact details: see support_tickets in Supabase'
     ].join('\n'));
     res.json({ success: true });
   } catch (err) {
@@ -1177,7 +1177,7 @@ app.get('/payments/latest', requireAuth, async (req, res) => {
     res.json({
       name: PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id,
       amount_paise: pay.amount_paise,
-      refund_paise: Math.round(pay.amount_paise * 0.98),
+      refund_paise: pay.amount_paise,
       paid_at: pay.paid_at
     });
   } catch (err) {
@@ -1196,14 +1196,18 @@ app.post('/payments/refund-request', requireAuth, async (req, res) => {
     const since = encodeURIComponent(pay.paid_at);
     const notes = [];
     if ((Date.now() - new Date(pay.paid_at).getTime()) > 24 * 3600000) notes.push('over 24 hours since paying');
-    const posted = await supabaseCall('items', 'GET', null,
-      `?owner_id=eq.${encodeURIComponent(req.userId)}&created_at=gte.${since}&select=id&limit=1`);
-    if (posted && posted.length) notes.push('ad posted since paying');
+    const isPlan = PAY_CATALOG[pay.product_id] && PAY_CATALOG[pay.product_id].type === 'plan';
+    if (isPlan) {
+      const posted = await supabaseCall('items', 'GET', null,
+        `?owner_id=eq.${encodeURIComponent(req.userId)}&created_at=gte.${since}&select=id&limit=1`);
+      const usedThisMonth = await countPostsThisMonth(req.userId);
+      if (posted && posted.length && usedThisMonth > 3) notes.push('ads posted beyond the free limit using the plan');
+    }
     const premium = await supabaseCall('items', 'GET', null,
       `?owner_id=eq.${encodeURIComponent(req.userId)}&premium_started_at=gte.${since}&select=id&limit=1`);
     if (premium && premium.length) notes.push('premium listing used since paying');
     const eligible = notes.length === 0;
-    const refundPaise = Math.round(pay.amount_paise * 0.98);
+    const refundPaise = pay.amount_paise;
 
     await supabaseCall('refund_requests', 'POST', {
       user_id: req.userId, razorpay_order_id: pay.razorpay_order_id,
@@ -1213,7 +1217,7 @@ app.post('/payments/refund-request', requireAuth, async (req, res) => {
     const product = PAY_CATALOG[pay.product_id] ? PAY_CATALOG[pay.product_id].name : pay.product_id;
     notifyTelegram(
       `↩️ Refund request (${eligible ? 'ELIGIBLE: nothing used, within 24 hours' : 'NOT AUTO-ELIGIBLE: ' + notes.join(', ')})\n` +
-      `${product}, paid ₹${pay.amount_paise / 100}, refund ₹${refundPaise / 100} after 2% fee\n` +
+      `${product}, paid ₹${pay.amount_paise / 100}, full refund ₹${refundPaise / 100}\n` +
       `User: ${req.userId}\nPayment: ${pay.razorpay_payment_id || pay.razorpay_order_id}\n` +
       `Reason: ${reason}`
     ).catch(() => {});
@@ -1221,8 +1225,8 @@ app.post('/payments/refund-request', requireAuth, async (req, res) => {
     res.json({
       eligible,
       message: eligible
-        ? 'Request received. If approved, you will get ₹' + (refundPaise / 100) + ' (the amount minus a 2% service fee) within 7 working days.'
-        : 'Request received. Because you have already used this payment or passed 24 hours, our team will read your reason and email you the decision.'
+        ? 'Request received. If approved, you will get the full ₹' + (refundPaise / 100) + ' back within 7 working days.'
+        : 'Request received. Because a paid feature has been used or 24 hours have passed, this payment is normally not refundable. Our team will read your reason and email you.'
     });
   } catch (err) {
     console.error('refund request error:', err.message);
@@ -1275,8 +1279,7 @@ app.post('/social/report', requireAuth, async (req, res) => {
         '🚩 New report on Baganto',
         'Type: ' + (r.type || 'ad'),
         'Reason: ' + (r.reason || '-'),
-        'Details: ' + String(r.details || '-').slice(0, 500),
-        ...(await userContactLines(req.userId)),
+
         'Reporter ID: ' + req.userId,
         'Target: ' + (r.targetUserId || r.itemId || '-'),
         'Report ID: ' + r.id
