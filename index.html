@@ -5,6 +5,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
 <title>Baganto — Sell. Exchange. Save.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,8 +62,8 @@
   .nav-logo-words{display:flex;flex-direction:column;justify-content:center;gap:1px;}
   .nav-logo-words .w1{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--ink);line-height:1.1;letter-spacing:.2px;}
   .nav-logo-words .w1 .ob{color:var(--primary);}
-  .nav-logo-words .w2{font-size:9px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;line-height:1;}
-  .sync-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .nav-logo-words .w2{font-size:12px;font-weight:700;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;line-height:1;}
+  .sync-pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
   .sync-pill.sync-on{background:var(--success-light);color:var(--success);}
   .sync-pill.sync-off{background:var(--pending-light);color:var(--pending);}
   .sync-pill.sync-wait{background:var(--border);color:var(--muted);}
@@ -76,13 +77,13 @@
   .nav-tab.active{background:var(--primary);color:#fff;}
   .nav-badge{
     position:absolute;top:1px;right:1px;background:var(--danger);color:#fff;
-    font-size:10px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;
+    font-size:12px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;
   }
   /* ---------- Notifications ---------- */
   .notif-wrap{position:relative;flex-shrink:0;}
   .notif-bell{position:relative;background:transparent;border:1px solid var(--border);border-radius:9px;padding:7px 10px;font-size:16px;line-height:1;margin-right:6px;}
   .notif-bell:hover{border-color:var(--primary);background:var(--primary-light);}
-  .notif-count{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;}
+  .notif-count{position:absolute;top:-5px;right:-5px;background:var(--danger);color:#fff;font-size:12px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;}
   .notif-panel{position:absolute;top:calc(100% + 8px);right:0;width:330px;max-width:88vw;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 8px 28px rgba(31,41,55,.16);z-index:60;overflow:hidden;}
   .notif-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;}
   .notif-list{max-height:340px;overflow-y:auto;}
@@ -92,7 +93,7 @@
   .notif-item.unread{background:var(--primary-light);}
   .notif-ico{font-size:16px;line-height:1.2;flex-shrink:0;}
   .notif-text{color:var(--ink);line-height:1.4;}
-  .notif-time{font-size:11px;color:var(--muted);}
+  .notif-time{font-size:12px;color:var(--muted);}
   .notif-empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:13px;line-height:1.8;}
 
   .nav-user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
@@ -137,7 +138,7 @@
   .io-txt{line-height:1.35;}
   .io-right{display:flex;gap:8px;align-items:center;flex-shrink:0;white-space:nowrap;padding-top:1px;}
 
-  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;}
   .pill-cat{background:var(--primary-light);color:var(--primary-dark);}
   .pill-cond{background:#eef2ff;color:#4338ca;}
   .per-month{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;}
@@ -153,7 +154,7 @@
   .pill-rejected{background:var(--danger-light);color:var(--danger);}
   .pill-withdrawn{background:#eee;color:#777;}
 
-  .trust-badge{display:inline-block;font-size:11px;font-weight:600;padding:4px 8px;border-radius:6px;background:#e0f2fe;color:#0369a1;margin-right:4px;margin-bottom:4px;}
+  .trust-badge{display:inline-block;font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;background:#e0f2fe;color:#0369a1;margin-right:4px;margin-bottom:4px;}
 
   .stars{color:var(--accent);letter-spacing:1px;}
   .empty{padding:46px 20px;text-align:center;color:var(--muted);}
@@ -195,10 +196,10 @@
   .chat-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;}
   .chat-head-av{width:34px;height:34px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
   .chat-head-name{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .chat-head-sub{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chat-head-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .chat-thread{background:#f3ede5;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;padding:12px 14px;}
   .chat-box{display:flex;flex-direction:column;gap:0;max-height:320px;overflow-y:auto;padding:2px 2px 6px;margin-bottom:10px;}
-  .chat-day{align-self:center;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 12px;border-radius:99px;margin:8px 0 10px;}
+  .chat-day{align-self:center;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:3px 12px;border-radius:99px;margin:8px 0 10px;}
   .chat-box .chat-day:first-child{margin-top:0;}
   .msg{max-width:76%;padding:7px 10px 5px;font-size:13.5px;line-height:1.42;position:relative;word-wrap:break-word;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.06);margin-bottom:8px;}
   .msg.grouped{margin-bottom:3px;}
@@ -206,9 +207,9 @@
   .msg-me.grouped{border-radius:12px 3px 3px 12px;}
   .msg-them{align-self:flex-start;background:var(--surface);color:var(--ink);border-radius:12px 12px 12px 3px;}
   .msg-them.grouped{border-radius:3px 12px 12px 3px;}
-  .msg-time{font-size:10px;margin-left:8px;margin-top:5px;float:right;white-space:nowrap;color:var(--muted);}
+  .msg-time{font-size:12px;margin-left:8px;margin-top:5px;float:right;white-space:nowrap;color:var(--muted);}
   .msg-me .msg-time{color:#8a5a2b;}
-  .msg-tick{margin-left:3px;font-size:10px;}
+  .msg-tick{margin-left:3px;font-size:12px;}
   .msg-tick.seen{color:#1d9bf0;}
   .chat-typing{align-self:flex-start;font-size:12px;color:var(--muted);font-style:italic;margin:2px 0 6px 4px;}
   .chat-input-row{display:flex;gap:8px;align-items:center;}
@@ -233,7 +234,7 @@
   /* ---------- Profile ---------- */
   .profile-head{display:flex;gap:16px;align-items:center;padding:22px;}
   .profile-avatar{font-size:48px;background:var(--primary-light);border-radius:16px;width:78px;height:78px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
-  .avatar-upload-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;}
+  .avatar-upload-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;}
   .avatar-upload-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
   .avatar-upload-btn input{display:none;}
   .stat-row{display:flex;gap:22px;margin-top:8px;flex-wrap:wrap;}
@@ -266,9 +267,9 @@
   .bf-name{font-size:15px;font-weight:700;color:#fff;}
   .bf-name span{color:#E8701A;}
   .bf-links{display:flex;gap:14px;flex-wrap:wrap;}
-  .bf-link{background:none;border:none;padding:0;color:#d0d0d0;font-size:11px;cursor:pointer;font-family:inherit;}
+  .bf-link{background:none;border:none;padding:0;color:#d0d0d0;font-size:12px;cursor:pointer;font-family:inherit;}
   .bf-link:hover{color:#fff;text-decoration:underline;}
-  .bf-copy{font-size:10px;color:#8f8f8f;}
+  .bf-copy{font-size:12px;color:#8f8f8f;}
   @media (max-width:640px){
     .bf-in{padding:10px 14px;}
     .bf-links{gap:10px;order:3;width:100%;}
@@ -280,10 +281,10 @@
   .item-card{position:relative;}
   .heart-btn{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:32px;height:32px;font-size:17px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15);z-index:2;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .1s;}
   .heart-btn:hover{transform:scale(1.18);}
-  .featured-ribbon{position:absolute;top:0;left:0;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:var(--radius) 0 10px 0;letter-spacing:.4px;z-index:1;}
-  .negotiable-tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fef3c7;color:#92400e;}
+  .featured-ribbon{position:absolute;top:0;left:0;background:var(--accent);color:#fff;font-size:12px;font-weight:800;padding:3px 10px;border-radius:var(--radius) 0 10px 0;letter-spacing:.4px;z-index:1;}
+  .negotiable-tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fef3c7;color:#92400e;}
   .free-price{font-size:18px;font-weight:800;color:var(--success);}
-  .view-count{font-size:11.5px;color:var(--muted);}
+  .view-count{font-size:12px;color:var(--muted);}
   .post-btn{background:var(--accent);border:none;color:#fff;font-weight:800;font-size:14px;padding:9px 18px;border-radius:9px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
   .post-btn:hover{background:#d97706;}
   .login-btn{background:#1a1a2e!important;}
@@ -295,8 +296,8 @@
   .cat-tile:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(249,115,22,.18);transform:translateY(-2px);}
   .cat-tile-icon{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 2px;overflow:hidden;}
   .cat-emoji{font-size:34px;line-height:1;display:block;}
-  .cat-tile-label{font-size:11px;font-weight:700;color:var(--ink);line-height:1.3;}
-  .cat-tile-count{font-size:10px;color:var(--muted);}
+  .cat-tile-label{font-size:12px;font-weight:700;color:var(--ink);line-height:1.3;}
+  .cat-tile-count{font-size:12px;color:var(--muted);}
 
   /* Home hero banner */
   .home-hero{background:linear-gradient(105deg,#1a1a2e 0%,#1f1f38 55%,#4a3728 100%);border-radius:18px;padding:22px 26px;display:flex;align-items:center;gap:20px;margin-bottom:20px;}
@@ -322,7 +323,7 @@
   .hero-tagline{height:120px;object-fit:contain;flex-shrink:0;opacity:0.9;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));}}
 
   /* Category group labels on home page */
-  .cat-group-tag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px;}
+  .cat-group-tag{font-size:12px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px;}
   .cat-group-barter{background:#f0fdf4;color:#15803d;border:1px solid #86efac;}
   .cat-group-nobarter{background:#eff6ff;color:#2563eb;border:1px solid #93c5fd;}
 
@@ -354,7 +355,7 @@
   .seller-thumb{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;min-width:90px;max-width:120px;text-align:center;font-size:12px;}
   .seller-thumb:hover{border-color:var(--primary);}
   .seller-thumb-icon{font-size:24px;}
-  .seller-thumb-title{margin-top:4px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;}
+  .seller-thumb-title{margin-top:4px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;}
   .seller-thumb-price{color:var(--primary-dark);font-weight:700;font-size:12px;}
 
   .report-reasons{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
@@ -362,7 +363,7 @@
   .saved-empty{padding:40px 20px;text-align:center;color:var(--muted);}
   .member-since{font-size:12.5px;color:var(--muted);margin-top:4px;}
   .verified-badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--success);background:var(--success-light);padding:2px 8px;border-radius:99px;margin-top:4px;}
-  .saved-badge{background:var(--danger);color:#fff;font-size:10px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;margin-left:4px;}
+  .saved-badge{background:var(--danger);color:#fff;font-size:12px;font-weight:700;border-radius:10px;padding:1px 5px;line-height:1.3;margin-left:4px;}
 
   /* ---------- My Ads tabs ---------- */
   .ads-tab-bar{display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0;}
@@ -382,7 +383,7 @@
   .similar-icon{font-size:28px;margin-bottom:4px;}
   .similar-title{font-size:12px;font-weight:700;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
   .similar-price{font-size:12px;color:var(--primary-dark);font-weight:700;margin-top:3px;}
-  .similar-city{font-size:11px;color:var(--muted);}
+  .similar-city{font-size:12px;color:var(--muted);}
 
   /* ---------- Chat inbox ---------- */
   .chat-list{display:flex;flex-direction:column;gap:0;}
@@ -402,9 +403,9 @@
   .chat-preview{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .chat-row.unread .chat-preview{color:var(--ink);font-weight:500;}
   .chat-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;padding-top:1px;}
-  .chat-time{font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
+  .chat-time{font-size:12px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
   .chat-unread{width:8px;height:8px;border-radius:50%;background:var(--primary);display:block;}
-  .chat-tag{font-size:10.5px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px solid var(--border);white-space:nowrap;}
+  .chat-tag{font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--bg);color:var(--muted);border:1px solid var(--border);white-space:nowrap;}
   .chat-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
   .chat-chip{font-size:12.5px;font-weight:600;padding:5px 12px;border-radius:99px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;}
   .chat-chip:hover{border-color:var(--primary);color:var(--primary);}
@@ -438,11 +439,11 @@
   .img-upload-label{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;color:var(--muted);}
   .img-upload-icon{font-size:28px;}
   .img-upload-text{font-size:13px;font-weight:600;}
-  .img-upload-hint{font-size:11px;color:var(--muted);}
+  .img-upload-hint{font-size:12px;color:var(--muted);}
   .img-previews{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
   .img-preview-wrap{position:relative;width:72px;height:72px;}
   .img-preview-wrap img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--border);}
-  .img-preview-del{position:absolute;top:-6px;right:-6px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+  .img-preview-del{position:absolute;top:-6px;right:-6px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
   /* Item card image */
   .item-card-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px 10px 0 0;display:block;}
   .item-card-emoji{font-size:44px;display:flex;align-items:center;justify-content:center;aspect-ratio:1;background:var(--bg);border-radius:10px 10px 0 0;}
@@ -456,7 +457,7 @@
   .img-previews{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
   .img-preview-wrap{position:relative;width:80px;height:80px;border-radius:8px;overflow:visible;}
   .img-preview-wrap img{width:80px;height:80px;object-fit:cover;border-radius:8px;display:block;}
-  .img-remove-btn{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
+  .img-remove-btn{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
   .modal-gallery-single img{width:100%;height:220px;object-fit:cover;border-radius:12px;margin-bottom:14px;}
 
   /* ---------- Auth pages ---------- */
@@ -761,6 +762,12 @@
   #app{min-height:100vh;display:flex;flex-direction:column;}
   #app > .wrap{flex:1 0 auto;width:100%;}
   #app > footer.bf{margin-top:auto;}
+  :root{color-scheme:light;}
+  /* Easier tapping on phones */
+  @media (max-width:640px){
+    .btn{min-height:44px;}
+    .btn-sm{min-height:40px;padding:9px 14px;font-size:13px;}
+  }
 </style>
 </head>
 <body>
@@ -4136,7 +4143,7 @@ function syncFromServer(){
       '<span id="syncPill" class="'+sp.cls+'">'+esc(sp.text)+'</span>' +
       '<div class="nav-tabs">'+tabsHtml+'</div>' +
       '<button class="btn btn-ghost btn-sm" data-action="goto-support" title="Support" style="margin-right:6px;">💬 Contact Us</button>' +
-      '<div style="position:relative;display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:2px solid var(--primary);border-radius:20px;max-width:220px;font-size:11px;margin-right:8px;"><span style="font-size:13px;flex-shrink:0;">📍</span><input type="text" id="navLocationInput" placeholder="Location" value="'+esc(currentUser().city)+'" style="border:none;outline:none;flex:1;font-size:11px;background:transparent;min-width:80px;" data-action="location-search"><div id="locationDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;margin-top:4px;max-height:240px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div></div>' +
+      '<div style="position:relative;display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:2px solid var(--primary);border-radius:20px;max-width:220px;font-size:12px;margin-right:8px;"><span style="font-size:13px;flex-shrink:0;">📍</span><input type="text" id="navLocationInput" placeholder="Location" value="'+esc(currentUser().city)+'" style="border:none;outline:none;flex:1;font-size:12px;background:transparent;min-width:80px;" data-action="location-search"><div id="locationDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:12px;margin-top:4px;max-height:240px;overflow-y:auto;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div></div>' +
       (UI.currentUserId ? '' : '<button class="post-btn login-btn" data-action="goto-login-screen" style="background:#1a1a2e;margin-right:6px;">Login</button>') +
       '<button class="post-btn" data-action="start-sell">+ Post</button>' +
       '</div>';
@@ -4539,7 +4546,7 @@ function syncFromServer(){
     var premiumBadge = isPremium(it) ? '<span class="pill" style="background:#ede9fe;color:#5b21b6;">👑 Premium</span>' : '';
     var mineBadge = (it.ownerId===UI.currentUserId) ? '<span class="pill" style="background:#fef3c7;color:#92400e;">Your ad</span>' : '';
     var heartBtn   = '<button class="heart-btn '+(saved?'saved':'')+'" data-action="toggle-save" data-id="'+it.id+'" title="'+(saved?'Remove from saved':'Save ad')+'">'+(saved?'❤️':'🤍')+'</button>';
-    var photoDisplay = (it.photos && it.photos.length) ? '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:6px;margin-bottom:8px;border-radius:6px;">' + it.photos.map(function(src){ return '<img src="'+src+'" alt="" style="flex:0 0 100%;width:100%;height:160px;object-fit:cover;scroll-snap-align:start;border-radius:6px;">'; }).join('') + '</div>' : '<div class="item-icon">'+it.icon+'</div>';
+    var photoDisplay = (it.photos && it.photos.length) ? '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:6px;margin-bottom:8px;border-radius:6px;">' + it.photos.map(function(src){ return '<img src="'+src+'" alt="'+esc(it.title||"Ad photo")+'" style="flex:0 0 100%;width:100%;height:160px;object-fit:cover;scroll-snap-align:start;border-radius:6px;">'; }).join('') + '</div>' : '<div class="item-icon">'+it.icon+'</div>';
     return '' +
       '<div class="card item-card" data-action="open-item" data-id="'+it.id+'">' +
         ribbon +
@@ -4711,7 +4718,7 @@ function syncFromServer(){
     return '' +
       '<form class="card" data-form="edit-listing" data-id="'+it.id+'" style="padding:20px;margin-bottom:18px;">' +
         '<div style="font-weight:800;margin-bottom:12px;color:var(--primary-dark);">✏️ Edit Ad</div>' +
-        '<div class="form-row"><label>📸 Photos (up to 5)</label>'+(it.photos && it.photos.length ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Current photos:</div><div class="img-previews">'+it.photos.map(function(src, ki){ return '<div class="img-preview-wrap"><img src="'+src+'" alt="" style="border:2px solid var(--success);"><button type="button" class="img-remove-btn kept-remove-btn" data-keptidx="'+ki+'" title="Remove">✕</button></div>'; }).join("")+'</div>' : '<div style="color:var(--muted);font-size:13px;margin-bottom:8px;">No photos yet</div>')+'<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><i>Add new photos below:</i></div><input type="file" id="imgFileInput" multiple accept="image/*" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><div id="imgPreviews" class="img-previews"></div></div>' +
+        '<div class="form-row"><label>📸 Photos (up to 5)</label>'+(it.photos && it.photos.length ? '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Current photos:</div><div class="img-previews">'+it.photos.map(function(src, ki){ return '<div class="img-preview-wrap"><img src="'+src+'" alt="'+esc(it.title||"Ad photo")+'" style="border:2px solid var(--success);"><button type="button" class="img-remove-btn kept-remove-btn" data-keptidx="'+ki+'" title="Remove">✕</button></div>'; }).join("")+'</div>' : '<div style="color:var(--muted);font-size:13px;margin-bottom:8px;">No photos yet</div>')+'<div style="font-size:12px;color:var(--muted);margin-bottom:6px;"><i>Add new photos below:</i></div><input type="file" id="imgFileInput" multiple accept="image/*" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;"><div id="imgPreviews" class="img-previews"></div></div>' +
         '<div class="form-row"><label>Title</label><input type="text" name="title" required value="'+esc(it.title)+'" placeholder="e.g. Mixer Grinder"></div>' +
         '<div class="form-2col">' +
           '<div class="form-row"><label>Category</label><select name="category">'+catOpts+'</select></div>' +
@@ -4953,7 +4960,7 @@ function syncFromServer(){
             '<button class="btn btn-sm btn-outline" data-action="deactivate-account">Deactivate account</button>' +
             '<button class="btn btn-sm btn-danger" data-action="delete-my-account">Delete my account</button>' +
           '</div>' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:8px;">Deleting removes your profile, ads, chats, messages and reviews. It cannot be undone.</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:8px;">Deleting removes your profile, ads, chats, messages and reviews. It cannot be undone.</div>' +
         '</div>' +
         '<div class="hr"></div>' +
         ''
@@ -5005,7 +5012,7 @@ function syncFromServer(){
             (u.avatarPhoto ? '🔄 Change' : '📷 Add photo') +
             '<input type="file" id="avatarFileInput" accept="image/*">' +
           '</label>' +
-          (u.avatarPhoto ? '<button class="btn btn-ghost btn-sm" data-action="remove-avatar-photo" style="font-size:11.5px;padding:2px 8px;color:#ef4444;">Remove</button>' : '') +
+          (u.avatarPhoto ? '<button class="btn btn-ghost btn-sm" data-action="remove-avatar-photo" style="font-size:12px;padding:2px 8px;color:#ef4444;">Remove</button>' : '') +
         '</div>' +
         '<div>' +
           '<div style="font-size:19px;font-weight:800;">'+esc(u.name)+'</div>' +
@@ -5061,8 +5068,8 @@ function syncFromServer(){
     var isActive = (p.id===activeId);
     var border = isActive ? '2px solid var(--primary)' : (p.badge ? '2px solid #f59e0b' : '1px solid var(--border)');
     var badgeHtml = '';
-    if(isActive) badgeHtml = '<div style="display:inline-block;background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;">YOUR PLAN</div>';
-    else if(p.badge) badgeHtml = '<div style="display:inline-block;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;">'+esc(p.badge.toUpperCase())+'</div>';
+    if(isActive) badgeHtml = '<div style="display:inline-block;background:var(--primary);color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;">YOUR PLAN</div>';
+    else if(p.badge) badgeHtml = '<div style="display:inline-block;background:#fef3c7;color:#92400e;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;">'+esc(p.badge.toUpperCase())+'</div>';
     var feats = p.features.map(function(f){
       return '<li style="padding:6px 0;font-size:13px;border-bottom:1px solid var(--border);list-style:none;">✓ '+esc(f)+'</li>';
     }).join("");
@@ -5109,7 +5116,7 @@ function syncFromServer(){
     var savingCol = isAnnual ? '#10b981' : 'var(--muted)';
     var billingToggle = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;justify-content:center;">' +
       '<button class="btn btn-sm" data-action="set-billing-period" data-period="monthly" style="padding:8px 18px;background:'+monthlyBg+';color:'+monthlyCol+';border:none;border-radius:8px 0 0 8px;font-weight:700;font-size:13px;cursor:pointer;">Monthly</button>' +
-      '<button class="btn btn-sm" data-action="set-billing-period" data-period="annual" style="padding:8px 18px;background:'+annualBg+';color:'+annualCol+';border:none;border-radius:0 8px 8px 0;font-weight:700;font-size:13px;cursor:pointer;">Annual <span style="color:'+savingCol+';font-size:11px;margin-left:4px;">-15%</span></button>' +
+      '<button class="btn btn-sm" data-action="set-billing-period" data-period="annual" style="padding:8px 18px;background:'+annualBg+';color:'+annualCol+';border:none;border-radius:0 8px 8px 0;font-weight:700;font-size:13px;cursor:pointer;">Annual <span style="color:'+savingCol+';font-size:12px;margin-left:4px;">-15%</span></button>' +
     '</div>';
     billingToggle = '';
 
@@ -5122,7 +5129,7 @@ function syncFromServer(){
         if(p.price > 0){
           cardHtml = cardHtml.replace(
             '<div style="font-size:28px;font-weight:800;">'+formatINR(p.price)+'<span style="font-size:13px;font-weight:500;color:var(--muted);">/month</span></div>',
-            '<div style="font-size:28px;font-weight:800;">'+priceHtml+'</div>' + (isAnnual ? '<div style="font-size:11px;color:#10b981;font-weight:700;">Save ₹'+Math.round(p.price*12*0.15)+'</div>' : '')
+            '<div style="font-size:28px;font-weight:800;">'+priceHtml+'</div>' + (isAnnual ? '<div style="font-size:12px;color:#10b981;font-weight:700;">Save ₹'+Math.round(p.price*12*0.15)+'</div>' : '')
           );
         }
         return cardHtml;
@@ -5228,7 +5235,7 @@ function syncFromServer(){
       return '<div class="card" style="padding:12px;margin-bottom:10px;">' +
         '<div style="font-weight:600;margin-bottom:6px;">'+item.icon+' '+esc(item.title)+'</div>' +
         '<div class="muted" style="font-size:12px;margin-bottom:6px;">Reported by '+esc(reporter.name)+' for: '+esc(rpt.reason)+'</div>' +
-        (rpt.details ? '<div class="muted" style="font-size:11px;margin-bottom:8px;">Details: '+esc(rpt.details)+'</div>' : '') +
+        (rpt.details ? '<div class="muted" style="font-size:12px;margin-bottom:8px;">Details: '+esc(rpt.details)+'</div>' : '') +
         '<div style="display:flex;gap:6px;">' +
           '<button class="btn btn-sm btn-danger" data-action="admin-remove-item" data-id="'+rpt.itemId+'">Remove Item</button>' +
           '<button class="btn btn-sm btn-ghost" data-action="admin-dismiss-report" data-id="'+rpt.id+'">Dismiss</button>' +
@@ -5244,7 +5251,7 @@ function syncFromServer(){
       return '<div class="card" style="padding:12px;margin-bottom:10px;">' +
         '<div style="display:flex;justify-content:space-between;gap:8px;">' +
           '<div style="font-weight:600;">'+esc(t.subject)+'</div>' +
-          '<span class="muted" style="font-size:11px;white-space:nowrap;">'+timeAgo(t.createdAt)+'</span>' +
+          '<span class="muted" style="font-size:12px;white-space:nowrap;">'+timeAgo(t.createdAt)+'</span>' +
         '</div>' +
         '<div class="muted" style="font-size:12px;margin:4px 0;">'+esc(t.category)+' · '+esc(who?who.name:t.contactEmail)+' ('+esc(t.contactEmail)+')</div>' +
         '<div style="font-size:13px;margin-bottom:8px;">'+esc(t.message)+'</div>' +
@@ -5362,7 +5369,7 @@ function syncFromServer(){
     var bio = u.bio ? '<div style="margin-bottom:12px;">' + esc(u.bio) + '</div>' : '';
     var hint = (u.id !== UI.currentUserId && ads.length) ? '<div class="muted" style="font-size:13px;margin-bottom:10px;">To contact ' + esc(u.name) + ', open any ad below and tap “Is this still available?”</div>' : '';
     var grid = ads.length ? '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px;">' + ads.map(function(it){
-      var img = (it.photos && it.photos.length) ? '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:6px;border-radius:8px;">' + it.photos.map(function(src){ return '<img src="' + src + '" alt="" style="flex:0 0 100%;width:100%;height:100px;object-fit:cover;scroll-snap-align:start;border-radius:8px;">'; }).join('') + '</div>' : '<div style="height:100px;display:flex;align-items:center;justify-content:center;font-size:36px;">' + it.icon + '</div>';
+      var img = (it.photos && it.photos.length) ? '<div style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:6px;border-radius:8px;">' + it.photos.map(function(src){ return '<img src="' + src + '" alt="'+esc(it.title||"Ad photo")+'" style="flex:0 0 100%;width:100%;height:100px;object-fit:cover;scroll-snap-align:start;border-radius:8px;">'; }).join('') + '</div>' : '<div style="height:100px;display:flex;align-items:center;justify-content:center;font-size:36px;">' + it.icon + '</div>';
       var pr = it.forSale ? ((it.price || 0) > 0 ? formatINR(it.price) : 'FREE') : 'Barter';
       return '<div class="card" data-action="view-seller-item" data-id="' + it.id + '" style="padding:8px;cursor:pointer;">' + img +
         '<div style="font-weight:700;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(it.title) + '</div>' +
@@ -5396,7 +5403,7 @@ function syncFromServer(){
     var saved = isSaved(it.id);
     var modeBadges = (it.forSale ? '<span class="pill pill-sale">'+(isRental(it.category)?'For Rent':'For Sale')+'</span>' : '') + (it.forBarter && !isNoBarter(it.category) ? '<span class="pill pill-barter">For Barter</span>' : '');
     var galleryHtml = (it.photos && it.photos.length) ?
-      '<div class="modal-gallery">' + it.photos.map(function(src){ return '<img src="'+src+'" alt="">'; }).join("") + '</div>' :
+      '<div class="modal-gallery">' + it.photos.map(function(src){ return '<img src="'+src+'" alt="'+esc(it.title||"Ad photo")+'">'; }).join("") + '</div>' :
       '<div class="modal-icon-big">'+it.icon+'</div>';
     var priceLine = '';
     if(it.forSale){
@@ -5479,7 +5486,7 @@ function syncFromServer(){
         (owner.idVerified ? '<span class="trust-badge" style="background:#fef3c7;color:#b45309;">🆔 Pro</span>' : '') +
         (owner.isVerified ? '<span class="trust-badge" style="background:#dcfce7;color:#15803d;">✓ Trusted</span>' : '') +
       '</div>' +
-      '<div style="font-size:11px;color:var(--muted);margin-bottom:12px;">' +
+      '<div style="font-size:12px;color:var(--muted);margin-bottom:12px;">' +
         '🎯 '+calculateReputationScore(owner.id)+'/100 | ⚡ '+calculateResponseTime(owner.id)+'h avg | ✅ '+calculateDealCompletionRate(owner.id)+'% deals' +
       '</div>' +
       '<div style="height:8px;"></div>' +
@@ -5497,8 +5504,8 @@ function syncFromServer(){
     var thumbs = others.slice(0,4).map(function(it){
       return '<div class="seller-thumb" data-action="open-item" data-id="'+it.id+'">' +
         '<div style="font-size:26px;margin-bottom:2px;">'+it.icon+'</div>' +
-        '<div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(it.title)+'</div>' +
-        (it.forSale?'<div style="font-size:11px;color:var(--primary-dark);font-weight:700;">'+(it.price===0?'FREE':formatINR(it.price))+'</div>':'') +
+        '<div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(it.title)+'</div>' +
+        (it.forSale?'<div style="font-size:12px;color:var(--primary-dark);font-weight:700;">'+(it.price===0?'FREE':formatINR(it.price))+'</div>':'') +
       '</div>';
     }).join("");
     return '<div class="seller-other"><div style="font-weight:700;margin-bottom:8px;">More from this seller</div><div style="display:flex;gap:8px;flex-wrap:wrap;">'+thumbs+'</div></div>';
@@ -5543,7 +5550,7 @@ function syncFromServer(){
       '<label class="attach-wide">📎 Attach photos' +
         '<input type="file" id="chatImgInput" accept="image/*" multiple>' +
       '</label>' +
-      '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Up to 4 photos. They are sent with your message.</div>' +
+      '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Up to 4 photos. They are sent with your message.</div>' +
     '</div>';
   }
 
@@ -5606,7 +5613,7 @@ function syncFromServer(){
         '<div class="form-row" id="offerCustomWrap" style="display:none;">' +
           '<label>What are you offering?</label>' +
           '<input type="text" name="offeredText" id="offeredTextInput" maxlength="80" placeholder="e.g. Yamaha keyboard, 61 keys, barely used">' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">Attach photos below so they can see it.</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:6px;">Attach photos below so they can see it.</div>' +
         '</div>';
     } else {
       pickerHtml =
@@ -5614,7 +5621,7 @@ function syncFromServer(){
           '<label>What are you offering?</label>' +
           '<input type="hidden" name="offeredItemId" value="__custom__">' +
           '<input type="text" name="offeredText" id="offeredTextInput" maxlength="80" placeholder="e.g. Yamaha keyboard, 61 keys, barely used" required>' +
-          '<div style="font-size:11.5px;color:var(--muted);margin-top:6px;">You have no ads posted yet — just describe your item and add photos.</div>' +
+          '<div style="font-size:12px;color:var(--muted);margin-top:6px;">You have no ads posted yet — just describe your item and add photos.</div>' +
         '</div>';
     }
     return '' +
@@ -6733,7 +6740,11 @@ function syncFromServer(){
     if(type==="add-listing"){
       var fd = new FormData(form);
       // Get uploaded image files
-      var photoUrls = await uploadImages((UI.newListingImages || []).slice(0, 5));
+      if(UI.postingAd){ showToast("Posting your ad, please wait…"); return; }
+      UI.postingAd = true;
+      var photoUrls;
+      try { photoUrls = await uploadImages((UI.newListingImages || []).slice(0, 5)); }
+      finally { UI.postingAd = false; }
       var catA = fd.get("category")||"";
       var noTradeA = isNoTrade(catA);
       var propA    = isProperty(catA);
@@ -6846,7 +6857,11 @@ function syncFromServer(){
       if(forSaleE && (priceE===null || isNaN(priceE) || priceE<0)){ showToast("Enter a valid price (0 for free)."); return; }
       var editingItem = itemById(form.dataset.id);
       var keptPhotos = (editingItem.photos||[]).filter(function(ph){ return typeof ph === "string" && ph.indexOf("http") === 0; });
-      var newPhotoUrls = await uploadImages((UI.newListingImages||[]).slice(0, Math.max(0, 5 - keptPhotos.length)));
+      if(UI.postingAd){ showToast("Saving your ad, please wait…"); return; }
+      UI.postingAd = true;
+      var newPhotoUrls;
+      try { newPhotoUrls = await uploadImages((UI.newListingImages||[]).slice(0, Math.max(0, 5 - keptPhotos.length))); }
+      finally { UI.postingAd = false; }
       var allPhotos = keptPhotos.concat(newPhotoUrls);
       var editCat = fdE.get("category")||"Other";
       saveEditedListing(form.dataset.id, {
